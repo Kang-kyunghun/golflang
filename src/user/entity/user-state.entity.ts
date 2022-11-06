@@ -6,7 +6,7 @@ import { User } from './user.entity';
 @Entity()
 export class UserState extends GuardCoreEntity {
   @CreateDateColumn()
-  @ApiProperty({ description: '' })
+  @ApiProperty({ description: '마지막 로그인 시간' })
   lastLoginDate: Date;
 
   @Column({ nullable: true, default: 0 })

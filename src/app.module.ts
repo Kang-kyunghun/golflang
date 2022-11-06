@@ -5,18 +5,7 @@ import {
   RequestMethod,
 } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { CommonModule } from './common/common.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
-import { UserModule } from './user/user.module';
-import { PostModule } from './post/post.module';
-import { ClubModule } from './club/club.module';
-import { ScheduleModule } from './schedule/schedule.module';
-import { UploadFileModule } from './upload-file/upload-file.module';
-import { AlarmModule } from './alarm/alarm.module';
-import { ChatModule } from './chat/chat.module';
-import { AuthModule } from './auth/auth.module';
-import { LikeModule } from './like/like.module';
-import { MailModule } from './mail/mail.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import { ENTITIES, MODULES } from './config/config';
