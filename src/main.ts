@@ -2,12 +2,12 @@ import { HttpExceptionFilter } from './common/exception/common.exception';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
-import { swaggerSetup } from '../src/util/swagger-setup';
+import { swaggerSetup } from './util/swagger-setup';
 
 declare const module: any;
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { cors: true });
   const PORT = process.env.PORT || 3000;
 
   app.useGlobalPipes(
@@ -23,6 +23,9 @@ async function bootstrap() {
 
   // 스웨거 셋업
   swaggerSetup(app);
+
+  // cors 에러 해결
+  app.enableCors();
 
   // 포트 확인
   await app.listen(PORT);

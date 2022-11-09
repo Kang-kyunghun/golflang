@@ -26,8 +26,6 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 
         const accountId = await this.validateToken(access_token[1]);
         console.log('accountId :', accountId);
-
-        const;
       }
 
       return true;

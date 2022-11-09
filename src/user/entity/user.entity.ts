@@ -40,10 +40,6 @@ export class User extends GuardCoreEntity {
   @ApiProperty({ description: '전화번호' })
   phone: string;
 
-  @Column()
-  @ApiProperty({ description: '이메일' })
-  email: string;
-
   @OneToMany(() => Account, (account) => account.user)
   accounts: Account[];
 

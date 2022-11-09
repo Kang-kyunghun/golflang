@@ -34,8 +34,8 @@ export class Account extends GuardCoreEntity {
   })
   psResetToken: string;
 
-  @Column({ unique: true })
-  @ApiProperty({ description: 'account key값' })
+  @Column({ default: null, nullable: true })
+  @ApiProperty({ description: 'account key값', default: null, nullable: true })
   accountKey: string;
 
   @ManyToOne(() => User, (user) => user.id)
