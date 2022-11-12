@@ -1,8 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { UploadFile } from 'src/upload-file/entity/upload-file.entity';
+import { UploadFile } from 'src/modules/upload-file/entity/upload-file.entity';
 import { Column, Entity, JoinColumn, OneToMany, OneToOne } from 'typeorm';
 import { Gender, Role } from '../enum/user.enum';
-import { GuardCoreEntity } from './../../common/entity/guard-core.entity';
+import { GuardCoreEntity } from '../../../common/entity/guard-core.entity';
 import { Account } from './account.entity';
 import { UserState } from './user-state.entity';
 

@@ -1,4 +1,4 @@
-import { JwtAuthGuard } from './../../auth/guard/jwt.guard';
+import { JwtAuthGuard } from '../../modules/auth/guard/jwt.guard';
 import { applyDecorators, SetMetadata, UseGuards } from '@nestjs/common';
 import { PermissionRole } from '../enum/common.enum';
 import { RolesGuard } from '../guard/role.guard';

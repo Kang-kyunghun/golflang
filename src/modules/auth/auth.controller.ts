@@ -16,9 +16,12 @@ import { ResultFormatInterceptor } from 'src/common/interceptor/result-format.in
 import {
   CheckNicknameInputDto,
   CheckNicknameOutputDto,
-} from 'src/user/dto/check-nickname.dto';
-import { LoginInputDto, LoginOutputDto } from 'src/user/dto/login-dto';
-import { SignupInputDto, SignupOutputDto } from 'src/user/dto/signup-dto';
+} from 'src/modules/user/dto/check-nickname.dto';
+import { LoginInputDto, LoginOutputDto } from 'src/modules/user/dto/login-dto';
+import {
+  SignupInputDto,
+  SignupOutputDto,
+} from 'src/modules/user/dto/signup-dto';
 import { AuthService } from './auth.service';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';

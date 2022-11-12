@@ -1,10 +1,10 @@
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Module } from '@nestjs/common';
 import { AuthController } from './auth.controller';
-import { User } from 'src/user/entity/user.entity';
-import { Account } from 'src/user/entity/account.entity';
-import { UserState } from 'src/user/entity/user-state.entity';
-import { UserService } from 'src/user/user.service';
+import { User } from 'src/modules/user/entity/user.entity';
+import { Account } from 'src/modules/user/entity/account.entity';
+import { UserState } from 'src/modules/user/entity/user-state.entity';
+import { UserService } from 'src/modules/user/user.service';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { CommonService } from 'src/common/common.service';
