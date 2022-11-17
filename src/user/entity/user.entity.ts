@@ -20,24 +20,29 @@ export class User extends GuardCoreEntity {
   })
   nickname: string;
 
-  @Column()
-  @ApiProperty({ description: '생년월일', example: 'YYYY-MM-DD' })
+  @Column({ nullable: true, default: null })
+  @ApiProperty({
+    description: '생년월일',
+    example: 'YYYY-MM-DD',
+    nullable: true,
+    default: null,
+  })
   birthday: string;
 
   @Column({ type: 'enum', enum: Gender })
   @ApiProperty({ description: '성별', enum: Gender })
   gender: Gender;
 
-  @Column()
-  @ApiProperty({ description: '메인 주소' })
+  @Column({ nullable: true, default: null })
+  @ApiProperty({ description: '메인 주소', nullable: true, default: null })
   address: string;
 
-  @Column()
-  @ApiProperty({ description: '상세 주소' })
+  @Column({ nullable: true, default: null })
+  @ApiProperty({ description: '상세 주소', nullable: true, default: null })
   addressDetail: string;
 
-  @Column()
-  @ApiProperty({ description: '전화번호' })
+  @Column({ nullable: true, default: null })
+  @ApiProperty({ description: '전화번호', nullable: true, default: null })
   phone: string;
 
   @OneToMany(() => Account, (account) => account.user)

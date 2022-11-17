@@ -1,5 +1,5 @@
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Module } from '@nestjs/common';
+import { Logger, Module } from '@nestjs/common';
 import { AuthController } from './auth.controller';
 import { User } from 'src/user/entity/user.entity';
 import { Account } from 'src/user/entity/account.entity';
@@ -9,18 +9,19 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { CommonService } from 'src/common/common.service';
 import { AuthService } from './auth.service';
+import { AuthError } from './error/auth.error';
 
 @Module({
   imports: [
     PassportModule,
     TypeOrmModule.forFeature([User, Account, UserState]),
     JwtModule.register({
-      secret: 'jwtConstantsTest1234', // jwtConstants 개념 이해
+      secret: 'jwtConstantsTest1234',
       signOptions: { expiresIn: '30d' },
     }),
   ],
   controllers: [AuthController],
-  providers: [UserService, CommonService, AuthService],
-  exports: [UserService],
+  providers: [UserService, CommonService, AuthService, Logger, AuthError],
+  exports: [UserService, AuthError],
 })
 export class AuthModule {}

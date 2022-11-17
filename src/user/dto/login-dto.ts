@@ -24,8 +24,9 @@ export class LoginInputDto {
   password?: string;
 
   @IsString()
-  @ApiProperty({ description: 'SNS 계정 공급자', enum: Provider })
-  provider: string;
+  @IsOptional()
+  @ApiProperty({ description: '카카오 ACCESS TOKEN' })
+  kakaoAccessToken: string;
 }
 
 export class LoginOutputDto extends PickType(SignupOutputDto, [
