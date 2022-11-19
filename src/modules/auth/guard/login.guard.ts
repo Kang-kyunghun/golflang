@@ -9,11 +9,11 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BaseGuard } from 'src/common/guard/base.guard';
-import { Account } from 'src/user/entity/account.entity';
-import { Provider } from 'src/user/enum/user.enum';
+import { Account } from 'src/modules/user/entity/account.entity';
+import { Provider } from 'src/modules/user/enum/user.enum';
 import { Repository } from 'typeorm';
-import axios from 'axios';
 import { AuthError, AUTH_ERROR } from '../error/auth.error';
+import axios from 'axios';
 
 @Injectable()
 export class LoginGuard extends BaseGuard {

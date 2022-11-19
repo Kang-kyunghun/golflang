@@ -17,7 +17,7 @@ import {
   ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
-import { LoginGuard } from 'src/auth/guard/login.guard';
+import { LoginGuard } from 'src/modules/auth/guard/login.guard';
 import { RoleGuard } from 'src/common/decorator/role.decorator';
 import { SwaggerDefault } from 'src/common/decorator/swagger.decorator';
 import { PermissionRole } from 'src/common/enum/common.enum';

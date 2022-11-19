@@ -8,11 +8,7 @@ import {
   Injectable,
   Logger,
   NotFoundException,
-  UnauthorizedException,
 } from '@nestjs/common';
-import { UserService } from 'src/modules/user/user.service';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
 import * as bcrypt from 'bcrypt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/modules/user/entity/user.entity';
@@ -25,9 +21,9 @@ import {
   SignupInputDto,
   SignupOutputDto,
 } from 'src/modules/user/dto/signup-dto';
-import { Role } from 'src/modules/user/enum/user.enum';
+import { Provider, Role } from 'src/modules/user/enum/user.enum';
 import { LoginInputDto, LoginOutputDto } from 'src/modules/user/dto/login-dto';
-import { AUTH_ERROR } from 'src/auth/error/auth.error';
+import { AuthError, AUTH_ERROR } from 'src/modules/auth/error/auth.error';
 
 @Injectable()
 export class AuthService {

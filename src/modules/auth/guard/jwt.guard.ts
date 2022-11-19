@@ -8,7 +8,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Observable } from 'rxjs';
 import { PermissionRole } from 'src/common/enum/common.enum';
-import { Account } from 'src/user/entity/account.entity';
+import { Account } from 'src/modules/user/entity/account.entity';
 import { Repository } from 'typeorm';
 
 @Injectable()
