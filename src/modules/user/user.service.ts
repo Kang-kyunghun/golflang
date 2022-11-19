@@ -16,7 +16,7 @@ import { Account } from './entity/account.entity';
 import { UserState } from './entity/user-state.entity';
 import { User } from './entity/user.entity';
 import { Provider, Role } from './enum/user.enum';
-import { AuthService } from 'src/auth/auth.service';
+import { AuthService } from 'src/modules/auth/auth.service';
 import { CommonService } from 'src/common/common.service';
 import * as bcrypt from 'bcrypt';
 import { SignupInputDto, SignupOutputDto } from './dto/signup-dto';

@@ -23,7 +23,7 @@ import { ENTITIES, MODULES } from './config/config';
       username: process.env.GL_DB_USERNAME,
       password: process.env.GL_DB_PASSWORD,
       database: process.env.GL_DB_NAME,
-      synchronize: false,
+      synchronize: process.env.NODE_ENV !== 'production',
       logging: false,
       namingStrategy: new SnakeNamingStrategy(),
       entities: ENTITIES,

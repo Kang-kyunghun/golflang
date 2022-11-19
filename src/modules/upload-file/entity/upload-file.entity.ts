@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { CoreEntity } from 'src/common/entity/core.entity';
-import { User } from 'src/user/entity/user.entity';
+import { User } from 'src/modules/user/entity/user.entity';
 import { Column, Entity, OneToOne } from 'typeorm';
 
 @Entity()

@@ -1,11 +1,5 @@
-import { GuardCoreEntity } from './../../common/entity/guard-core.entity';
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  JoinColumn,
-  OneToOne,
-} from 'typeorm';
+import { GuardCoreEntity } from '../../../common/entity/guard-core.entity';
+import { Column, CreateDateColumn, Entity, OneToOne } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { User } from './user.entity';
 

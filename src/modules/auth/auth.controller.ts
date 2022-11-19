@@ -17,6 +17,7 @@ import {
   ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
+import { LoginGuard } from 'src/auth/guard/login.guard';
 import { RoleGuard } from 'src/common/decorator/role.decorator';
 import { SwaggerDefault } from 'src/common/decorator/swagger.decorator';
 import { PermissionRole } from 'src/common/enum/common.enum';
@@ -24,14 +25,16 @@ import { ResultFormatInterceptor } from 'src/common/interceptor/result-format.in
 import {
   CheckNicknameInputDto,
   CheckNicknameOutputDto,
-} from 'src/user/dto/check-nickname.dto';
-import { LoginInputDto, LoginOutputDto } from 'src/user/dto/login-dto';
-import { SignupInputDto, SignupOutputDto } from 'src/user/dto/signup-dto';
-import { Provider } from 'src/user/enum/user.enum';
+} from 'src/modules/user/dto/check-nickname.dto';
+import { LoginInputDto, LoginOutputDto } from 'src/modules/user/dto/login-dto';
+import {
+  SignupInputDto,
+  SignupOutputDto,
+} from 'src/modules/user/dto/signup-dto';
+import { Provider } from '../user/enum/user.enum';
 import { AuthService } from './auth.service';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
-import { LoginGuard } from './guard/login.guard';
 
 @ApiTags('AUTH')
 @Controller('auth')

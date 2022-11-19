@@ -10,22 +10,24 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { UserService } from 'src/user/user.service';
+import { UserService } from 'src/modules/user/user.service';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
 import * as bcrypt from 'bcrypt';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from 'src/user/entity/user.entity';
+import { User } from 'src/modules/user/entity/user.entity';
 import { Connection, Repository } from 'typeorm';
-import { Account } from 'src/user/entity/account.entity';
-import { UserState } from 'src/user/entity/user-state.entity';
+import { Account } from 'src/modules/user/entity/account.entity';
+import { UserState } from 'src/modules/user/entity/user-state.entity';
 import { CommonService } from 'src/common/common.service';
 import { JwtService } from '@nestjs/jwt';
-import { SignupInputDto, SignupOutputDto } from 'src/user/dto/signup-dto';
-import { Provider, Role } from 'src/user/enum/user.enum';
-import { LoginInputDto, LoginOutputDto } from 'src/user/dto/login-dto';
-import axios from 'axios';
-import { AuthError, AUTH_ERROR } from './error/auth.error';
+import {
+  SignupInputDto,
+  SignupOutputDto,
+} from 'src/modules/user/dto/signup-dto';
+import { Role } from 'src/modules/user/enum/user.enum';
+import { LoginInputDto, LoginOutputDto } from 'src/modules/user/dto/login-dto';
+import { AUTH_ERROR } from 'src/auth/error/auth.error';
 
 @Injectable()
 export class AuthService {
