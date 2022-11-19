@@ -1,12 +1,14 @@
+import { Post } from './../post/entity/post.entity';
+import { response } from 'express';
 import {
   BadRequestException,
   ConflictException,
+  HttpException,
+  HttpStatus,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { UserService } from 'src/modules/user/user.service';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
 import * as bcrypt from 'bcrypt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/modules/user/entity/user.entity';
@@ -19,8 +21,9 @@ import {
   SignupInputDto,
   SignupOutputDto,
 } from 'src/modules/user/dto/signup-dto';
-import { Role } from 'src/modules/user/enum/user.enum';
+import { Provider, Role } from 'src/modules/user/enum/user.enum';
 import { LoginInputDto, LoginOutputDto } from 'src/modules/user/dto/login-dto';
+import { AuthError, AUTH_ERROR } from 'src/modules/auth/error/auth.error';
 
 @Injectable()
 export class AuthService {
@@ -31,9 +34,13 @@ export class AuthService {
     private readonly accountRepo: Repository<Account>,
     @InjectRepository(UserState)
     private readonly userStateRepo: Repository<UserState>,
+
     private readonly commonService: CommonService,
     private readonly JwtService: JwtService,
+    private readonly authError: AuthError,
+
     private connection: Connection,
+    private readonly logger: Logger,
   ) {}
 
   async signup(body: SignupInputDto): Promise<SignupOutputDto> {
@@ -47,7 +54,17 @@ export class AuthService {
       });
 
       if (accountEmail) {
-        throw new ConflictException();
+        throw new ConflictException(AUTH_ERROR.ACCOUNT_EMAIL_ALREADY_EXIST);
+      }
+
+      const userNickname = await this.userRepo.findOne({
+        where: {
+          nickname: body.nickname,
+        },
+      });
+
+      if (userNickname) {
+        throw new ConflictException(AUTH_ERROR.ACCOUNT_NICKNAME_ALREADY_EXIST);
       }
 
       const user = new User();
@@ -69,7 +86,10 @@ export class AuthService {
 
       const account = new Account();
       account.email = body.email;
-      account.password = await this.commonService.hash(body.password);
+      account.password =
+        body.provider === Provider.LOCAL
+          ? await this.commonService.hash(body.password)
+          : null;
       account.user = user;
 
       await queryRunner.manager.save(Account, account);
@@ -88,34 +108,72 @@ export class AuthService {
         },
       };
     } catch (error) {
-      console.error(error);
+      this.logger.error(error);
       await queryRunner.rollbackTransaction();
+
+      const statusCode = error.response
+        ? error.response.statusCode
+        : HttpStatus.BAD_REQUEST;
+
+      throw new HttpException(
+        this.authError.errorHandler(error.message),
+        statusCode,
+      );
     } finally {
       await queryRunner.release();
     }
   }
 
-  async login(body: LoginInputDto): Promise<LoginOutputDto> {
+  async login(guard): Promise<LoginOutputDto> {
+    const queryRunner = this.connection.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
     try {
-      const account = await this.accountRepo.findOne({
-        where: { email: body.email },
+      const { email, password, provider, nickname, gender } = guard;
+
+      let account = await this.accountRepo.findOne({
+        where: { email },
         relations: {
           user: { userState: true },
         },
       });
 
-      if (!account) {
-        throw new NotFoundException();
+      if (provider === Provider.LOCAL) {
+        if (!account) {
+          throw new NotFoundException(AUTH_ERROR.ACCOUNT_ACCOUNT_NOT_FOUND);
+        }
+
+        const checkPassword = await bcrypt.compare(password, account.password);
+
+        if (!checkPassword) {
+          throw new BadRequestException(AUTH_ERROR.ACCOUNT_PASSWORD_WAS_WRONG);
+        }
+      } else {
+        if (!account) {
+          const userState = new UserState();
+
+          await queryRunner.manager.insert(UserState, userState);
+
+          const user = new User();
+          user.role = Role.USER;
+          user.nickname = nickname;
+          user.gender = gender;
+          user.userState = userState;
+
+          await queryRunner.manager.insert(User, user);
+
+          account = new Account();
+          account.email = email;
+          account.provider = provider;
+          account.user = user;
+
+          await queryRunner.manager.insert(Account, account);
+        }
       }
 
-      const loginResult = await bcrypt.compare(body.password, account.password);
-
-      if (!loginResult) {
-        throw new BadRequestException();
-      }
-
-      // 마지막 로그인 시간 업데이트
-      await this.userStateRepo.update(
+      await queryRunner.manager.update(
+        UserState,
         { id: account.user.userState.id },
         { lastLoginDate: new Date() },
       );
@@ -123,6 +181,8 @@ export class AuthService {
       const payload = {
         id: account.uid,
       };
+
+      await queryRunner.commitTransaction();
 
       return {
         jwt: this.JwtService.sign(payload),
@@ -132,7 +192,19 @@ export class AuthService {
         },
       };
     } catch (error) {
-      console.error(error);
+      this.logger.error(error);
+      await queryRunner.rollbackTransaction();
+
+      const statusCode = error.response
+        ? error.response.statusCode
+        : HttpStatus.BAD_REQUEST;
+
+      throw new HttpException(
+        this.authError.errorHandler(error.message),
+        statusCode,
+      );
+    } finally {
+      await queryRunner.release();
     }
   }
 

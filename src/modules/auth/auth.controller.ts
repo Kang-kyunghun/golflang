@@ -7,8 +7,18 @@ import {
   Param,
   Delete,
   UseInterceptors,
+  UseGuards,
+  Req,
+  Request,
+  Query,
 } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import {
+  ApiBadRequestResponse,
+  ApiBody,
+  ApiParam,
+  ApiTags,
+} from '@nestjs/swagger';
+import { LoginGuard } from 'src/modules/auth/guard/login.guard';
 import { RoleGuard } from 'src/common/decorator/role.decorator';
 import { SwaggerDefault } from 'src/common/decorator/swagger.decorator';
 import { PermissionRole } from 'src/common/enum/common.enum';
@@ -22,6 +32,7 @@ import {
   SignupInputDto,
   SignupOutputDto,
 } from 'src/modules/user/dto/signup-dto';
+import { Provider } from '../user/enum/user.enum';
 import { AuthService } from './auth.service';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
@@ -33,19 +44,28 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('signup')
-  @SwaggerDefault('회원가입', SignupOutputDto)
+  @SwaggerDefault('로컬 회원가입', SignupOutputDto, '로컬 회원가입')
   async signup(@Body() body: SignupInputDto): Promise<SignupOutputDto> {
     return await this.authService.signup(body);
   }
 
-  @Post('login')
+  @Post('login/:provider')
+  @UseGuards(LoginGuard)
   @SwaggerDefault(
     '소셜 & 로컬 통합 로그인',
     LoginOutputDto,
     '소셜 로그인 추후 개발 진행 예정',
   )
-  async login(@Body() body: LoginInputDto): Promise<LoginOutputDto> {
-    return await this.authService.login(body);
+  @ApiParam({
+    name: 'provider',
+    required: true,
+    description: '로그인 경로(카카오, 애플, 로컬)',
+    type: 'enum',
+    enum: Provider,
+  })
+  @ApiBody({ type: LoginInputDto })
+  async login(@Req() req: Request): Promise<LoginOutputDto> {
+    return await this.authService.login(req['guard']);
   }
 
   @Post('check/nickname')

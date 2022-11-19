@@ -40,4 +40,16 @@ export class CommonService {
 
     return result;
   }
+
+  async getAge(birthday) {
+    const birth = new Date('1992-04-01');
+    const birthYear = birth.getFullYear();
+
+    const today = new Date();
+    const todayYear = today.getFullYear();
+
+    const age = todayYear - birthYear + 1;
+
+    return age;
+  }
 }
