@@ -71,8 +71,8 @@ class SignupAccountField {
 }
 
 export class SignupOutputDto {
-  @ApiProperty({ description: 'jwt' })
-  jwt: string;
+  @ApiProperty({ description: 'accessToken' })
+  accessToken: string;
 
   @ApiProperty({ description: '계정 정보' })
   account: SignupAccountField;

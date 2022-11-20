@@ -22,6 +22,8 @@ import * as bcrypt from 'bcrypt';
 import { SignupInputDto, SignupOutputDto } from './dto/signup-dto';
 import { LoginInputDto, LoginOutputDto } from './dto/login-dto';
 import { UpdateUserInfoInputDto } from './dto/update-user-info.dto';
+import { UploadFileService } from '../upload-file/upload-file.service';
+import { UploadFile } from '../upload-file/entity/upload-file.entity';
 
 @Injectable()
 export class UserService {
@@ -32,9 +34,11 @@ export class UserService {
     private readonly accountRepo: Repository<Account>,
     @InjectRepository(UserState)
     private readonly userStateRepo: Repository<UserState>,
-    private readonly commonService: CommonService,
-    private readonly JwtService: JwtService,
+
     private connection: Connection,
+    private readonly JwtService: JwtService,
+    private readonly commonService: CommonService,
+    private readonly uploadFileService: UploadFileService,
   ) {}
 
   async getUserDetail(userId: number) {
@@ -53,12 +57,12 @@ export class UserService {
 
       return {
         id: user.id,
-        // thumbnail,
         nickname: user.nickname,
         email: user.accounts[0].email,
         gender: user.gender,
         age,
         city: user.address.split(' ')[0],
+        profileImage: user.profileImage.url,
         avgHitScore: user.userState ? user.userState.avgHitScore : 0,
         mannerScore: user.userState ? user.userState.mannerScore : 0,
       };
@@ -67,12 +71,27 @@ export class UserService {
     }
   }
 
-  async updateUserInfo(userId: number, body: UpdateUserInfoInputDto) {
+  async updateUserInfo(userId: number, body: UpdateUserInfoInputDto, file) {
     const queryRunner = this.connection.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
     try {
+      const user = await queryRunner.manager.findOne(User, {
+        where: {
+          id: userId,
+        },
+        relations: {
+          userState: true,
+        },
+      });
+
+      let profileImage;
+      if (file) {
+        profileImage = await this.uploadFileService.uploadSingleImageFile(file);
+        await queryRunner.manager.save(UploadFile, profileImage);
+      }
+
       await queryRunner.manager.update(
         User,
         { id: userId },
@@ -82,12 +101,13 @@ export class UserService {
           gender: body.gender,
           address: body.address,
           addressDetail: body.addressDetail,
+          profileImage,
         },
       );
 
       await queryRunner.manager.update(
         UserState,
-        { user: { id: userId } },
+        { id: user.userState.id },
         { avgHitScore: body.avgHitScore },
       );
 

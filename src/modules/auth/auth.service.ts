@@ -24,6 +24,12 @@ import {
 import { Provider, Role } from 'src/modules/user/enum/user.enum';
 import { LoginInputDto, LoginOutputDto } from 'src/modules/user/dto/login-dto';
 import { AuthError, AUTH_ERROR } from 'src/modules/auth/error/auth.error';
+import { UploadFileService } from '../upload-file/upload-file.service';
+import { UploadFile } from '../upload-file/entity/upload-file.entity';
+import {
+  CheckNicknameInputDto,
+  CheckNicknameOutputDto,
+} from '../user/dto/check-nickname.dto';
 
 @Injectable()
 export class AuthService {
@@ -35,37 +41,43 @@ export class AuthService {
     @InjectRepository(UserState)
     private readonly userStateRepo: Repository<UserState>,
 
-    private readonly commonService: CommonService,
-    private readonly JwtService: JwtService,
     private readonly authError: AuthError,
+    private readonly JwtService: JwtService,
+    private readonly commonService: CommonService,
+    private readonly uploadFileService: UploadFileService,
 
     private connection: Connection,
     private readonly logger: Logger,
   ) {}
 
-  async signup(body: SignupInputDto): Promise<SignupOutputDto> {
+  async signup(body, file): Promise<SignupOutputDto> {
+    const accountEmail = await this.accountRepo.findOne({
+      where: { email: body.email },
+    });
+
+    if (accountEmail) {
+      throw new ConflictException(AUTH_ERROR.ACCOUNT_EMAIL_ALREADY_EXIST);
+    }
+
+    const userNickname = await this.userRepo.findOne({
+      where: {
+        nickname: body.nickname,
+      },
+    });
+
+    if (userNickname) {
+      throw new ConflictException(AUTH_ERROR.ACCOUNT_NICKNAME_ALREADY_EXIST);
+    }
+
     const queryRunner = this.connection.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
     try {
-      const accountEmail = await this.accountRepo.findOne({
-        where: { email: body.email },
-      });
-
-      if (accountEmail) {
-        throw new ConflictException(AUTH_ERROR.ACCOUNT_EMAIL_ALREADY_EXIST);
-      }
-
-      const userNickname = await this.userRepo.findOne({
-        where: {
-          nickname: body.nickname,
-        },
-      });
-
-      if (userNickname) {
-        throw new ConflictException(AUTH_ERROR.ACCOUNT_NICKNAME_ALREADY_EXIST);
-      }
+      const profileImage = await this.uploadFileService.uploadSingleImageFile(
+        file,
+      );
+      await queryRunner.manager.save(UploadFile, profileImage);
 
       const user = new User();
       user.role = Role.USER;
@@ -74,6 +86,7 @@ export class AuthService {
       user.gender = body.gender;
       user.address = body.address;
       user.addressDetail = body.addressDetail;
+      user.profileImage = profileImage;
       user.phone = await this.commonService.encrypt(body.phone);
 
       await queryRunner.manager.save(User, user);
@@ -101,7 +114,7 @@ export class AuthService {
       await queryRunner.commitTransaction();
 
       return {
-        jwt: this.JwtService.sign(payload),
+        accessToken: this.JwtService.sign(payload),
         account: {
           email: account.email,
           nickname: user.nickname,
@@ -185,7 +198,7 @@ export class AuthService {
       await queryRunner.commitTransaction();
 
       return {
-        jwt: this.JwtService.sign(payload),
+        accessToken: this.JwtService.sign(payload),
         account: {
           email: account.email,
           nickname: account.user.nickname,
@@ -208,7 +221,9 @@ export class AuthService {
     }
   }
 
-  async checkNickname(body) {
+  async checkNickname(
+    body: CheckNicknameInputDto,
+  ): Promise<CheckNicknameOutputDto> {
     try {
       const userNickname = await this.userRepo.findOne({
         where: {
@@ -216,9 +231,9 @@ export class AuthService {
         },
       });
 
-      const isAble = !userNickname ? true : false;
+      const isDuplicatedNickname = userNickname ? true : false;
 
-      return { isAble };
+      return { isDuplicatedNickname };
     } catch (error) {
       console.error(error);
     }

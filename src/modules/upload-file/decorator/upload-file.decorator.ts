@@ -1,14 +1,16 @@
 import { applyDecorators, UseInterceptors } from '@nestjs/common';
 import {
   FileFieldsInterceptor,
+  FileInterceptor,
   FilesInterceptor,
 } from '@nestjs/platform-express';
 
-import path from 'path';
-import crypto from 'crypto';
+const path = require('path');
+const crypto = require('crypto');
 import { Buffer } from 'buffer';
 import * as AWS from 'aws-sdk';
 import * as multerS3 from 'multer-s3';
+import 'dotenv/config';
 
 const s3 = new AWS.S3();
 AWS.config.update({
@@ -17,14 +19,32 @@ AWS.config.update({
   region: process.env.AWS_REGION,
 });
 
-export function CustomUploadFiles(fieldName: string, maxCount?: number) {
+// export function UploadSingleImage(fieldName: string) {
+//   return applyDecorators(
+//     UseInterceptors(
+//       FileInterceptor(fieldName, {
+//         storage: multerS3({
+//           s3: s3,
+//           bucket: process.env.AWS_S3_BUCKET_NAME,
+//           acl: "public-read",
+//           key(req, file, callback) {
+//             callback(null, `${Date.now()}_${path.basename(file.originalname)}`);
+//           },
+//         }),
+//         limits: {},
+//       }),
+//     ),
+//   );
+// }
+
+export function UploadSingleImage(fieldName: string) {
   return applyDecorators(
     UseInterceptors(
-      FilesInterceptor(fieldName, maxCount, {
+      FileInterceptor(fieldName, {
         storage: multerS3({
           s3: s3,
           bucket: process.env.AWS_S3_BUCKET_NAME,
-          acl: 'public-read',
+          // acl: 'public-read',
           key: function (request, file, cb) {
             file.originalname = Buffer.from(
               file.originalname,

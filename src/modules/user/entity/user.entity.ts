@@ -52,7 +52,7 @@ export class User extends GuardCoreEntity {
   @JoinColumn()
   userState: UserState;
 
-  @OneToOne(() => UploadFile, (uploadFile) => uploadFile.userThumbnail)
+  @OneToOne(() => UploadFile, (uploadFile) => uploadFile.userProfileImage)
   @JoinColumn()
-  thumbnail: UploadFile;
+  profileImage: UploadFile;
 }

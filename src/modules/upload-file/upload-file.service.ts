@@ -1,26 +1,25 @@
-import { Injectable } from '@nestjs/common';
-import { CreateUploadFileDto } from './dto/create-upload-file.dto';
-import { UpdateUploadFileDto } from './dto/update-upload-file.dto';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { UploadFile } from './entity/upload-file.entity';
+
+const path = require('path');
 
 @Injectable()
 export class UploadFileService {
-  create(createUploadFileDto: CreateUploadFileDto) {
-    return 'This action adds a new uploadFile';
-  }
+  constructor() {}
 
-  findAll() {
-    return `This action returns all uploadFile`;
-  }
+  async uploadSingleImageFile(file: Express.MulterS3.File) {
+    try {
+      const image = new UploadFile();
+      image.name = file.originalname;
+      image.hash = file.filename;
+      image.size = file.size;
+      image.url = file.location;
+      image.ext = path.extname(file.originalname);
+      image.mime = file.mimetype;
 
-  findOne(id: number) {
-    return `This action returns a #${id} uploadFile`;
-  }
-
-  update(id: number, updateUploadFileDto: UpdateUploadFileDto) {
-    return `This action updates a #${id} uploadFile`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} uploadFile`;
+      return image;
+    } catch (error) {
+      throw new BadRequestException('image upload failed');
+    }
   }
 }
