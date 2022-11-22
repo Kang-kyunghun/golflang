@@ -7,28 +7,28 @@ import { Column, Entity, OneToOne } from 'typeorm';
 export class UploadFile extends CoreEntity {
   @Column()
   @ApiProperty({ description: '파일명' })
-  fileName: string;
-
-  @Column()
-  @ApiProperty({ description: '해쉬값' })
-  hash: string;
+  name: string;
 
   @Column({ nullable: true, type: 'float' })
   @ApiProperty({ description: '파일 크기', nullable: true, type: 'float' })
   size: number;
 
-  @Column({ type: 'float', nullable: true })
-  @ApiProperty({ description: '파일 가로', nullable: true, type: 'float' })
-  width: number;
-
-  @Column({ type: 'float', nullable: true })
-  @ApiProperty({ description: '파일 세로', nullable: true, type: 'float' })
-  height: number;
-
   @Column({ type: 'text' })
   @ApiProperty({ description: 'AWS S3에 저장된 URL' })
   url: string;
 
-  @OneToOne(() => User, (user) => user.thumbnail)
-  userThumbnail: User;
+  @Column()
+  @ApiProperty({ description: '확장자명' })
+  ext: string;
+
+  @Column()
+  @ApiProperty({ description: '확장자명' })
+  mime: string;
+
+  @Column()
+  @ApiProperty({ description: '해쉬값' })
+  hash: string;
+
+  @OneToOne(() => User, (user) => user.profileImage)
+  userProfileImage: User;
 }

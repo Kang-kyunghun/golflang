@@ -10,6 +10,7 @@ import { PassportModule } from '@nestjs/passport';
 import { CommonService } from 'src/common/common.service';
 import { AuthService } from './auth.service';
 import { AuthError } from './error/auth.error';
+import { UploadFileService } from '../upload-file/upload-file.service';
 
 @Module({
   imports: [
@@ -21,7 +22,14 @@ import { AuthError } from './error/auth.error';
     }),
   ],
   controllers: [AuthController],
-  providers: [UserService, CommonService, AuthService, Logger, AuthError],
+  providers: [
+    UserService,
+    CommonService,
+    AuthService,
+    Logger,
+    AuthError,
+    UploadFileService,
+  ],
   exports: [UserService, AuthError],
 })
 export class AuthModule {}

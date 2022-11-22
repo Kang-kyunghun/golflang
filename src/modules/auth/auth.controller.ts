@@ -11,6 +11,8 @@ import {
   Req,
   Request,
   Query,
+  UploadedFiles,
+  UploadedFile,
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
@@ -34,8 +36,9 @@ import {
 } from 'src/modules/user/dto/signup-dto';
 import { Provider } from '../user/enum/user.enum';
 import { AuthService } from './auth.service';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+import { UploadSingleImage } from '../upload-file/decorator/upload-file.decorator';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { FormDataValidate } from 'src/util/json.interceptor';
 
 @ApiTags('AUTH')
 @Controller('auth')
@@ -45,8 +48,14 @@ export class AuthController {
 
   @Post('signup')
   @SwaggerDefault('로컬 회원가입', SignupOutputDto, '로컬 회원가입')
-  async signup(@Body() body: SignupInputDto): Promise<SignupOutputDto> {
-    return await this.authService.signup(body);
+  @UploadSingleImage('profileImage')
+  async signup(
+    @Body() body,
+    @UploadedFile() file: Express.MulterS3.File,
+  ): Promise<SignupOutputDto> {
+    body = await new FormDataValidate(SignupInputDto, body.data).parse();
+
+    return await this.authService.signup(body, file);
   }
 
   @Post('login/:provider')

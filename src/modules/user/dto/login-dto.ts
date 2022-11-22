@@ -30,6 +30,6 @@ export class LoginInputDto {
 }
 
 export class LoginOutputDto extends PickType(SignupOutputDto, [
-  'jwt',
+  'accessToken',
   'account',
 ]) {}
