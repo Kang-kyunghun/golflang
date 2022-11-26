@@ -1,3 +1,4 @@
+import { JwtService } from '@nestjs/jwt';
 import { Injectable } from '@nestjs/common';
 import { CreateCommonDto } from './dto/create-common.dto';
 import { UpdateCommonDto } from './dto/update-common.dto';
@@ -11,7 +12,7 @@ const IV_LENGTH = 16;
 
 @Injectable()
 export class CommonService {
-  constructor() {}
+  constructor(private readonly JwtService: JwtService) {}
 
   async hash(string: string) {
     const salt = 10;
@@ -51,5 +52,13 @@ export class CommonService {
     const age = todayYear - birthYear + 1;
 
     return age;
+  }
+
+  createAccessToken(payload: object) {
+    return this.JwtService.sign(payload);
+  }
+
+  createRefreshToken(payload: object) {
+    return this.JwtService.sign(payload);
   }
 }

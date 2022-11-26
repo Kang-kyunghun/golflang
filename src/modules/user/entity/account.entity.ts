@@ -1,8 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail } from 'class-validator';
+import { IsEmail, IsString } from 'class-validator';
 import { GuardCoreEntity } from 'src/common/entity/guard-core.entity';
+import { Provider } from 'src/modules/auth/enum/account.enum';
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
-import { Provider } from '../enum/user.enum';
 import { User } from './user.entity';
 
 @Entity()
@@ -33,6 +33,19 @@ export class Account extends GuardCoreEntity {
     nullable: true,
   })
   psResetToken: string;
+
+  @Column({ default: null, nullable: true })
+  @ApiProperty({
+    description: '암호화된 refeshToken',
+    default: null,
+    nullable: true,
+  })
+  refreshToken: string;
+
+  @Column({ default: null, nullable: true })
+  @IsString()
+  @ApiProperty({ description: 'account key값' })
+  accountKey: string;
 
   @ManyToOne(() => User, (user) => user.id)
   @JoinColumn()

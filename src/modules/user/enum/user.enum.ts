@@ -8,10 +8,4 @@ enum Gender {
   FEMALE = 'female',
 }
 
-enum Provider {
-  LOCAL = 'local',
-  GOOGLE = 'google',
-  KAKAO = 'kakao',
-}
-
-export { Role, Gender, Provider };
+export { Role, Gender };

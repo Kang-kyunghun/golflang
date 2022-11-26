@@ -10,10 +10,10 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { BaseGuard } from 'src/common/guard/base.guard';
 import { Account } from 'src/modules/user/entity/account.entity';
-import { Provider } from 'src/modules/user/enum/user.enum';
 import { Repository } from 'typeorm';
 import { AuthError, AUTH_ERROR } from '../error/auth.error';
 import axios from 'axios';
+import { Provider } from '../enum/account.enum';
 
 @Injectable()
 export class LoginGuard extends BaseGuard {
@@ -56,12 +56,6 @@ export class LoginGuard extends BaseGuard {
           data.provider = param;
           data.nickname = kakaoUserInfo.properties.nickname;
           data.gender = kakaoUserInfo.kakao_account.gender;
-          break;
-
-        case Provider.LOCAL:
-          data.provider = param;
-          data.email = email;
-          data.password = password;
           break;
 
         default:

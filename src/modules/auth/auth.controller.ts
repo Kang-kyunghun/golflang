@@ -29,16 +29,20 @@ import {
   CheckNicknameInputDto,
   CheckNicknameOutputDto,
 } from 'src/modules/user/dto/check-nickname.dto';
-import { LoginInputDto, LoginOutputDto } from 'src/modules/user/dto/login-dto';
+import {
+  LocalLoginInputDto,
+  LoginOutputDto,
+  OAuthLoginInputDto,
+} from 'src/modules/user/dto/login-dto';
 import {
   SignupInputDto,
   SignupOutputDto,
 } from 'src/modules/user/dto/signup-dto';
-import { Provider } from '../user/enum/user.enum';
 import { AuthService } from './auth.service';
 import { UploadSingleImage } from '../upload-file/decorator/upload-file.decorator';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { FormDataValidate } from 'src/util/json.interceptor';
+import { Provider } from './enum/account.enum';
 
 @ApiTags('AUTH')
 @Controller('auth')
@@ -58,23 +62,29 @@ export class AuthController {
     return await this.authService.signup(body, file);
   }
 
-  @Post('login/:provider')
+  @Post('login/local')
+  @SwaggerDefault('로컬 로그인', null, '로컬 로그인')
+  async loginLocal(@Body() body: LocalLoginInputDto): Promise<LoginOutputDto> {
+    return await this.authService.loginLocal(body);
+  }
+
+  @Post('login/oauth/:provider')
   @UseGuards(LoginGuard)
   @SwaggerDefault(
-    '소셜 & 로컬 통합 로그인',
-    LoginOutputDto,
-    '소셜 로그인 추후 개발 진행 예정',
+    '소셜 로그인',
+    OAuthLoginInputDto,
+    '소셜 로그인 & 최초 소셜 로그인시 자동 회원가입',
   )
   @ApiParam({
     name: 'provider',
     required: true,
-    description: '로그인 경로(카카오, 애플, 로컬)',
+    description: '로그인 경로(카카오, 애플)',
     type: 'enum',
     enum: Provider,
   })
-  @ApiBody({ type: LoginInputDto })
-  async login(@Req() req: Request): Promise<LoginOutputDto> {
-    return await this.authService.login(req['guard']);
+  @ApiBody({ type: OAuthLoginInputDto })
+  async loginOAuth(@Req() req: Request): Promise<LoginOutputDto> {
+    return await this.authService.loginOAuth(req['guard'], req['body']);
   }
 
   @Post('check/nickname')
