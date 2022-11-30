@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   HttpException,
   HttpStatus,
   Injectable,
@@ -9,7 +10,11 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CommonService } from 'src/common/common.service';
 import { Repository } from 'typeorm';
 import { User } from '../user/entity/user.entity';
-import { SendSMSOutputDto, SendSMSQueryDto } from './dto/send-sms.dto';
+import {
+  CheckSMSOTPInputDto,
+  CheckSMSOTPOutputDto,
+} from './dto/check-sms-otp.dto';
+import { SendSMSOutputDto, SendSMSInPutDto } from './dto/send-sms.dto';
 import { Otp } from './entities/otp.entity';
 import { OtpAction } from './enum/otp.enum';
 import { OtpError, OTP_ERROR } from './error/otp.error';
@@ -37,9 +42,9 @@ export class OtpService {
   createOTP = () =>
     [0, 0, 0, 0, 0, 0].map(() => Math.floor(Math.random() * 10)).join('');
 
-  async sendSMS(query: SendSMSQueryDto): Promise<SendSMSOutputDto | any> {
+  async sendSMS(body: SendSMSInPutDto): Promise<SendSMSOutputDto | any> {
     try {
-      const encryptedPhone = await this.commonService.encrypt(query.phone);
+      const encryptedPhone = await this.commonService.encrypt(body.phone);
 
       const user = await this.userRepo.findOne({
         where: { phone: encryptedPhone },
@@ -47,6 +52,7 @@ export class OtpService {
         select: {
           id: true,
           phone: true,
+          nickname: true,
           accounts: { email: true },
         },
       });
@@ -59,45 +65,45 @@ export class OtpService {
         throw new NotFoundException(OTP_ERROR.USER_PHONE_NOT_FOUND);
       }
 
-      const newOtpNumber = this.createOTP();
       const expireDate = moment().add(this.EXPIRE_MINUTE, 'm').toDate();
-      const receiverNumber = `+82${query.phone}`;
+      const receiverNumber = `+82${body.phone}`;
 
-      // 기존 otp 존재 유무 확인
+      // // 기존 otp 존재 유무 확인
       const existingOtp = await this.otpRepo.findOne({
         where: {
           email: user.accounts[0].email,
           isActive: true,
-          action: OtpAction.SMS,
+          action: body.action,
         },
       });
 
+      const newOtpNumber = this.createOTP();
+
+      // // otp 존재하지 않을 경우 새로 발급
       if (!existingOtp) {
-        // otp 존재하지 않을 경우 새로 발급
-        const otp = new Otp();
-        otp.email = user.accounts[0].email;
-        otp.otp = newOtpNumber;
-        otp.expireDate = expireDate;
-        otp.action = OtpAction.SMS;
+        const newOtp = new Otp();
+        newOtp.email = user.accounts[0].email;
+        newOtp.otp = newOtpNumber;
+        newOtp.expireDate = expireDate;
+        newOtp.action = body.action;
 
-        await this.otpRepo.save(otp);
+        await this.otpRepo.save(newOtp);
 
-        // twilio 인증번호 발송
         client.messages
           .create({
             from: process.env.TWILIO_MY_PHONE_NUMBER,
             to: receiverNumber,
-            body: `골프랑 인증번호는 ${otp.otp} 입니다.`,
+            body: `골프랑 인증번호는 ${newOtp.otp} 입니다.`,
           })
           .then((message) => console.log('새 인증번호 발급 완료'))
           .done();
 
-        return { email: otp.email, expireDate };
+        return { email: newOtp.email, expireDate };
       }
 
       // otp 존재할 경우 업데이트 후 재발급
       await this.otpRepo.update(
-        { id: existingOtp.id },
+        { id: existingOtp.id, action: body.action },
         {
           reqCount: existingOtp.reqCount + 1,
           otp: newOtpNumber,
@@ -129,20 +135,37 @@ export class OtpService {
     }
   }
 
-  async checkSMSOTP(body) {
+  async checkSMSOTP(body: CheckSMSOTPInputDto): Promise<CheckSMSOTPOutputDto> {
     try {
-      // console.log('body :', body);
-      // const existingOtp = await this.otpRepo.findOne({
-      //   where: {
-      //     otp: body.otp,
-      //     // email: body.email,
-      //   },
-      // });
-      // console.log('existingOtp :', existingOtp);
-      // if (!existingOtp) {
-      //   throw new NotFoundException(OTP_ERROR.OTP_NOT_FOUND);
-      // }
-      // return existingOtp.email;
+      const existingOtp = await this.otpRepo.findOne({
+        where: {
+          otp: body.otp,
+          email: body.email,
+          action: body.action,
+        },
+        select: {
+          id: true,
+          email: true,
+          action: true,
+          expireDate: true,
+        },
+      });
+
+      if (!existingOtp) {
+        throw new NotFoundException(OTP_ERROR.OTP_NOT_FOUND);
+      }
+
+      if (moment(existingOtp.expireDate).diff(moment()) < 0) {
+        throw new BadRequestException(OTP_ERROR.OTP_EXPIRE);
+      }
+
+      if (existingOtp.action === OtpAction.FIND_ID) {
+        return { result: existingOtp.email };
+      }
+
+      return {
+        result: 'done',
+      };
     } catch (error) {
       this.logger.error(error);
 
