@@ -1,9 +1,8 @@
 import { ApiProperty, PickType } from '@nestjs/swagger';
 import { IsEmail, IsOptional, IsString, Matches } from 'class-validator';
-import { Provider } from '../enum/user.enum';
 import { SignupOutputDto } from './signup-dto';
 
-export class LoginInputDto {
+export class LocalLoginInputDto {
   @IsEmail()
   @IsOptional()
   @ApiProperty({
@@ -22,7 +21,9 @@ export class LoginInputDto {
     required: false,
   })
   password?: string;
+}
 
+export class OAuthLoginInputDto {
   @IsString()
   @IsOptional()
   @ApiProperty({ description: '카카오 ACCESS TOKEN' })
@@ -31,5 +32,6 @@ export class LoginInputDto {
 
 export class LoginOutputDto extends PickType(SignupOutputDto, [
   'accessToken',
+  'refreshToken',
   'account',
 ]) {}

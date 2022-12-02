@@ -7,8 +7,9 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
+import { Provider } from 'src/modules/auth/enum/account.enum';
 import { User } from '../entity/user.entity';
-import { Gender, Provider } from '../enum/user.enum';
+import { Gender } from '../enum/user.enum';
 
 export class SignupInputDto {
   @IsEmail()
@@ -73,6 +74,9 @@ class SignupAccountField {
 export class SignupOutputDto {
   @ApiProperty({ description: 'accessToken' })
   accessToken: string;
+
+  @ApiProperty({ description: 'refreshToken' })
+  refreshToken: string;
 
   @ApiProperty({ description: '계정 정보' })
   account: SignupAccountField;

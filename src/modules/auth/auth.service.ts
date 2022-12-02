@@ -21,8 +21,8 @@ import {
   SignupInputDto,
   SignupOutputDto,
 } from 'src/modules/user/dto/signup-dto';
-import { Provider, Role } from 'src/modules/user/enum/user.enum';
-import { LoginInputDto, LoginOutputDto } from 'src/modules/user/dto/login-dto';
+import { Role } from 'src/modules/user/enum/user.enum';
+import { LoginOutputDto } from 'src/modules/user/dto/login-dto';
 import { AuthError, AUTH_ERROR } from 'src/modules/auth/error/auth.error';
 import { UploadFileService } from '../upload-file/upload-file.service';
 import { UploadFile } from '../upload-file/entity/upload-file.entity';
@@ -30,6 +30,7 @@ import {
   CheckNicknameInputDto,
   CheckNicknameOutputDto,
 } from '../user/dto/check-nickname.dto';
+import { Provider } from './enum/account.enum';
 
 @Injectable()
 export class AuthService {
@@ -60,9 +61,7 @@ export class AuthService {
     }
 
     const userNickname = await this.userRepo.findOne({
-      where: {
-        nickname: body.nickname,
-      },
+      where: { nickname: body.nickname },
     });
 
     if (userNickname) {
@@ -98,23 +97,29 @@ export class AuthService {
       await queryRunner.manager.save(UserState, userState);
 
       const account = new Account();
-      account.email = body.email;
-      account.password =
-        body.provider === Provider.LOCAL
-          ? await this.commonService.hash(body.password)
-          : null;
       account.user = user;
+      account.email = body.email;
+      account.accountKey = `l_${body.email}`;
+      account.password = await this.commonService.hash(body.password);
 
       await queryRunner.manager.save(Account, account);
 
-      const payload = {
-        id: account.uid,
-      };
+      const payload = { id: account.uid };
+
+      const accessToken = this.commonService.createAccessToken(payload);
+      const refreshToken = this.commonService.createRefreshToken(payload);
+
+      await queryRunner.manager.update(
+        Account,
+        { id: account.id },
+        { refreshToken },
+      );
 
       await queryRunner.commitTransaction();
 
       return {
-        accessToken: this.JwtService.sign(payload),
+        accessToken,
+        refreshToken,
         account: {
           email: account.email,
           nickname: user.nickname,
@@ -137,13 +142,13 @@ export class AuthService {
     }
   }
 
-  async login(guard): Promise<LoginOutputDto> {
+  async loginLocal(body) {
     const queryRunner = this.connection.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
     try {
-      const { email, password, provider, nickname, gender } = guard;
+      const { email, password } = body;
 
       let account = await this.accountRepo.findOne({
         where: { email },
@@ -152,37 +157,14 @@ export class AuthService {
         },
       });
 
-      if (provider === Provider.LOCAL) {
-        if (!account) {
-          throw new NotFoundException(AUTH_ERROR.ACCOUNT_ACCOUNT_NOT_FOUND);
-        }
+      if (!account) {
+        throw new NotFoundException(AUTH_ERROR.ACCOUNT_ACCOUNT_NOT_FOUND);
+      }
 
-        const checkPassword = await bcrypt.compare(password, account.password);
+      const checkPassword = await bcrypt.compare(password, account.password);
 
-        if (!checkPassword) {
-          throw new BadRequestException(AUTH_ERROR.ACCOUNT_PASSWORD_WAS_WRONG);
-        }
-      } else {
-        if (!account) {
-          const userState = new UserState();
-
-          await queryRunner.manager.insert(UserState, userState);
-
-          const user = new User();
-          user.role = Role.USER;
-          user.nickname = nickname;
-          user.gender = gender;
-          user.userState = userState;
-
-          await queryRunner.manager.insert(User, user);
-
-          account = new Account();
-          account.email = email;
-          account.provider = provider;
-          account.user = user;
-
-          await queryRunner.manager.insert(Account, account);
-        }
+      if (!checkPassword) {
+        throw new BadRequestException(AUTH_ERROR.ACCOUNT_PASSWORD_WAS_WRONG);
       }
 
       await queryRunner.manager.update(
@@ -191,14 +173,104 @@ export class AuthService {
         { lastLoginDate: new Date() },
       );
 
-      const payload = {
-        id: account.uid,
-      };
+      const payload = { id: account.uid };
+      const accessToken = this.commonService.createAccessToken(payload);
 
       await queryRunner.commitTransaction();
 
       return {
-        accessToken: this.JwtService.sign(payload),
+        accessToken,
+        refreshToken: account.refreshToken,
+        account: {
+          email: account.email,
+          nickname: account.user.nickname,
+        },
+      };
+    } catch (error) {
+      this.logger.error(error);
+      await queryRunner.rollbackTransaction();
+
+      const statusCode = error.response
+        ? error.response.statusCode
+        : HttpStatus.BAD_REQUEST;
+
+      throw new HttpException(
+        this.authError.errorHandler(error.message),
+        statusCode,
+      );
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  async loginOAuth(guard, body): Promise<LoginOutputDto> {
+    const queryRunner = this.connection.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      const { email, provider, nickname, gender } = guard;
+      const { kakaoAccessToken, kakaoRefreshToken } = body;
+
+      const accountKey = `${provider.slice(0, 1)}_${email}`;
+
+      console.log(1);
+
+      let account = await this.accountRepo.findOne({
+        where: { accountKey },
+        relations: {
+          user: { userState: true },
+        },
+      });
+
+      if (!account) {
+        const userState = new UserState();
+
+        await queryRunner.manager.save(UserState, userState);
+
+        const user = new User();
+        user.role = Role.USER;
+        user.nickname = nickname;
+        user.gender = gender;
+        user.userState = userState;
+
+        await queryRunner.manager.save(User, user);
+
+        account = new Account();
+        account.email = email;
+        account.provider = provider;
+        account.user = user;
+        account.accountKey = `${provider.slice(0, 1)}_${email}`;
+
+        await queryRunner.manager.save(Account, account);
+      }
+
+      await queryRunner.manager.update(
+        UserState,
+        { id: account.user.userState.id },
+        { lastLoginDate: new Date() },
+      );
+
+      const payload = { id: account.uid };
+
+      const accessToken = this.commonService.createAccessToken(payload);
+
+      const refreshToken = this.commonService.createRefreshToken({
+        id: account.uid,
+        refreshToken: kakaoRefreshToken,
+      });
+
+      await queryRunner.manager.update(
+        Account,
+        { id: account.id },
+        { refreshToken },
+      );
+
+      await queryRunner.commitTransaction();
+
+      return {
+        accessToken,
+        refreshToken,
         account: {
           email: account.email,
           nickname: account.user.nickname,
