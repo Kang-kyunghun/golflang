@@ -9,6 +9,10 @@ export class Otp extends CoreEntity {
   @ApiProperty({ description: '이메일' })
   email: string;
 
+  @Column({ nullable: true, default: null })
+  @ApiProperty({ description: '폰 번호' })
+  phone: string;
+
   @Column()
   @ApiProperty({ description: 'OTP 번호' })
   otp: string;
