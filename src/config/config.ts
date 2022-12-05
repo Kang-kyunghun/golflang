@@ -3,7 +3,8 @@ import { AuthModule } from 'src/modules/auth/auth.module';
 import { ChatModule } from 'src/modules/chat/chat.module';
 import { ClubModule } from 'src/modules/club/club.module';
 import { LikeModule } from 'src/modules/like/like.module';
-import { MailModule } from 'src/modules/mail/mail.module';
+import { Otp } from 'src/modules/otp/entities/otp.entity';
+import { OtpModule } from 'src/modules/otp/otp.module';
 import { PostModule } from 'src/modules/post/post.module';
 import { ScheduleModule } from 'src/modules/schedule/schedule.module';
 import { UploadFile } from 'src/modules/upload-file/entity/upload-file.entity';
@@ -14,7 +15,7 @@ import { User } from 'src/modules/user/entity/user.entity';
 import { UserModule } from 'src/modules/user/user.module';
 import { CommonModule } from '../common/common.module';
 
-export const ENTITIES = [User, Account, UserState, UploadFile];
+export const ENTITIES = [User, Account, UserState, UploadFile, Otp];
 
 export const MODULES = [
   CommonModule,
@@ -27,5 +28,5 @@ export const MODULES = [
   ChatModule,
   AuthModule,
   LikeModule,
-  MailModule,
+  OtpModule,
 ];

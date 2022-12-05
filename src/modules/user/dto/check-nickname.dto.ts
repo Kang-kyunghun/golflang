@@ -1,6 +1,5 @@
 import { ApiProperty, PickType } from '@nestjs/swagger';
 import { IsString } from 'class-validator';
-import { User } from '../entity/user.entity';
 
 export class CheckNicknameInputDto {
   @IsString()
