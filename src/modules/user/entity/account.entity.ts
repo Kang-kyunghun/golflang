@@ -22,25 +22,13 @@ export class Account extends GuardCoreEntity {
   @ApiProperty({ description: '현재 비밀번호가 임시비밀번호인지 여부' })
   isTempPassword: boolean = false;
 
-  @Column({ nullable: true, default: 0 })
-  @ApiProperty({ description: '비밀번호 실패 횟수' })
-  psFailCount: number;
-
   @Column({ type: 'enum', enum: Provider })
   @ApiProperty({ description: 'SNS 계정 공급자', enum: Provider })
   provider: Provider;
 
   @Column({ default: null, nullable: true })
   @ApiProperty({
-    description: '비밀번호 찾기용 토큰',
-    default: null,
-    nullable: true,
-  })
-  psResetToken: string;
-
-  @Column({ default: null, nullable: true })
-  @ApiProperty({
-    description: '암호화된 refeshToken',
+    description: '암호화된 refreshToken',
     default: null,
     nullable: true,
   })
