@@ -101,6 +101,7 @@ export class AuthService {
       account.email = body.email;
       account.accountKey = `l_${body.email}`;
       account.password = await this.commonService.hash(body.password);
+      account.provider = Provider.LOCAL;
 
       await queryRunner.manager.save(Account, account);
 

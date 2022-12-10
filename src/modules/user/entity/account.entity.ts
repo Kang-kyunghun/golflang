@@ -13,7 +13,7 @@ export class Account extends GuardCoreEntity {
 
   @Column({ nullable: true })
   @ApiProperty({
-    description: '비밀번호(알파벳+숫자+특수문자 8자리 이상',
+    description: '비밀번호(알파벳+숫자+특수문자) 8자리 이상',
     example: 'abcd1234!',
   })
   password: string;
