@@ -62,6 +62,8 @@ export class MailService {
       mailgunClient.messages().send(data, async function (error, result) {
         try {
           if (result.message === 'Queued. Thank you.') {
+            console.log('임시비밀번호 이메일 발송 완료');
+
             const updateAccount = await accountLocalRepo.update(
               { id: user.accounts[0].id },
               { password: encrytedPassword },

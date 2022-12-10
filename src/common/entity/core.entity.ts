@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
   BaseEntity,
+  Column,
   CreateDateColumn,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -10,6 +11,10 @@ export class CoreEntity extends BaseEntity {
   @PrimaryGeneratedColumn()
   @ApiProperty({ description: 'id' })
   id: number;
+
+  @Column({ default: true })
+  @ApiProperty({ description: '활성화 여부', default: true })
+  isActive: boolean;
 
   @CreateDateColumn()
   @ApiProperty({ description: '생성 시간' })

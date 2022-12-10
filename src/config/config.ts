@@ -8,9 +8,10 @@ import { ClubModule } from 'src/modules/club/club.module';
 import { Club } from 'src/modules/club/entity/club.entity';
 import { Like } from 'src/modules/like/entity/like.entity';
 import { LikeModule } from 'src/modules/like/like.module';
-import { Mail } from 'src/modules/mail/entities/mail.entity';
 import { MailModule } from 'src/modules/mail/mail.module';
 import { Post } from 'src/modules/post/entity/post.entity';
+import { Otp } from 'src/modules/otp/entities/otp.entity';
+import { OtpModule } from 'src/modules/otp/otp.module';
 import { PostModule } from 'src/modules/post/post.module';
 import { Schedule } from 'src/modules/schedule/entity/schedule.entity';
 import { ScheduleModule } from 'src/modules/schedule/schedule.module';
@@ -27,7 +28,6 @@ export const ENTITIES = [
   Account,
   UserState,
   UploadFile,
-  Mail,
   Post,
   Club,
   Schedule,
@@ -35,6 +35,7 @@ export const ENTITIES = [
   Chat,
   Auth,
   Like,
+  Otp,
 ];
 
 export const MODULES = [
@@ -48,5 +49,6 @@ export const MODULES = [
   ChatModule,
   AuthModule,
   LikeModule,
+  OtpModule,
   MailModule,
 ];
