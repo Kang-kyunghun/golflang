@@ -66,7 +66,7 @@ export class MailService {
 
             const updateAccount = await accountLocalRepo.update(
               { id: user.accounts[0].id },
-              { password: encrytedPassword },
+              { password: encrytedPassword, isTempPassword: true },
             );
 
             if (updateAccount.affected === 1) {

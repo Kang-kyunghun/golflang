@@ -18,6 +18,10 @@ export class Account extends GuardCoreEntity {
   })
   password: string;
 
+  @Column({ default: false })
+  @ApiProperty({ description: '현재 비밀번호가 임시비밀번호인지 여부' })
+  isTempPassword: boolean = false;
+
   @Column({ nullable: true, default: 0 })
   @ApiProperty({ description: '비밀번호 실패 횟수' })
   psFailCount: number;
