@@ -1,4 +1,5 @@
 export enum Provider {
-  GOOGLE = 'google',
+  APPLE = 'apple',
   KAKAO = 'kakao',
+  LOCAL = 'local',
 }
