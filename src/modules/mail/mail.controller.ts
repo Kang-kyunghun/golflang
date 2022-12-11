@@ -11,7 +11,7 @@ import {
 import { MailService } from './mail.service';
 import { ApiTags } from '@nestjs/swagger';
 import { ResultFormatInterceptor } from 'src/common/interceptor/result-format.interceptor';
-import { SendResetPsEmailInputDto } from './dto/send-reset-ps-email.dto';
+import { SendResetPasswordEmailInputDto } from './dto/send-reset-ps-email.dto';
 import { SwaggerDefault } from 'src/common/decorator/swagger.decorator';
 
 @ApiTags('MAIL')
@@ -26,9 +26,9 @@ export class MailController {
     'done',
     '비밀번호 찾기 시 이메일 발송',
   )
-  async sendResetPsEmail(
-    @Body() body: SendResetPsEmailInputDto,
+  async sendResetPasswordEmail(
+    @Body() body: SendResetPasswordEmailInputDto,
   ): Promise<String> {
-    return await this.mailService.sendResetPsEmail(body);
+    return await this.mailService.sendResetPasswordEmail(body);
   }
 }

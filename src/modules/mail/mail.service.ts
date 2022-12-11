@@ -10,15 +10,19 @@ import { Repository } from 'typeorm';
 import { Account } from '../user/entity/account.entity';
 import { User } from '../user/entity/user.entity';
 import { MailError } from './error/mail.error';
-import { SendResetPsEmailInputDto } from './dto/send-reset-ps-email.dto';
+import { SendResetPasswordEmailInputDto } from './dto/send-reset-ps-email.dto';
 import { CommonService } from 'src/common/common.service';
 import { AUTH_ERROR } from '../auth/error/auth.error';
 
 const mailgun = require('mailgun-js');
 
-const API_KEY = 'cbc44f1e2aac32a756328fa53a6e1992-bdb2c8b4-e2e2b83b';
-const DOMAIN = 'sandboxa052f5ca5a5d446e81044069943f0d9f.mailgun.org';
-const mailgunClient = mailgun({ apiKey: API_KEY, domain: DOMAIN });
+const MAILGUN_API_KEY = process.env.MAILGUN_API_KEY;
+const MAILGUN_DOMAIN = process.env.MAILGUN_DOMAIN;
+
+const mailgunClient = mailgun({
+  apiKey: MAILGUN_API_KEY,
+  domain: MAILGUN_DOMAIN,
+});
 
 @Injectable()
 export class MailService {
@@ -36,7 +40,9 @@ export class MailService {
   createOTP = () =>
     [0, 0, 0, 0, 0, 0].map(() => Math.floor(Math.random() * 10)).join('');
 
-  async sendResetPsEmail(body: SendResetPsEmailInputDto): Promise<String> {
+  async sendResetPasswordEmail(
+    body: SendResetPasswordEmailInputDto,
+  ): Promise<String> {
     const accountLocalRepo: Repository<Account> = this.accountRepo;
     try {
       const user = await this.userRepo.findOne({
@@ -53,9 +59,9 @@ export class MailService {
       const encrytedPassword = await this.commonService.hash(tempPassword);
 
       const data = {
-        from: 'mailgun@sandboxa052f5ca5a5d446e81044069943f0d9f.mailgun.org',
+        from: `mailgun@${MAILGUN_DOMAIN}`,
         to: body.email,
-        subject: '골프랑 임시비밀번호 발급',
+        subject: '골프랑 임시비밀번호 발급 최종 테스트',
         text: `골프랑 로그인 임시 비밀번호는 ${tempPassword} 입니다`,
       };
 
