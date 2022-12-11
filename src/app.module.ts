@@ -9,6 +9,7 @@ import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import { ENTITIES, MODULES } from './config/config';
+import { RoundingModule } from './rounding/rounding.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { ENTITIES, MODULES } from './config/config';
       charset: 'utf8mb4',
     }),
     ...MODULES,
+    RoundingModule,
   ],
   controllers: [],
   providers: [],

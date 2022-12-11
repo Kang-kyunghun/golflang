@@ -13,9 +13,10 @@ import { Account } from 'src/modules/user/entity/account.entity';
 import { UserState } from 'src/modules/user/entity/user-state.entity';
 import { User } from 'src/modules/user/entity/user.entity';
 import { UserModule } from 'src/modules/user/user.module';
+import { Rounding } from 'src/rounding/entities/rounding.entity';
 import { CommonModule } from '../common/common.module';
 
-export const ENTITIES = [User, Account, UserState, UploadFile, Otp];
+export const ENTITIES = [User, Account, UserState, UploadFile, Otp, Rounding];
 
 export const MODULES = [
   CommonModule,

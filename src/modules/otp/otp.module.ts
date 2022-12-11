@@ -6,10 +6,11 @@ import { User } from '../user/entity/user.entity';
 import { CommonService } from 'src/common/common.service';
 import { Otp } from './entities/otp.entity';
 import { OtpError } from './error/otp.error';
+import { JwtService } from '@nestjs/jwt';
 
 @Module({
   imports: [TypeOrmModule.forFeature([User, Otp])],
-  providers: [OtpService, Logger, CommonService, OtpError],
+  providers: [OtpService, Logger, CommonService, OtpError, JwtService],
   controllers: [OtpController],
 })
 export class OtpModule {}
