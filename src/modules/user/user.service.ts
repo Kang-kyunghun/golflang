@@ -24,6 +24,10 @@ import { LoginOutputDto } from './dto/login-dto';
 import { UpdateUserInfoInputDto } from './dto/update-user-info.dto';
 import { UploadFileService } from '../upload-file/upload-file.service';
 import { UploadFile } from '../upload-file/entity/upload-file.entity';
+import {
+  SearchUsersOutputDto,
+  SearchUsersQueryDto,
+} from './dto/search-users.dto';
 
 @Injectable()
 export class UserService {
@@ -118,6 +122,57 @@ export class UserService {
       await queryRunner.rollbackTransaction();
     } finally {
       await queryRunner.release();
+    }
+  }
+
+  async searchUsers(query: SearchUsersQueryDto): Promise<SearchUsersOutputDto> {
+    try {
+      const { keyword } = query;
+
+      const resultQuery = this.userRepo
+        .createQueryBuilder('user')
+        .innerJoin('user.userState', 'userState')
+        .innerJoin('user.accounts', 'account')
+        .innerJoin('user.profileImage', 'profileImage')
+        .select([
+          'user.id',
+          'user.uid',
+          'user.gender',
+          'user.birthday',
+          'account.email',
+          'user.nickname',
+          'profileImage.url',
+          'userState.avgHitScore',
+        ]);
+
+      let result;
+      if (keyword) {
+        result = await resultQuery
+          .where('user.nickname like :nickname', { nickname: `%${keyword}%` })
+          .orWhere('account.email like :email', { email: `%${keyword}%` })
+          .getManyAndCount();
+      } else {
+        result = await resultQuery.getManyAndCount();
+      }
+
+      const participants = await Promise.all(
+        result[0].map(async (v) => {
+          return {
+            profileImage: v.profileImage.url,
+            nickname: v.nickname,
+            gender: v.gender,
+            age: await this.commonService.getAge(v.birthday),
+            avgHitScore: v.userState.avgHitScore,
+          };
+        }),
+      );
+
+      return {
+        participantCount: result[1],
+        participants,
+      };
+    } catch (error) {
+      console.log(error);
     }
   }
 }

@@ -57,7 +57,7 @@ export class User extends GuardCoreEntity {
   @JoinColumn()
   profileImage: UploadFile;
 
-  @OneToOne(() => Rounding, (rounding) => rounding.host)
-  @JoinColumn()
-  roundingHost: Rounding;
+  // @OneToOne(() => Rounding, (rounding) => rounding.host)
+  // @JoinColumn()
+  // roundingHost: Rounding;
 }

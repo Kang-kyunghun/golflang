@@ -3,3 +3,9 @@ export enum PermissionRole {
   ADMIN = 'admin',
   USER = 'user',
 }
+
+export enum InvitationState {
+  PENDING = 'pending',
+  CONFIRM = 'confirm',
+  REJECT = 'reject',
+}
