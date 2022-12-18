@@ -12,7 +12,7 @@ export class User extends GuardCoreEntity {
   @ApiProperty({ description: '유저 역할', enum: Role, default: Role.USER })
   role: Role;
 
-  @Column()
+  @Column({ nullable: true, default: null })
   @ApiProperty({
     description: '닉네임 (2~20자 사이)',
     minLength: 2,
@@ -29,8 +29,13 @@ export class User extends GuardCoreEntity {
   })
   birthday: string;
 
-  @Column({ type: 'enum', enum: Gender })
-  @ApiProperty({ description: '성별', enum: Gender })
+  @Column({ type: 'enum', enum: Gender, nullable: true, default: null })
+  @ApiProperty({
+    description: '성별',
+    enum: Gender,
+    nullable: true,
+    default: null,
+  })
   gender: Gender;
 
   @Column({ nullable: true, default: null })

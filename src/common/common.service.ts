@@ -20,7 +20,7 @@ export class CommonService {
     return await bcrypt.hash(string, salt);
   }
 
-  async encrypt(text) {
+  async encrypt(text: string) {
     const iv = Buffer.alloc(IV_LENGTH, 0);
     const key = (await promisify(scrypt)(PASSWORD, 'salt', 32)) as Buffer;
     const cipher = createCipheriv('aes-256-cbc', key, iv);
@@ -31,7 +31,7 @@ export class CommonService {
     return result;
   }
 
-  async decrypt(text) {
+  async decrypt(text: string) {
     const iv = Buffer.alloc(IV_LENGTH, 0);
     const key = (await promisify(scrypt)(PASSWORD, 'salt', 32)) as Buffer;
 
@@ -42,8 +42,8 @@ export class CommonService {
     return result;
   }
 
-  async getAge(birthday) {
-    const birth = new Date('1992-04-01');
+  async getAge(birthday: string): Promise<number> {
+    const birth = new Date(birthday);
     const birthYear = birth.getFullYear();
 
     const today = new Date();

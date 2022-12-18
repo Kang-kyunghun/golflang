@@ -60,12 +60,27 @@ export class AuthService {
       throw new ConflictException(AUTH_ERROR.ACCOUNT_EMAIL_ALREADY_EXIST);
     }
 
-    const userNickname = await this.userRepo.findOne({
-      where: { nickname: body.nickname },
-    });
+    let userNickname;
+    if (body.nickname) {
+      userNickname = await this.userRepo.findOne({
+        where: { nickname: body?.nickname },
+      });
 
-    if (userNickname) {
-      throw new ConflictException(AUTH_ERROR.ACCOUNT_NICKNAME_ALREADY_EXIST);
+      if (userNickname) {
+        throw new ConflictException(AUTH_ERROR.ACCOUNT_NICKNAME_ALREADY_EXIST);
+      }
+    }
+
+    if (body.phone) {
+      const checkPhone = await this.userRepo.findOne({
+        where: {
+          phone: await this.commonService.encrypt(body.phone),
+        },
+      });
+
+      if (checkPhone) {
+        throw new ConflictException(AUTH_ERROR.ACCOUNT_PHONE_ALREADY_EXIST);
+      }
     }
 
     const queryRunner = this.connection.createQueryRunner();

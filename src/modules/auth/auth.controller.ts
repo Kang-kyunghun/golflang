@@ -53,6 +53,7 @@ export class AuthController {
   @Post('signup')
   @SwaggerDefault('로컬 회원가입', SignupOutputDto, '로컬 회원가입')
   @UploadSingleImage('profileImage')
+  @ApiBody({ type: SignupInputDto })
   async signup(
     @Body() body,
     @UploadedFile() file: Express.MulterS3.File,
