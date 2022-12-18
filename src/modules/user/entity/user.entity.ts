@@ -5,7 +5,7 @@ import { Gender, Role } from '../enum/user.enum';
 import { GuardCoreEntity } from '../../../common/entity/guard-core.entity';
 import { Account } from './account.entity';
 import { UserState } from './user-state.entity';
-import { Rounding } from 'src/rounding/entities/rounding.entity';
+import { UserScheduleMapping } from 'src/modules/schedule/entity/user-schedule-mapping.entity';
 
 @Entity()
 export class User extends GuardCoreEntity {
@@ -57,7 +57,9 @@ export class User extends GuardCoreEntity {
   @JoinColumn()
   profileImage: UploadFile;
 
-  // @OneToOne(() => Rounding, (rounding) => rounding.host)
-  // @JoinColumn()
-  // roundingHost: Rounding;
+  @OneToMany(
+    () => UserScheduleMapping,
+    (userScheduleMapping) => userScheduleMapping.user,
+  )
+  userScheduleMappings: UserScheduleMapping[];
 }

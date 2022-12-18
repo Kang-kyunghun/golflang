@@ -21,10 +21,8 @@ import { Account } from 'src/modules/user/entity/account.entity';
 import { UserState } from 'src/modules/user/entity/user-state.entity';
 import { User } from 'src/modules/user/entity/user.entity';
 import { UserModule } from 'src/modules/user/user.module';
-import { Rounding } from 'src/rounding/entities/rounding.entity';
 import { CommonModule } from '../common/common.module';
-import { UserRoundingMapping } from 'src/rounding/entities/user-rounding-mapping.entity';
-import { RoundingModule } from 'src/rounding/rounding.module';
+import { UserScheduleMapping } from 'src/modules/schedule/entity/user-schedule-mapping.entity';
 
 export const ENTITIES = [
   User,
@@ -34,13 +32,12 @@ export const ENTITIES = [
   Post,
   Club,
   Schedule,
+  UserScheduleMapping,
   Alarm,
   Chat,
   Auth,
   Like,
   Otp,
-  Rounding,
-  UserRoundingMapping,
 ];
 
 export const MODULES = [
@@ -56,5 +53,4 @@ export const MODULES = [
   LikeModule,
   OtpModule,
   MailModule,
-  RoundingModule,
 ];

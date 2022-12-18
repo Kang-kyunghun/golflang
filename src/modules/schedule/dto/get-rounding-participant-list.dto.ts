@@ -18,7 +18,7 @@ class userField {
   avgHitScore: number;
 }
 
-export class GetAcceptParticipantListOutputDto {
+export class GetRoundingAcceptParticipantListOutputDto {
   @ApiProperty({ description: '참가자 수' })
   participantCount: number;
 
@@ -42,7 +42,7 @@ class RejectField {
   users: userField[];
 }
 
-export class GetWaitingParticipantListOutputDto {
+export class GetRoundingWaitingParticipantListOutputDto {
   @ApiProperty({ description: '초대 진행중', type: PendingField })
   pending: PendingField;
 

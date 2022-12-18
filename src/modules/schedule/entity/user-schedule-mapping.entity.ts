@@ -3,18 +3,10 @@ import { CoreEntity } from 'src/common/entity/core.entity';
 import { InvitationState } from 'src/common/enum/common.enum';
 import { User } from 'src/modules/user/entity/user.entity';
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
-import { Rounding } from './rounding.entity';
+import { Schedule } from './schedule.entity';
 
 @Entity()
-export class UserRoundingMapping extends CoreEntity {
-  @ManyToOne(() => User, (user) => user.id)
-  @JoinColumn()
-  user: User;
-
-  @ManyToOne(() => Rounding, (rounding) => rounding.id)
-  @JoinColumn()
-  rounding: Rounding;
-
+export class UserScheduleMapping extends CoreEntity {
   @Column()
   @ApiProperty({ description: '주최자 여부' })
   isHost: boolean;
@@ -30,4 +22,12 @@ export class UserRoundingMapping extends CoreEntity {
     default: InvitationState.PENDING,
   })
   invitationState: InvitationState;
+
+  @ManyToOne(() => User, (user) => user.id)
+  @JoinColumn()
+  user: User;
+
+  @ManyToOne(() => Schedule, (schedule) => schedule.id)
+  @JoinColumn()
+  schedule: Schedule;
 }

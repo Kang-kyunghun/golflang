@@ -7,14 +7,18 @@ import {
   IsString,
 } from 'class-validator';
 
-export class CreateMyRoundingScheduleInputDto {
+export class CreateRoundingScheduleInputDto {
+  @IsString()
+  @ApiProperty({ description: '라운딩 이름' })
+  roundingName: string;
+
   @IsString()
   @ApiProperty({ description: '라운딩 장소' })
-  place: string;
+  roundingPlace: string;
 
   @IsString()
   @ApiProperty({ description: '라운딩 지역 위치' })
-  location: string;
+  roundingLocation: string;
 
   @IsString()
   @ApiProperty({ description: '라운딩 시작 시간' })
