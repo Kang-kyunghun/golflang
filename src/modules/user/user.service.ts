@@ -1,26 +1,11 @@
-import { response } from 'express';
 import { JwtService } from '@nestjs/jwt';
-import {
-  BadRequestException,
-  ConflictException,
-  HttpException,
-  HttpStatus,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Connection, Repository } from 'typeorm';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { Account } from './entity/account.entity';
 import { UserState } from './entity/user-state.entity';
 import { User } from './entity/user.entity';
-import { Role } from './enum/user.enum';
-import { AuthService } from 'src/modules/auth/auth.service';
 import { CommonService } from 'src/common/common.service';
-import * as bcrypt from 'bcrypt';
-import { SignupInputDto, SignupOutputDto } from './dto/signup-dto';
-import { LoginOutputDto } from './dto/login-dto';
 import { UpdateUserInfoInputDto } from './dto/update-user-info.dto';
 import { UploadFileService } from '../upload-file/upload-file.service';
 import { UploadFile } from '../upload-file/entity/upload-file.entity';

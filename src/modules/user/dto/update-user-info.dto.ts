@@ -1,19 +1,6 @@
-import { ApiProperty, PickType } from '@nestjs/swagger';
-import { PartialType } from '@nestjs/mapped-types';
-import { SignupInputDto } from './signup-dto';
+import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
 import { Gender } from '../enum/user.enum';
-
-// export class UpdateUserInfoInputDto extends PartialType(
-//   PickType(SignupInputDto, [
-//     // 'nickname',
-//     // 'birthday',
-//     'gender',
-//     'address',
-//     'addressDetail',
-//     'avgHitScore',
-//   ]),
-// ) {}
 
 export class UpdateUserInfoInputDto {
   @IsString()
