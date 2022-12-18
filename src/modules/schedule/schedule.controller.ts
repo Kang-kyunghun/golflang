@@ -14,12 +14,12 @@ import { ResultFormatInterceptor } from 'src/common/interceptor/result-format.in
 import { SwaggerDefault } from 'src/common/decorator/swagger.decorator';
 import { GetUserId } from 'src/common/decorator/user.decorator';
 import { CreateRoundingScheduleInputDto } from './dto/create-rounding-schedule.dto';
-import { GetRoundingScheduleListTwoOutputDto } from './dto/get-rounding-schedule2-list.dto';
+import { GetRoundingScheduleListOutputDto } from './dto/get-rounding-schedule-list.dto';
 import {
   GetRoundingAcceptParticipantListOutputDto,
   GetRoundingWaitingParticipantListOutputDto,
 } from './dto/get-rounding-participant-list.dto';
-import { GetRoundingScheduleDetailOutputDto } from './dto/get-rounding-schedule-detail2.dto';
+import { GetRoundingScheduleDetailOutputDto } from './dto/get-rounding-schedule-detail.dto';
 
 @ApiTags('SCHEDULE')
 @Controller('schedule')
@@ -39,14 +39,14 @@ export class ScheduleController {
   @Get('list')
   @SwaggerDefault(
     '라운딩 일정 리스트 조회',
-    GetRoundingScheduleListTwoOutputDto,
+    GetRoundingScheduleListOutputDto,
     '라운딩 일정 리스트 조회',
     null,
     true,
   )
   async getRoundingScheduleList(
     @GetUserId() userId: number,
-  ): Promise<GetRoundingScheduleListTwoOutputDto[]> {
+  ): Promise<GetRoundingScheduleListOutputDto[]> {
     return await this.scheduleService.getRoundingScheduleList(2);
   }
 

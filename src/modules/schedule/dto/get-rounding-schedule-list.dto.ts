@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class GetRoundingScheduleListTwoOutputDto {
+export class GetRoundingScheduleListOutputDto {
   @ApiProperty({ description: 'rounding id' })
   id: number;
 

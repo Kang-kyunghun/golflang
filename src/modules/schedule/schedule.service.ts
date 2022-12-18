@@ -16,8 +16,8 @@ import {
   GetRoundingAcceptParticipantListOutputDto,
   GetRoundingWaitingParticipantListOutputDto,
 } from './dto/get-rounding-participant-list.dto';
-import { GetRoundingScheduleDetailOutputDto } from './dto/get-rounding-schedule-detail2.dto';
-import { GetRoundingScheduleListTwoOutputDto } from './dto/get-rounding-schedule2-list.dto';
+import { GetRoundingScheduleDetailOutputDto } from './dto/get-rounding-schedule-detail.dto';
+import { GetRoundingScheduleListOutputDto } from './dto/get-rounding-schedule-list.dto';
 import { Schedule } from './entity/schedule.entity';
 import { UserScheduleMapping } from './entity/user-schedule-mapping.entity';
 import { RoundingScheduleType } from './enum/schedule.enum';
@@ -109,7 +109,7 @@ export class ScheduleService {
 
   async getRoundingScheduleList(
     userId: number,
-  ): Promise<GetRoundingScheduleListTwoOutputDto[]> {
+  ): Promise<GetRoundingScheduleListOutputDto[]> {
     try {
       const userScheduleMapping = await this.userScheduleMappingRepo.find({
         where: {

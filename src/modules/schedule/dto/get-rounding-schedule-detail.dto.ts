@@ -1,6 +1,4 @@
-import { PartialType, PickType } from '@nestjs/mapped-types';
 import { ApiProperty } from '@nestjs/swagger';
-import { GetRoundingScheduleListTwoOutputDto } from './get-rounding-schedule2-list.dto';
 
 export class GetRoundingScheduleDetailOutputDto {
   @ApiProperty({ description: 'Schedule id' })
