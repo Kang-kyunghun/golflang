@@ -10,6 +10,9 @@ export class SearchUsersQueryDto {
 }
 
 class userField {
+  @ApiProperty({ description: 'User ID' })
+  id: number;
+
   @ApiProperty({ description: '프로필 이미지 URL' })
   profileImage: string;
 

@@ -19,8 +19,8 @@ class userField {
 }
 
 export class GetRoundingAcceptParticipantListOutputDto {
-  @ApiProperty({ description: '참가자 수' })
-  participantCount: number;
+  @ApiProperty({ description: '확정 참가자 수' })
+  confirmParticipantCount: number;
 
   @ApiProperty({ description: '참가자 정보', type: [userField] })
   users: userField[];

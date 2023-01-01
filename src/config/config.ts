@@ -23,6 +23,8 @@ import { User } from 'src/modules/user/entity/user.entity';
 import { UserModule } from 'src/modules/user/user.module';
 import { CommonModule } from '../common/common.module';
 import { UserScheduleMapping } from 'src/modules/schedule/entity/user-schedule-mapping.entity';
+import { Invitation } from 'src/modules/invitation/entities/invitation.entity';
+import { InvitationModule } from 'src/modules/invitation/invitation.module';
 
 export const ENTITIES = [
   User,
@@ -38,6 +40,7 @@ export const ENTITIES = [
   Auth,
   Like,
   Otp,
+  Invitation,
 ];
 
 export const MODULES = [
@@ -53,4 +56,5 @@ export const MODULES = [
   LikeModule,
   OtpModule,
   MailModule,
+  InvitationModule,
 ];

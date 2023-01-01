@@ -1,3 +1,4 @@
+import { Schedule } from 'src/modules/schedule/entity/schedule.entity';
 import { ApiProperty } from '@nestjs/swagger';
 import { UploadFile } from 'src/modules/upload-file/entity/upload-file.entity';
 import { Column, Entity, JoinColumn, OneToMany, OneToOne } from 'typeorm';
@@ -59,7 +60,16 @@ export class User extends GuardCoreEntity {
 
   @OneToMany(
     () => UserScheduleMapping,
-    (userScheduleMapping) => userScheduleMapping.user,
+    (userScheduleMapping) => userScheduleMapping.hostUser,
   )
-  userScheduleMappings: UserScheduleMapping[];
+  scheduleHostUsers: UserScheduleMapping[];
+
+  @OneToMany(
+    () => UserScheduleMapping,
+    (userScheduleMapping) => userScheduleMapping.targetUser,
+  )
+  scheduleTargerUsers: UserScheduleMapping[];
+
+  @OneToMany(() => Schedule, (schedule) => schedule.hostUser)
+  schedules: Schedule[];
 }

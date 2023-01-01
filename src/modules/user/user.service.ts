@@ -158,6 +158,7 @@ export class UserService {
       const participants = await Promise.all(
         result[0].map(async (v) => {
           return {
+            id: v.id,
             profileImage: v.profileImage.url,
             nickname: v.nickname,
             gender: v.gender,

@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   UseInterceptors,
+  Query,
 } from '@nestjs/common';
 import { ScheduleService } from './schedule.service';
 import { ApiParam, ApiTags } from '@nestjs/swagger';
@@ -14,12 +15,17 @@ import { ResultFormatInterceptor } from 'src/common/interceptor/result-format.in
 import { SwaggerDefault } from 'src/common/decorator/swagger.decorator';
 import { GetUserId } from 'src/common/decorator/user.decorator';
 import { CreateRoundingScheduleInputDto } from './dto/create-rounding-schedule.dto';
-import { GetRoundingScheduleListOutputDto } from './dto/get-rounding-schedule-list.dto';
+import {
+  GetRoundingScheduleListOutputDto,
+  GetRoundingScheduleListQueryDto,
+} from './dto/get-rounding-schedule-list.dto';
 import {
   GetRoundingAcceptParticipantListOutputDto,
   GetRoundingWaitingParticipantListOutputDto,
 } from './dto/get-rounding-participant-list.dto';
 import { GetRoundingScheduleDetailOutputDto } from './dto/get-rounding-schedule-detail.dto';
+import { query } from 'express';
+import { Schedule } from './entity/schedule.entity';
 
 @ApiTags('SCHEDULE')
 @Controller('schedule')
@@ -32,7 +38,7 @@ export class ScheduleController {
   async createMyRoundingSchedule(
     @Body() body: CreateRoundingScheduleInputDto,
     @GetUserId() userId: number,
-  ): Promise<string> {
+  ): Promise<boolean> {
     return await this.scheduleService.createMyRoundingSchedule(body, 2);
   }
 
@@ -45,12 +51,13 @@ export class ScheduleController {
     true,
   )
   async getRoundingScheduleList(
+    @Query() query: GetRoundingScheduleListQueryDto,
     @GetUserId() userId: number,
-  ): Promise<GetRoundingScheduleListOutputDto[]> {
-    return await this.scheduleService.getRoundingScheduleList(2);
+  ): Promise<Schedule[]> {
+    return await this.scheduleService.getRoundingScheduleList(query, 2);
   }
 
-  @Get(':scheduleId/participant/accept')
+  @Get(':scheduleId/participant/confirm')
   @SwaggerDefault(
     '라운딩 확정 참가자 리스트 조회',
     GetRoundingAcceptParticipantListOutputDto,

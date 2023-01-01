@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { CoreEntity } from 'src/common/entity/core.entity';
-import { Column, Entity, OneToMany } from 'typeorm';
+import { User } from 'src/modules/user/entity/user.entity';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { RoundingScheduleType } from '../enum/schedule.enum';
 import { UserScheduleMapping } from './user-schedule-mapping.entity';
 
@@ -11,7 +12,7 @@ export class Schedule extends CoreEntity {
   roundingName: string;
 
   @Column()
-  @ApiProperty({ description: '라운딩 장소' })
+  @ApiProperty({ description: '라운딩 장소(골프장)' })
   roundingPlace: string;
 
   @Column()
@@ -31,8 +32,8 @@ export class Schedule extends CoreEntity {
   memo: string;
 
   @Column({ default: true })
-  @ApiProperty({ description: '공개 여부', default: true })
-  isOpen: boolean;
+  @ApiProperty({ description: '비공개 여부', default: true })
+  isPrivate: boolean;
 
   @Column({
     type: 'enum',
@@ -51,4 +52,8 @@ export class Schedule extends CoreEntity {
     (userScheduleMapping) => userScheduleMapping.schedule,
   )
   userScheduleMappings: UserScheduleMapping[];
+
+  @ManyToOne(() => User, (user) => user.scheduleHostUsers)
+  @JoinColumn()
+  hostUser: User;
 }
