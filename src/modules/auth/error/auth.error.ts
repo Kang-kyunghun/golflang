@@ -8,6 +8,7 @@ export const AUTH_ERROR = {
   ACCOUNT_SOCIAL_DATA_ERROR: 'authSocialDataError',
   ACCOUNT_LOGIN_FAILED: 'authAccountLoginFailed',
   ACCOUNT_EMAIL_IS_NOT_EXIST: 'authEmailIsNotExist',
+  ACCOUNT_PHONE_ALREADY_EXIST: 'authPhoneAlreadyExist',
 };
 
 export class AuthError extends CoreError {
@@ -41,6 +42,10 @@ export class AuthError extends CoreError {
       [AUTH_ERROR.ACCOUNT_EMAIL_IS_NOT_EXIST]: {
         id: 'Auth.account.email.is.not.exist',
         message: '존재하지 않는 이메일입니다.',
+      },
+      [AUTH_ERROR.ACCOUNT_PHONE_ALREADY_EXIST]: {
+        id: 'Auth.phone.already.exist',
+        message: '이미 가입된 휴대폰 번호입니다.',
       },
     };
   }

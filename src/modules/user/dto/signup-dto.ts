@@ -8,7 +8,6 @@ import {
   IsString,
 } from 'class-validator';
 import { Provider } from 'src/modules/auth/enum/account.enum';
-import { User } from '../entity/user.entity';
 import { Gender } from '../enum/user.enum';
 
 export class SignupInputDto {
@@ -18,6 +17,7 @@ export class SignupInputDto {
   email: string;
 
   @IsString()
+  @IsNotEmpty()
   @ApiProperty({
     description: '비밀번호(알파벳+숫자+특수문자 8자리 이상',
     example: 'abcd1234!',
@@ -25,10 +25,12 @@ export class SignupInputDto {
   password: string;
 
   @IsString()
+  @IsNotEmpty()
   @ApiProperty({ description: '전화번호' })
   phone: string;
 
   @IsString()
+  @IsOptional()
   @ApiProperty({
     description: '닉네임 (2~20자 사이)',
     minLength: 2,
@@ -37,23 +39,27 @@ export class SignupInputDto {
   nickname: string;
 
   @IsString()
+  @IsOptional()
   @ApiProperty({ description: '생년월일', example: 'YYYY-MM-DD' })
   birthday: string;
 
   @IsEnum(Gender)
+  @IsOptional()
   @ApiProperty({ description: '성별', enum: Gender })
   gender: Gender;
 
   @IsString()
+  @IsOptional()
   @ApiProperty({ description: '메인 주소' })
   address: string;
 
   @IsString()
+  @IsOptional()
   @ApiProperty({ description: '상세 주소' })
   addressDetail: string;
 
   @IsEnum(Provider)
-  @IsNotEmpty()
+  @IsOptional()
   @ApiProperty({ description: 'SNS 계정 공급자', enum: Provider })
   provider: Provider;
 

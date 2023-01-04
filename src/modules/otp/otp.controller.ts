@@ -1,14 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  UseInterceptors,
-  Query,
-} from '@nestjs/common';
+import { Controller, Post, Body, UseInterceptors } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { SwaggerDefault } from 'src/common/decorator/swagger.decorator';
 import { ResultFormatInterceptor } from 'src/common/interceptor/result-format.interceptor';

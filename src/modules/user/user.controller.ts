@@ -6,7 +6,7 @@ import {
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiTags } from '@nestjs/swagger';
 import { RoleGuard } from 'src/common/decorator/role.decorator';
 import { SwaggerDefault } from 'src/common/decorator/swagger.decorator';
 import { GetUserId } from 'src/common/decorator/user.decorator';
@@ -37,6 +37,7 @@ export class UserController {
   @RoleGuard(PermissionRole.USER)
   @SwaggerDefault('회원 정보 수정', 'done')
   @UploadSingleImage('profileImage')
+  @ApiBody({ type: UpdateUserInfoInputDto })
   async updateUserInfo(
     @Body() body,
     @GetUserId() userId: number,
