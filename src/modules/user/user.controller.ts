@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Patch,
+  Query,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
@@ -15,6 +16,7 @@ import { ResultFormatInterceptor } from 'src/common/interceptor/result-format.in
 import { FormDataValidate } from 'src/util/json.interceptor';
 import { UploadSingleImage } from '../upload-file/decorator/upload-file.decorator';
 import { GetUserDetailOutputDto } from './dto/get-user-detail.dto';
+import { SearchUsersOutputDto, SearchUsersQueryDto } from './dto/search-users.dto';
 import { UpdateUserInfoInputDto } from './dto/update-user-info.dto';
 import { UserService } from './user.service';
 
@@ -49,5 +51,11 @@ export class UserController {
     ).parse();
 
     return await this.userService.updateUserInfo(userId, body, file);
+  }
+
+  @Get('search')
+  @SwaggerDefault('유저 검색', SearchUsersOutputDto, 'id 또는 닉네임으로 이용자 검색')
+  async searchUsers(@Query() query: SearchUsersQueryDto): Promise<SearchUsersOutputDto> {
+    return await this.userService.searchUsers(query);
   }
 }

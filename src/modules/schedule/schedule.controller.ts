@@ -6,42 +6,110 @@ import {
   Patch,
   Param,
   Delete,
+  UseInterceptors,
+  Query,
 } from '@nestjs/common';
 import { ScheduleService } from './schedule.service';
-import { CreateScheduleDto } from './dto/create-schedule.dto';
-import { UpdateScheduleDto } from './dto/update-schedule.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiParam, ApiTags } from '@nestjs/swagger';
+import { ResultFormatInterceptor } from 'src/common/interceptor/result-format.interceptor';
+import { SwaggerDefault } from 'src/common/decorator/swagger.decorator';
+import { GetUserId } from 'src/common/decorator/user.decorator';
+import { CreateRoundingScheduleInputDto } from './dto/create-rounding-schedule.dto';
+import {
+  GetRoundingScheduleListOutputDto,
+  GetRoundingScheduleListQueryDto,
+} from './dto/get-rounding-schedule-list.dto';
+import {
+  GetRoundingAcceptParticipantListOutputDto,
+  GetRoundingWaitingParticipantListOutputDto,
+} from './dto/get-rounding-participant-list.dto';
+import { GetRoundingScheduleDetailOutputDto } from './dto/get-rounding-schedule-detail.dto';
+import { query } from 'express';
+import { Schedule } from './entity/schedule.entity';
 
 @ApiTags('SCHEDULE')
 @Controller('schedule')
+@UseInterceptors(ResultFormatInterceptor)
 export class ScheduleController {
   constructor(private readonly scheduleService: ScheduleService) {}
 
   @Post()
-  create(@Body() createScheduleDto: CreateScheduleDto) {
-    return this.scheduleService.create(createScheduleDto);
+  @SwaggerDefault('라운딩 일정 생성', 'done', '라운딩 일정 생성')
+  async createMyRoundingSchedule(
+    @Body() body: CreateRoundingScheduleInputDto,
+    @GetUserId() userId: number,
+  ): Promise<boolean> {
+    return await this.scheduleService.createMyRoundingSchedule(body, 2);
   }
 
-  @Get()
-  findAll() {
-    return this.scheduleService.findAll();
+  @Get('list')
+  @SwaggerDefault(
+    '라운딩 일정 리스트 조회',
+    GetRoundingScheduleListOutputDto,
+    '라운딩 일정 리스트 조회',
+    null,
+    true,
+  )
+  async getRoundingScheduleList(
+    @Query() query: GetRoundingScheduleListQueryDto,
+    @GetUserId() userId: number,
+  ): Promise<Schedule[]> {
+    return await this.scheduleService.getRoundingScheduleList(query, 2);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.scheduleService.findOne(+id);
+  @Get(':scheduleId/participant/confirm')
+  @SwaggerDefault(
+    '라운딩 확정 참가자 리스트 조회',
+    GetRoundingAcceptParticipantListOutputDto,
+    '라운딩 확정 참가자 리스트 조회',
+  )
+  @ApiParam({
+    name: 'scheduleId',
+    required: true,
+    description: 'Schedule id',
+  })
+  async getRoundingAcceptParticipantList(
+    @Param('scheduleId') scheduleId: number,
+  ): Promise<GetRoundingAcceptParticipantListOutputDto> {
+    return await this.scheduleService.getRoundingAcceptParticipantList(
+      scheduleId,
+    );
   }
 
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateScheduleDto: UpdateScheduleDto,
-  ) {
-    return this.scheduleService.update(+id, updateScheduleDto);
+  @Get(':scheduleId/participant/waiting')
+  @SwaggerDefault(
+    '라운딩 대기중인 참가자 리스트 조회',
+    GetRoundingWaitingParticipantListOutputDto,
+    '라운딩 대기중인 참가자 리스트 조회',
+  )
+  @ApiParam({
+    name: 'scheduleId',
+    required: true,
+    description: 'Schedule id',
+  })
+  async getRoundingWaitingParticipantList(
+    @Param('scheduleId') scheduleId: number,
+  ): Promise<GetRoundingWaitingParticipantListOutputDto> {
+    return await this.scheduleService.getRoundingWaitingParticipantList(
+      scheduleId,
+    );
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.scheduleService.remove(+id);
+  @Get('detail/:scheduleId')
+  @SwaggerDefault(
+    '라운딩 일정 상세 조회',
+    GetRoundingScheduleDetailOutputDto,
+    '라운딩 일정 상세 조회',
+  )
+  @ApiParam({
+    name: 'scheduleId',
+    required: true,
+    description: 'Schedule id',
+  })
+  async getRoundingScheduleDetail(
+    @Param('scheduleId') scheduleId: number,
+    @GetUserId() userId: number,
+  ): Promise<GetRoundingScheduleDetailOutputDto> {
+    return await this.scheduleService.getRoundingScheduleDetail(scheduleId, 2);
   }
 }

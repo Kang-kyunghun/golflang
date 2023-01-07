@@ -230,8 +230,6 @@ export class AuthService {
 
       const accountKey = `${provider.slice(0, 1)}_${email}`;
 
-      console.log(1);
-
       let account = await this.accountRepo.findOne({
         where: { accountKey },
         relations: {

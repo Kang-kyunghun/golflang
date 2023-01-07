@@ -1,6 +1,7 @@
 enum Role {
   USER = 'user',
   ADMIN = 'admin',
+  LEADER = 'leader',
 }
 
 enum Gender {
