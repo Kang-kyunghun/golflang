@@ -28,6 +28,11 @@ export class OAuthLoginInputDto {
   @IsOptional()
   @ApiProperty({ description: '카카오 ACCESS TOKEN' })
   kakaoAccessToken: string;
+
+  @IsString()
+  @IsOptional()
+  @ApiProperty({ description: '애플 IDENTITY TOKEN' })
+  appleIdentityToken: string;
 }
 
 export class LoginOutputDto extends PickType(SignupOutputDto, [

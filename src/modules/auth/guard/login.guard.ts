@@ -14,6 +14,7 @@ import { Repository } from 'typeorm';
 import { AuthError, AUTH_ERROR } from '../error/auth.error';
 import axios from 'axios';
 import { Provider } from '../enum/account.enum';
+import { AuthService } from '../auth.service';
 
 @Injectable()
 export class LoginGuard extends BaseGuard {
@@ -22,6 +23,7 @@ export class LoginGuard extends BaseGuard {
     private readonly accountRepo: Repository<Account>,
 
     private readonly authError: AuthError,
+    private readonly authService: AuthService,
     private readonly logger: Logger,
   ) {
     super();
@@ -41,7 +43,8 @@ export class LoginGuard extends BaseGuard {
         addressDetail: null,
       };
 
-      const { kakaoAccessToken, email, password } = request.body;
+      const { kakaoAccessToken, email, password, appleIdentityToken } =
+        request.body;
       const param = request.params.provider;
 
       switch (param) {
@@ -56,6 +59,19 @@ export class LoginGuard extends BaseGuard {
           data.provider = param;
           data.nickname = kakaoUserInfo.properties.nickname;
           data.gender = kakaoUserInfo.kakao_account.gender;
+          break;
+
+        case Provider.APPLE:
+          const decodedToken = await this.authService.verifyAppleToken(
+            appleIdentityToken,
+          );
+
+          if (!decodedToken) {
+            throw new BadRequestException(AUTH_ERROR.ACCOUNT_SOCIAL_DATA_ERROR);
+          }
+
+          data.email = decodedToken.email;
+          data.provider = param;
           break;
 
         default:

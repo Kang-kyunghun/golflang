@@ -31,6 +31,9 @@ import {
   CheckNicknameOutputDto,
 } from '../user/dto/check-nickname.dto';
 import { Provider } from './enum/account.enum';
+import * as jwt from 'jsonwebtoken';
+import { JwksClient } from 'jwks-rsa';
+import { AppleJwtTokenPayloadOutputDto } from './dto/verify-apple-token.dto';
 
 @Injectable()
 export class AuthService {
@@ -226,7 +229,7 @@ export class AuthService {
 
     try {
       const { email, provider, nickname, gender } = guard;
-      const { kakaoAccessToken, kakaoRefreshToken } = body;
+      const { kakaoAccessToken, kakaoRefreshToken, appleIdentityToken } = body;
 
       const accountKey = `${provider.slice(0, 1)}_${email}`;
 
@@ -244,8 +247,8 @@ export class AuthService {
 
         const user = new User();
         user.role = Role.USER;
-        user.nickname = nickname;
-        user.gender = gender;
+        user.nickname = nickname ? nickname : null;
+        user.gender = gender ? gender : null;
         user.userState = userState;
 
         await queryRunner.manager.save(User, user);
@@ -323,5 +326,33 @@ export class AuthService {
     } catch (error) {
       console.error(error);
     }
+  }
+
+  async verifyAppleToken(
+    appleIdToken: string,
+  ): Promise<AppleJwtTokenPayloadOutputDto> {
+    const decodedToken = jwt.decode(appleIdToken, { complete: true }) as {
+      header: { kid: string; alg: jwt.Algorithm };
+      payload: { sub: string };
+    };
+
+    const keyIdFromToken = decodedToken.header.kid;
+
+    const applePublicKeyUrl = 'https://appleid.apple.com/auth/keys';
+
+    const jwksClient = new JwksClient({ jwksUri: applePublicKeyUrl });
+
+    const key = await jwksClient.getSigningKey(keyIdFromToken);
+    const publicKey = key.getPublicKey();
+
+    const verifiedDecodedToken: AppleJwtTokenPayloadOutputDto = jwt.verify(
+      appleIdToken,
+      publicKey,
+      {
+        algorithms: [decodedToken.header.alg],
+      },
+    ) as AppleJwtTokenPayloadOutputDto;
+
+    return verifiedDecodedToken;
   }
 }
