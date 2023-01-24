@@ -35,8 +35,14 @@ export class OAuthLoginInputDto {
   appleIdentityToken: string;
 }
 
-export class LoginOutputDto extends PickType(SignupOutputDto, [
-  'accessToken',
-  'refreshToken',
-  'account',
-]) {}
+export class LoginOutputDto {
+  @ApiProperty({ description: 'accessToken' })
+  accessToken: string;
+
+  @IsOptional()
+  @ApiProperty({
+    description:
+      'refreshToken : 기존의 refreshToken이 만료됐을시만 새로 발급하여 반환',
+  })
+  refreshToken?: string;
+}

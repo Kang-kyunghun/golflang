@@ -24,7 +24,6 @@ import {
   GetRoundingWaitingParticipantListOutputDto,
 } from './dto/get-rounding-participant-list.dto';
 import { GetRoundingScheduleDetailOutputDto } from './dto/get-rounding-schedule-detail.dto';
-import { query } from 'express';
 import { Schedule } from './entity/schedule.entity';
 
 @ApiTags('SCHEDULE')
