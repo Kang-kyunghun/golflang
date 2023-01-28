@@ -406,7 +406,7 @@ export class AuthService {
     lastLoginUpdateDate.setMinutes(date.getMinutes() - 10);
 
     try {
-      const { refreshToken, isAutoLogin, accountUid } = query;
+      const { refreshToken, accountUid } = query;
       const payload = { id: accountUid };
 
       const account = await this.accountRepo.findOne({
@@ -418,55 +418,43 @@ export class AuthService {
         throw new NotFoundException(AUTH_ERROR.ACCOUNT_ACCOUNT_NOT_FOUND);
       }
 
-      if (!account.refreshToken) {
-        throw new ForbiddenException(AUTH_ERROR.ACCESS_TOKEN_ERROR);
-      }
-
-      if (refreshToken !== account.refreshToken) {
-        throw new ForbiddenException(AUTH_ERROR.ACCESS_TOKEN_ERROR);
-      }
-
       // 새로운 accessToken 발급
       const newAccessToken = this.commonService.createAccessToken(payload);
 
       const refreshTokenExpireCheck =
-        this.commonService.refreshTokenExpireCheck(account.refreshToken);
+        this.commonService.refreshTokenExpireCheck(refreshToken);
 
-      // 기존에 발급된 refreshToken이 만료됐을 경우
+      // refreshToken이 만료됐을 경우
       if (!refreshTokenExpireCheck) {
-        // 자동 로그인이면 재발급
-        if (isAutoLogin) {
-          const newRefreshToken =
-            this.commonService.createRefreshToken(payload);
+        // 새로운 refreshToken 발급
+        const newRefreshToken = this.commonService.createRefreshToken(payload);
 
-          await queryRunner.manager.update(
-            UserState,
-            {
-              id: account.user.userState.id,
-              lastLoginDate: LessThan(lastLoginUpdateDate),
-            },
-            { lastLoginDate: new Date() },
-          );
+        // 마지막 로그인 시간 업데이트 후
+        await queryRunner.manager.update(
+          UserState,
+          {
+            id: account.user.userState.id,
+            lastLoginDate: LessThan(lastLoginUpdateDate),
+          },
+          { lastLoginDate: new Date() },
+        );
 
-          await queryRunner.manager.update(
-            Account,
-            { id: account.id },
-            { refreshToken: newRefreshToken },
-          );
+        await queryRunner.manager.update(
+          Account,
+          { id: account.id },
+          { refreshToken: newRefreshToken },
+        );
 
-          await queryRunner.commitTransaction();
-          return {
-            accessToken: newAccessToken,
-            refreshToken: newRefreshToken,
-          };
-        } else {
-          // 자동 로그인이 아닐 경우 refreshToken이 만료로 로그아웃 처리
-          throw new ForbiddenException(AUTH_ERROR.REFRESH_TOKEN_EXPIRED);
-        }
+        await queryRunner.commitTransaction();
+        // accessToken 와 refreshToken 둘 다 반환
+        return {
+          accessToken: newAccessToken,
+          refreshToken: newRefreshToken,
+        };
       }
 
-      // 기존에 발급된 refreshToken이 만료되지 않았을 경우
-      // 마지막 로그인 시간 업데이트
+      // refreshToken이 만료되지 않았을 경우
+      // 마지막 로그인 시간 업데이트 후
       await queryRunner.manager.update(
         UserState,
         {

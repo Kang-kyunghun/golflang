@@ -107,11 +107,11 @@ export class AuthController {
     return await this.authService.checkNickname(body);
   }
 
-  @Get('access-token')
+  @Get('refresh')
   @SwaggerDefault(
-    'access token 발급',
+    'accessToken 재발급 & refreshToken 만료 여부 확인 후 재발급',
     RefreshTokenOutputDto,
-    'access token 발급',
+    'accessToken 재발급 & refreshToken 만료 여부 확인 후 재발급',
   )
   async refreshToken(
     @Query() query: RefreshTokenQueryDto,

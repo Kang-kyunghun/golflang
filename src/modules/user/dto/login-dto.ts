@@ -42,7 +42,7 @@ export class LoginOutputDto {
   @IsOptional()
   @ApiProperty({
     description:
-      'refreshToken : 기존의 refreshToken이 만료됐을시만 새로 발급하여 반환',
+      'refreshToken : refreshToken이 만료됐을시만 새로 발급하여 반환',
   })
   refreshToken?: string;
 }

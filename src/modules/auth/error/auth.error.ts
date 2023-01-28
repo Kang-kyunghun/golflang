@@ -11,6 +11,7 @@ export const AUTH_ERROR = {
   ACCOUNT_PHONE_ALREADY_EXIST: 'authPhoneAlreadyExist',
   ACCESS_TOKEN_ERROR: 'accessTokenError',
   REFRESH_TOKEN_EXPIRED: 'refreshTokenExpired',
+  REFRESH_TOKEN_NOT_FOUND: 'refreshTokenNotFound',
 };
 
 export class AuthError extends CoreError {
@@ -56,6 +57,10 @@ export class AuthError extends CoreError {
       [AUTH_ERROR.REFRESH_TOKEN_EXPIRED]: {
         id: 'Auth.refresh.token.expired',
         message: 'refreshToken이 만료되었습니다.',
+      },
+      [AUTH_ERROR.REFRESH_TOKEN_NOT_FOUND]: {
+        id: 'Auth.refresh.token.not.found',
+        message: 'refreshToken이 존재하지 않습니다.',
       },
     };
   }
