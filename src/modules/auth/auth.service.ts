@@ -26,7 +26,7 @@ import { Role } from 'src/modules/user/enum/user.enum';
 import {
   LocalLoginInputDto,
   LoginOutputDto,
-} from 'src/modules/user/dto/login-dto';
+} from 'src/modules/auth/dto/login-dto';
 import { AuthError, AUTH_ERROR } from 'src/modules/auth/error/auth.error';
 import { UploadFileService } from '../upload-file/upload-file.service';
 import { UploadFile } from '../upload-file/entity/upload-file.entity';
@@ -43,8 +43,6 @@ import {
   RefreshTokenOutputDto,
   RefreshTokenQueryDto,
 } from './dto/refresh-token.dto';
-import { WithdrawAccountQueryDto } from './dto/withdraw-account.dto';
-import { LogoutQueryDto } from './dto/logout.dto';
 
 @Injectable()
 export class AuthService {
@@ -396,7 +394,7 @@ export class AuthService {
 
   async refreshToken(
     query: RefreshTokenQueryDto,
-  ): Promise<RefreshTokenOutputDto> {
+  ): Promise<RefreshTokenOutputDto | any> {
     const queryRunner = this.connection.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -406,11 +404,14 @@ export class AuthService {
     lastLoginUpdateDate.setMinutes(date.getMinutes() - 10);
 
     try {
-      const { refreshToken, accountUid } = query;
-      const payload = { id: accountUid };
+      const { refreshToken } = query;
+
+      const decodeRefreshToken: any = this.jwtService.decode(refreshToken);
+
+      const payload = { accountUid: decodeRefreshToken.id };
 
       const account = await this.accountRepo.findOne({
-        where: { uid: accountUid },
+        where: { uid: decodeRefreshToken.id },
         relations: { user: { userState: true } },
       });
 
@@ -488,27 +489,44 @@ export class AuthService {
     }
   }
 
-  async withdrawAccount(query: WithdrawAccountQueryDto): Promise<boolean> {
+  async withdrawAccount(userId: number): Promise<boolean> {
+    const queryRunner = this.connection.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
     try {
       const account = await this.accountRepo.findOne({
-        where: { uid: query.accountUid },
+        where: { user: { id: userId } },
+        relations: { user: { userState: true } },
       });
 
       if (!account) {
         throw new NotFoundException(AUTH_ERROR.ACCOUNT_ACCOUNT_NOT_FOUND);
       }
 
-      const result = await this.accountRepo.update(
-        { uid: query.accountUid },
+      await queryRunner.manager.update(
+        Account,
+        { id: account.id },
         { isActive: false },
       );
 
-      if (result.affected === 1) {
-        return true;
-      } else {
-        return false;
-      }
+      await queryRunner.manager.update(
+        User,
+        { id: userId },
+        { isActive: false },
+      );
+
+      await queryRunner.manager.update(
+        UserState,
+        { id: account.user.userState.id },
+        { isActive: false },
+      );
+
+      await queryRunner.commitTransaction();
+
+      return true;
     } catch (error) {
+      await queryRunner.rollbackTransaction();
       this.logger.error(error);
 
       const statusCode = error.response
@@ -519,29 +537,25 @@ export class AuthService {
         this.authError.errorHandler(error.message),
         statusCode,
       );
+    } finally {
+      await queryRunner.release();
     }
   }
 
-  async logout(query: LogoutQueryDto): Promise<boolean> {
+  async logout(userId: number): Promise<boolean> {
     try {
       const account = await this.accountRepo.findOne({
-        where: { uid: query.accountUid },
+        where: { user: { id: userId } },
+        relations: { user: { userState: true } },
       });
 
       if (!account) {
         throw new NotFoundException(AUTH_ERROR.ACCOUNT_ACCOUNT_NOT_FOUND);
       }
 
-      const result = await this.accountRepo.update(
-        { uid: query.accountUid },
-        { refreshToken: null },
-      );
+      await this.accountRepo.update({ id: account.id }, { refreshToken: null });
 
-      if (result.affected === 1) {
-        return true;
-      } else {
-        return false;
-      }
+      return true;
     } catch (error) {
       this.logger.error(error);
 

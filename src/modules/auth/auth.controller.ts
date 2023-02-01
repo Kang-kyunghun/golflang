@@ -20,7 +20,7 @@ import {
   ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
-import { LoginGuard } from 'src/modules/auth/guard/login.guard';
+import { OAuthLoginGuard } from 'src/modules/auth/guard/login.guard';
 import { RoleGuard } from 'src/common/decorator/role.decorator';
 import { SwaggerDefault } from 'src/common/decorator/swagger.decorator';
 import { PermissionRole } from 'src/common/enum/common.enum';
@@ -33,7 +33,7 @@ import {
   LocalLoginInputDto,
   LoginOutputDto,
   OAuthLoginInputDto,
-} from 'src/modules/user/dto/login-dto';
+} from 'src/modules/auth/dto/login-dto';
 import {
   SignupInputDto,
   SignupOutputDto,
@@ -48,8 +48,7 @@ import {
   RefreshTokenQueryDto,
 } from './dto/refresh-token.dto';
 import { Account } from '../user/entity/account.entity';
-import { WithdrawAccountQueryDto } from './dto/withdraw-account.dto';
-import { LogoutQueryDto } from './dto/logout.dto';
+import { GetUserId } from 'src/common/decorator/user.decorator';
 
 @ApiTags('AUTH')
 @Controller('auth')
@@ -77,7 +76,7 @@ export class AuthController {
   }
 
   @Post('login/oauth/:provider')
-  @UseGuards(LoginGuard)
+  @UseGuards(OAuthLoginGuard)
   @SwaggerDefault(
     '소셜 로그인',
     LoginOutputDto,
@@ -120,16 +119,16 @@ export class AuthController {
   }
 
   @Delete('withdrawal')
+  @RoleGuard(PermissionRole.USER)
   @SwaggerDefault('회원탈퇴', Boolean, '회원탈퇴')
-  async withdrawAccount(
-    @Query() query: WithdrawAccountQueryDto,
-  ): Promise<boolean> {
-    return await this.authService.withdrawAccount(query);
+  async withdrawAccount(@GetUserId() userId: number): Promise<boolean> {
+    return await this.authService.withdrawAccount(userId);
   }
 
   @Patch('logout')
+  @RoleGuard(PermissionRole.USER)
   @SwaggerDefault('로그아웃', Boolean, '로그아웃')
-  async logout(@Query() query: LogoutQueryDto): Promise<boolean> {
-    return await this.authService.logout(query);
+  async logout(@GetUserId() userId: number): Promise<boolean> {
+    return await this.authService.logout(userId);
   }
 }

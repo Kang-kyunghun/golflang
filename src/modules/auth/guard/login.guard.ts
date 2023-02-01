@@ -17,7 +17,7 @@ import { Provider } from '../enum/account.enum';
 import { AuthService } from '../auth.service';
 
 @Injectable()
-export class LoginGuard extends BaseGuard {
+export class OAuthLoginGuard extends BaseGuard {
   constructor(
     @InjectRepository(Account)
     private readonly accountRepo: Repository<Account>,
@@ -43,8 +43,7 @@ export class LoginGuard extends BaseGuard {
         addressDetail: null,
       };
 
-      const { kakaoAccessToken, email, password, appleIdentityToken } =
-        request.body;
+      const { kakaoAccessToken, appleIdentityToken } = request.body;
       const param = request.params.provider;
 
       switch (param) {
