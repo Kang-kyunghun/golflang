@@ -58,3 +58,24 @@ export const MODULES = [
   MailModule,
   InvitationModule,
 ];
+
+interface DatabaseConfig {
+  host: string;
+  port: number;
+  username: string;
+  password: string;
+  dbname: string;
+}
+// [사용법 예시] const dbConfig = this.configService.get<DatabaseConfig>('database');
+// const port = dbConfig.port;
+
+export default () => ({
+  port: parseInt(process.env.PORT, 10) || 3000,
+  database: {
+    host: process.env.GL_DB_HOST,
+    port: parseInt(process.env.GL_DB_PORT, 10) || 5432,
+    username: process.env.GL_DB_USERNAME,
+    password: process.env.GL_DB_PASSWORD,
+    dbname: process.env.GL_DB_NAME,
+  },
+});

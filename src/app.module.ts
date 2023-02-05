@@ -10,12 +10,14 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import { ENTITIES, MODULES } from './config/config';
 import { JwtModule } from '@nestjs/jwt';
+import configuration from './config/config';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: process.env.NODE_ENV === 'develop' ? '.env' : '.env',
+      load: [configuration],
+      envFilePath: process.env.NODE_ENV === 'production' ? '.env.prod' : '.env',
     }),
     TypeOrmModule.forRoot({
       type: 'mysql',
@@ -24,9 +26,7 @@ import { JwtModule } from '@nestjs/jwt';
       username: process.env.GL_DB_USERNAME,
       password: process.env.GL_DB_PASSWORD,
       database: process.env.GL_DB_NAME,
-      // synchronize: process.env.NODE_ENV !== 'production',
-      synchronize: false,
-      logging: false,
+      synchronize: process.env.NODE_ENV !== 'production',
       namingStrategy: new SnakeNamingStrategy(),
       entities: ENTITIES,
       charset: 'utf8mb4',
