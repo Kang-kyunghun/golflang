@@ -9,7 +9,7 @@ import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import { ENTITIES, MODULES } from './config/config';
-import { InvitationModule } from './modules/invitation/invitation.module';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -31,8 +31,14 @@ import { InvitationModule } from './modules/invitation/invitation.module';
       entities: ENTITIES,
       charset: 'utf8mb4',
     }),
+    {
+      // jwt 전역 설정으로 수정
+      ...JwtModule.register({
+        secret: process.env.ACCESS_TOKEN_SECRET_KEY,
+      }),
+      global: true,
+    },
     ...MODULES,
-    InvitationModule,
   ],
   controllers: [],
   providers: [],

@@ -16,10 +16,6 @@ import { UploadFileService } from '../upload-file/upload-file.service';
   imports: [
     PassportModule,
     TypeOrmModule.forFeature([User, Account, UserState]),
-    JwtModule.register({
-      secret: 'jwtConstantsTest1234',
-      signOptions: { expiresIn: '30d' },
-    }),
   ],
   controllers: [AuthController],
   providers: [

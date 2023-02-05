@@ -78,12 +78,6 @@ class SignupAccountField {
 }
 
 export class SignupOutputDto {
-  @ApiProperty({ description: 'accessToken' })
-  accessToken: string;
-
-  @ApiProperty({ description: 'refreshToken' })
-  refreshToken: string;
-
   @ApiProperty({ description: '계정 정보' })
   account: SignupAccountField;
 }

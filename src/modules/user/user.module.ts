@@ -14,8 +14,8 @@ import { UploadFileService } from '../upload-file/upload-file.service';
   imports: [
     TypeOrmModule.forFeature([User, Account, UserState]),
     JwtModule.register({
-      secret: 'jwtConstantsTest1234',
-      signOptions: { expiresIn: '30d' },
+      secret: process.env.ACCESS_TOKEN_SECRET_KEY,
+      signOptions: { expiresIn: process.env.ACCESS_TOKEN_EXPIRE_DATE },
     }),
   ],
   controllers: [UserController],

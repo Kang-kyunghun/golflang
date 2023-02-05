@@ -1,6 +1,6 @@
 import { ApiProperty, PickType } from '@nestjs/swagger';
 import { IsEmail, IsOptional, IsString, Matches } from 'class-validator';
-import { SignupOutputDto } from './signup-dto';
+import { SignupOutputDto } from '../../user/dto/signup-dto';
 
 export class LocalLoginInputDto {
   @IsEmail()
@@ -28,10 +28,21 @@ export class OAuthLoginInputDto {
   @IsOptional()
   @ApiProperty({ description: '카카오 ACCESS TOKEN' })
   kakaoAccessToken: string;
+
+  @IsString()
+  @IsOptional()
+  @ApiProperty({ description: '애플 IDENTITY TOKEN' })
+  appleIdentityToken: string;
 }
 
-export class LoginOutputDto extends PickType(SignupOutputDto, [
-  'accessToken',
-  'refreshToken',
-  'account',
-]) {}
+export class LoginOutputDto {
+  @ApiProperty({ description: 'accessToken' })
+  accessToken: string;
+
+  @IsOptional()
+  @ApiProperty({
+    description:
+      'refreshToken : refreshToken이 만료됐을시만 새로 발급하여 반환',
+  })
+  refreshToken?: string;
+}

@@ -9,6 +9,9 @@ export const AUTH_ERROR = {
   ACCOUNT_LOGIN_FAILED: 'authAccountLoginFailed',
   ACCOUNT_EMAIL_IS_NOT_EXIST: 'authEmailIsNotExist',
   ACCOUNT_PHONE_ALREADY_EXIST: 'authPhoneAlreadyExist',
+  ACCESS_TOKEN_ERROR: 'accessTokenError',
+  REFRESH_TOKEN_EXPIRED: 'refreshTokenExpired',
+  REFRESH_TOKEN_NOT_FOUND: 'refreshTokenNotFound',
 };
 
 export class AuthError extends CoreError {
@@ -46,6 +49,18 @@ export class AuthError extends CoreError {
       [AUTH_ERROR.ACCOUNT_PHONE_ALREADY_EXIST]: {
         id: 'Auth.phone.already.exist',
         message: '이미 가입된 휴대폰 번호입니다.',
+      },
+      [AUTH_ERROR.ACCESS_TOKEN_ERROR]: {
+        id: 'Auth.access.token.error',
+        message: '접근 권한이 없습니다.',
+      },
+      [AUTH_ERROR.REFRESH_TOKEN_EXPIRED]: {
+        id: 'Auth.refresh.token.expired',
+        message: 'refreshToken이 만료되었습니다.',
+      },
+      [AUTH_ERROR.REFRESH_TOKEN_NOT_FOUND]: {
+        id: 'Auth.refresh.token.not.found',
+        message: 'refreshToken이 존재하지 않습니다.',
       },
     };
   }

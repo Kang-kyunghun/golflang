@@ -53,11 +53,13 @@ export class ScheduleService {
     await queryRunner.startTransaction();
 
     try {
-      console.log('userId :', userId);
-
       const user = await this.userRepo.findOne({
         where: { id: userId },
       });
+
+      if (user) {
+        throw new NotFoundException(SCHEDULE_ERROR.ROUNDING_USER_NOT_FOUND);
+      }
 
       const schedule = new Schedule();
       schedule.roundingName = body.roundingName;
