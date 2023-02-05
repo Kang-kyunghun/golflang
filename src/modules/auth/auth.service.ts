@@ -38,6 +38,7 @@ import {
   RefreshTokenOutputDto,
   RefreshTokenQueryDto,
 } from './dto/refresh-token.dto';
+import { SignupInputDto } from '../user/dto/signup-dto';
 
 @Injectable()
 export class AuthService {
@@ -46,8 +47,6 @@ export class AuthService {
     private readonly userRepo: Repository<User>,
     @InjectRepository(Account)
     private readonly accountRepo: Repository<Account>,
-    @InjectRepository(UserState)
-    private readonly userStateRepo: Repository<UserState>,
 
     private readonly authError: AuthError,
     private readonly jwtService: JwtService,
@@ -57,59 +56,62 @@ export class AuthService {
     private readonly dataSource: DataSource,
   ) {}
 
-  async signup(body, file): Promise<Account> {
+  async signup(
+    body: SignupInputDto,
+    file?: Express.MulterS3.File,
+  ): Promise<Account> {
+    this.logger.log(`[singUp] info:${body}`);
+
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
     try {
-      const accountEmail = await this.accountRepo.findOne({
+      const duplicatedAccount = await this.accountRepo.findOne({
         where: { email: body.email },
       });
 
-      if (accountEmail) {
+      if (duplicatedAccount)
         throw new ConflictException(AUTH_ERROR.ACCOUNT_EMAIL_ALREADY_EXIST);
-      }
 
-      let userNickname;
       if (body.nickname) {
-        userNickname = await this.userRepo.findOne({
+        const nickNameDuplicatedUser = await this.userRepo.findOne({
           where: { nickname: body?.nickname },
         });
 
-        if (userNickname) {
+        if (nickNameDuplicatedUser)
           throw new ConflictException(
             AUTH_ERROR.ACCOUNT_NICKNAME_ALREADY_EXIST,
           );
-        }
       }
 
       if (body.phone) {
-        const checkPhone = await this.userRepo.findOne({
+        const phoneDuplicatedUser = await this.userRepo.findOne({
           where: {
             phone: await this.commonService.encrypt(body.phone),
           },
         });
 
-        if (checkPhone) {
+        if (phoneDuplicatedUser)
           throw new ConflictException(AUTH_ERROR.ACCOUNT_PHONE_ALREADY_EXIST);
-        }
       }
-
-      const profileImage = await this.uploadFileService.uploadSingleImageFile(
-        file,
-      );
-      await queryRunner.manager.save(UploadFile, profileImage);
 
       const user = new User();
       user.role = Role.USER;
       user.nickname = body.nickname;
       user.birthday = body.birthday;
       user.gender = body.gender;
-      user.address = body.address;
+      user.address = body.addressMain;
       user.addressDetail = body.addressDetail;
-      user.profileImage = profileImage;
       user.phone = await this.commonService.encrypt(body.phone);
+
+      if (file) {
+        const profileImage = await this.uploadFileService.uploadSingleImageFile(
+          file,
+        );
+        await queryRunner.manager.save(UploadFile, profileImage);
+        user.profileImage = profileImage;
+      }
 
       await queryRunner.manager.save(User, user);
 

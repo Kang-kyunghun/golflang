@@ -7,7 +7,6 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { Provider } from 'src/modules/auth/enum/account.enum';
 import { Gender } from '../enum/user.enum';
 
 export class SignupInputDto {
@@ -51,17 +50,12 @@ export class SignupInputDto {
   @IsString()
   @IsOptional()
   @ApiProperty({ description: '메인 주소' })
-  address: string;
+  addressMain: string;
 
   @IsString()
   @IsOptional()
   @ApiProperty({ description: '상세 주소' })
   addressDetail: string;
-
-  @IsEnum(Provider)
-  @IsOptional()
-  @ApiProperty({ description: 'SNS 계정 공급자', enum: Provider })
-  provider: Provider;
 
   @IsNumber()
   @IsOptional()

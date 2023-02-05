@@ -53,8 +53,8 @@ export class AuthController {
   @UploadSingleImage('profileImage')
   @ApiBody({ type: SignupInputDto })
   async signup(
-    @Body() body,
-    @UploadedFile() file: Express.MulterS3.File,
+    @Body() body: SignupInputDto,
+    @UploadedFile() file?: Express.MulterS3.File,
   ): Promise<Account> {
     return await this.authService.signup(body, file);
   }
