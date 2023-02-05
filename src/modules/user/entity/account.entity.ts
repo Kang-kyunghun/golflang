@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsString } from 'class-validator';
+import { IsString } from 'class-validator';
 import { GuardCoreEntity } from 'src/common/entity/guard-core.entity';
 import { Provider } from 'src/modules/auth/enum/account.enum';
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
@@ -20,7 +20,7 @@ export class Account extends GuardCoreEntity {
 
   @Column({ default: false })
   @ApiProperty({ description: '현재 비밀번호가 임시비밀번호인지 여부' })
-  isTempPassword: boolean = false;
+  isTempPassword: boolean;
 
   @Column({ type: 'enum', enum: Provider })
   @ApiProperty({ description: 'SNS 계정 공급자', enum: Provider })

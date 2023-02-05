@@ -39,7 +39,7 @@ import {
   RefreshTokenOutputDto,
   RefreshTokenQueryDto,
 } from './dto/refresh-token.dto';
-import { Account } from '../user/entity/account.entity';
+
 import { GetUserId } from 'src/common/decorator/user.decorator';
 
 @ApiTags('AUTH')
@@ -55,7 +55,7 @@ export class AuthController {
   async signup(
     @Body() body: SignupInputDto,
     @UploadedFile() file?: Express.MulterS3.File,
-  ): Promise<Account> {
+  ): Promise<LoginOutputDto> {
     return await this.authService.signup(body, file);
   }
 

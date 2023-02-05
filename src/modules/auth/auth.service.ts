@@ -59,7 +59,7 @@ export class AuthService {
   async signup(
     body: SignupInputDto,
     file?: Express.MulterS3.File,
-  ): Promise<Account> {
+  ): Promise<LoginOutputDto> {
     this.logger.log(`[singUp] info:${body}`);
 
     const queryRunner = this.dataSource.createQueryRunner();
@@ -132,7 +132,7 @@ export class AuthService {
 
       await queryRunner.commitTransaction();
 
-      return account;
+      return this.loginLocal({ email: body.email, password: body.password });
     } catch (error) {
       this.logger.error(error);
       await queryRunner.rollbackTransaction();
@@ -151,6 +151,8 @@ export class AuthService {
   }
 
   async loginLocal(body: LocalLoginInputDto): Promise<LoginOutputDto> {
+    this.logger.log(`[loginLocal] info: ${body}`);
+
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();

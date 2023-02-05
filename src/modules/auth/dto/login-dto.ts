@@ -1,6 +1,5 @@
 import { ApiProperty, PickType } from '@nestjs/swagger';
 import { IsEmail, IsOptional, IsString, Matches } from 'class-validator';
-import { SignupOutputDto } from '../../user/dto/signup-dto';
 
 export class LocalLoginInputDto {
   @IsEmail()
