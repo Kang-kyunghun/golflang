@@ -4,22 +4,15 @@ import {
   Post,
   Body,
   Patch,
-  Param,
   Delete,
   UseInterceptors,
   UseGuards,
   Req,
   Request,
   Query,
-  UploadedFiles,
   UploadedFile,
 } from '@nestjs/common';
-import {
-  ApiBadRequestResponse,
-  ApiBody,
-  ApiParam,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiBody, ApiParam, ApiTags } from '@nestjs/swagger';
 import { OAuthLoginGuard } from 'src/modules/auth/guard/login.guard';
 import { RoleGuard } from 'src/common/decorator/role.decorator';
 import { SwaggerDefault } from 'src/common/decorator/swagger.decorator';
@@ -40,8 +33,7 @@ import {
 } from 'src/modules/user/dto/signup-dto';
 import { AuthService } from './auth.service';
 import { UploadSingleImage } from '../upload-file/decorator/upload-file.decorator';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { FormDataValidate } from 'src/util/json.interceptor';
+
 import { Provider } from './enum/account.enum';
 import {
   RefreshTokenOutputDto,
@@ -64,8 +56,6 @@ export class AuthController {
     @Body() body,
     @UploadedFile() file: Express.MulterS3.File,
   ): Promise<Account> {
-    body = await new FormDataValidate(SignupInputDto, body.data).parse();
-
     return await this.authService.signup(body, file);
   }
 

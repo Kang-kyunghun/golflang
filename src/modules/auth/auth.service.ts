@@ -1,9 +1,6 @@
-import { Post } from './../post/entity/post.entity';
-import { response } from 'express';
 import {
   BadRequestException,
   ConflictException,
-  ForbiddenException,
   HttpException,
   HttpStatus,
   Injectable,
@@ -18,10 +15,7 @@ import { Account } from 'src/modules/user/entity/account.entity';
 import { UserState } from 'src/modules/user/entity/user-state.entity';
 import { CommonService } from 'src/common/common.service';
 import { JwtService } from '@nestjs/jwt';
-import {
-  SignupInputDto,
-  SignupOutputDto,
-} from 'src/modules/user/dto/signup-dto';
+
 import { Role } from 'src/modules/user/enum/user.enum';
 import {
   LocalLoginInputDto,
@@ -38,7 +32,7 @@ import { Provider } from './enum/account.enum';
 import * as jwt from 'jsonwebtoken';
 import { JwksClient } from 'jwks-rsa';
 import { AppleJwtTokenPayloadOutputDto } from './dto/verify-apple-token.dto';
-import * as argon2 from 'argon2';
+
 import {
   RefreshTokenOutputDto,
   RefreshTokenQueryDto,
