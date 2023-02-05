@@ -7,10 +7,11 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
+
 import * as bcrypt from 'bcrypt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/modules/user/entity/user.entity';
-import { Connection, LessThan, Repository } from 'typeorm';
+import { LessThan, Repository, DataSource } from 'typeorm';
 import { Account } from 'src/modules/user/entity/account.entity';
 import { UserState } from 'src/modules/user/entity/user-state.entity';
 import { CommonService } from 'src/common/common.service';
@@ -52,13 +53,12 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly commonService: CommonService,
     private readonly uploadFileService: UploadFileService,
-
-    private connection: Connection,
     private readonly logger: Logger,
+    private readonly dataSource: DataSource,
   ) {}
 
   async signup(body, file): Promise<Account> {
-    const queryRunner = this.connection.createQueryRunner();
+    const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
@@ -149,7 +149,7 @@ export class AuthService {
   }
 
   async loginLocal(body: LocalLoginInputDto): Promise<LoginOutputDto> {
-    const queryRunner = this.connection.createQueryRunner();
+    const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
@@ -244,7 +244,7 @@ export class AuthService {
   }
 
   async loginOAuth(guard, body): Promise<LoginOutputDto | any> {
-    const queryRunner = this.connection.createQueryRunner();
+    const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
@@ -389,7 +389,7 @@ export class AuthService {
   async refreshToken(
     query: RefreshTokenQueryDto,
   ): Promise<RefreshTokenOutputDto | any> {
-    const queryRunner = this.connection.createQueryRunner();
+    const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
@@ -484,7 +484,7 @@ export class AuthService {
   }
 
   async withdrawAccount(userId: number): Promise<boolean> {
-    const queryRunner = this.connection.createQueryRunner();
+    const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 

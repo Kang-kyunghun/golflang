@@ -1,12 +1,10 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 import { applyDecorators, UseInterceptors } from '@nestjs/common';
-import {
-  FileFieldsInterceptor,
-  FileInterceptor,
-  FilesInterceptor,
-} from '@nestjs/platform-express';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 const path = require('path');
 const crypto = require('crypto');
+
 import { Buffer } from 'buffer';
 import * as AWS from 'aws-sdk';
 import * as multerS3 from 'multer-s3';
@@ -19,30 +17,12 @@ AWS.config.update({
   region: process.env.AWS_REGION,
 });
 
-// export function UploadSingleImage(fieldName: string) {
-//   return applyDecorators(
-//     UseInterceptors(
-//       FileInterceptor(fieldName, {
-//         storage: multerS3({
-//           s3: s3,
-//           bucket: process.env.AWS_S3_BUCKET_NAME,
-//           acl: "public-read",
-//           key(req, file, callback) {
-//             callback(null, `${Date.now()}_${path.basename(file.originalname)}`);
-//           },
-//         }),
-//         limits: {},
-//       }),
-//     ),
-//   );
-// }
-
 export function UploadSingleImage(fieldName: string) {
   return applyDecorators(
     UseInterceptors(
       FileInterceptor(fieldName, {
         storage: multerS3({
-          s3: s3,
+          s3,
           bucket: process.env.AWS_S3_BUCKET_NAME,
           // acl: 'public-read',
           key: function (request, file, cb) {

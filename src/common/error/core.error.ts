@@ -2,7 +2,7 @@ import { ErrorEntity } from '../entity/error.entity';
 
 export class CoreError {
   protected api: string;
-  protected errorHandle: Object;
+  protected errorHandle: object;
   protected status: number;
 
   errorHandler(message): ErrorEntity {
