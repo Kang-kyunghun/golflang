@@ -58,7 +58,7 @@ export class CommonService {
     const iv = Buffer.alloc(IV_LENGTH, 0);
     const key = (await promisify(scrypt)(PASSWORD, 'salt', 32)) as Buffer;
 
-    let decipher = createDecipheriv('aes-256-cbc', key, iv);
+    const decipher = createDecipheriv('aes-256-cbc', key, iv);
     let result = decipher.update(text, 'base64', 'utf8');
     result += decipher.final('utf8');
 

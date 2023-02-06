@@ -7,21 +7,18 @@ import {
   Logger,
   UnauthorizedException,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+
 import { BaseGuard } from 'src/common/guard/base.guard';
-import { Account } from 'src/modules/user/entity/account.entity';
-import { Repository } from 'typeorm';
+
 import { AuthError, AUTH_ERROR } from '../error/auth.error';
 import axios from 'axios';
 import { Provider } from '../enum/account.enum';
 import { AuthService } from '../auth.service';
+import { SignupInputDto } from 'src/modules/user/dto/signup-dto';
 
 @Injectable()
 export class OAuthLoginGuard extends BaseGuard {
   constructor(
-    @InjectRepository(Account)
-    private readonly accountRepo: Repository<Account>,
-
     private readonly authError: AuthError,
     private readonly authService: AuthService,
     private readonly logger: Logger,
@@ -32,16 +29,7 @@ export class OAuthLoginGuard extends BaseGuard {
   async handleRequest(context: ExecutionContext) {
     try {
       const request = context.switchToHttp().getRequest();
-      const data = {
-        email: null,
-        provider: null,
-        password: null,
-        nickname: null,
-        birthday: null,
-        gender: null,
-        address: null,
-        addressDetail: null,
-      };
+      let data: SignupInputDto;
 
       const { kakaoAccessToken, appleIdentityToken } = request.body;
       const param = request.params.provider;
@@ -55,7 +43,6 @@ export class OAuthLoginGuard extends BaseGuard {
           }
 
           data.email = kakaoUserInfo.kakao_account.email;
-          data.provider = param;
           data.nickname = kakaoUserInfo.properties.nickname;
           data.gender = kakaoUserInfo.kakao_account.gender;
           break;
@@ -70,7 +57,6 @@ export class OAuthLoginGuard extends BaseGuard {
           }
 
           data.email = decodedToken.email;
-          data.provider = param;
           break;
 
         default:

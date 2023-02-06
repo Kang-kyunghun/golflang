@@ -13,7 +13,7 @@ import {
   UploadedFile,
 } from '@nestjs/common';
 import { ApiBody, ApiParam, ApiTags } from '@nestjs/swagger';
-import { OAuthLoginGuard } from 'src/modules/auth/guard/login.guard';
+import { OAuthLoginGuard } from 'src/modules/auth/guard/oAuthLogin.guard';
 import { RoleGuard } from 'src/common/decorator/role.decorator';
 import { SwaggerDefault } from 'src/common/decorator/swagger.decorator';
 import { PermissionRole } from 'src/common/enum/common.enum';

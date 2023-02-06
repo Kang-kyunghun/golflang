@@ -3,6 +3,7 @@ import {
   Module,
   NestModule,
   RequestMethod,
+  ValidationPipe,
 } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
@@ -12,6 +13,7 @@ import { ENTITIES, MODULES } from './config/config';
 import { JwtModule } from '@nestjs/jwt';
 import configuration from './config/config';
 import { DataSource } from 'typeorm';
+import { APP_PIPE } from '@nestjs/core';
 
 @Module({
   imports: [

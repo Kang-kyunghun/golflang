@@ -59,7 +59,7 @@ export class AuthService {
     body: SignupInputDto,
     file?: Express.MulterS3.File,
   ): Promise<LoginOutputDto> {
-    this.logger.log(`[singUp] info:${body}`);
+    this.logger.log(`[singUp] info:${JSON.stringify(body)}`);
 
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
@@ -150,7 +150,7 @@ export class AuthService {
   }
 
   async loginLocal(body: LocalLoginInputDto): Promise<LoginOutputDto> {
-    this.logger.log(`[loginLocal] info: ${body}`);
+    this.logger.log(`[loginLocal] info: ${JSON.stringify(body)}`);
 
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
@@ -163,8 +163,6 @@ export class AuthService {
         where: { email },
         relations: { user: { userState: true } },
       });
-
-      console.log(1, userAccount);
 
       if (!userAccount)
         throw new NotFoundException(AUTH_ERROR.ACCOUNT_ACCOUNT_NOT_FOUND);
