@@ -59,7 +59,7 @@ export const MODULES = [
   InvitationModule,
 ];
 
-interface DatabaseConfig {
+export interface DatabaseConfig {
   host: string;
   port: number;
   username: string;
@@ -69,6 +69,13 @@ interface DatabaseConfig {
 // [사용법 예시] const dbConfig = this.configService.get<DatabaseConfig>('database');
 // const port = dbConfig.port;
 
+export interface TokenInfoConfig {
+  accessSecretKey: string;
+  accessSecretKeyExpDate: string;
+  refrechSecretKey: string;
+  refrechSecretKeyExpDate: string;
+}
+
 export default () => ({
   port: parseInt(process.env.PORT, 10) || 3000,
   database: {
@@ -77,5 +84,11 @@ export default () => ({
     username: process.env.GL_DB_USERNAME,
     password: process.env.GL_DB_PASSWORD,
     dbname: process.env.GL_DB_NAME,
+  },
+  tokenInfos: {
+    accessSecretKey: process.env.ACCESS_TOKEN_SECRET_KEY,
+    accessSecretKeyExpDate: process.env.ACCESS_TOKEN_EXPIRE_DATE,
+    refrechSecretKey: process.env.REFRESH_TOKEN_SECRET_KEY,
+    refrechSecretKeyExpDate: process.env.REFRESH_TOKEN_EXPIRE_DATE,
   },
 });

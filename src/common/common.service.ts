@@ -1,23 +1,40 @@
 import { JwtService } from '@nestjs/jwt';
 import { Injectable } from '@nestjs/common';
-import { CreateCommonDto } from './dto/create-common.dto';
-import { UpdateCommonDto } from './dto/update-common.dto';
+
 import * as bcrypt from 'bcrypt';
 import { promisify } from 'util';
 import { createCipheriv, createDecipheriv, scrypt } from 'crypto';
-const crypto = require('crypto');
+import { ConfigService } from '@nestjs/config';
+import { TokenInfoConfig } from 'src/config/config';
 
-const PASSWORD = 'tempPassword123';
 const IV_LENGTH = 16;
 
 @Injectable()
 export class CommonService {
-  constructor(private readonly jwtService: JwtService) {}
+  private accessSecretKey: string;
+  private accessSecretKeyExpDate: string;
+  private refrechSecretKey: string;
+  private refrechSecretKeyExpDate: string;
+
+  constructor(
+    private readonly jwtService: JwtService,
+    private readonly configService: ConfigService,
+  ) {
+    const {
+      accessSecretKey,
+      accessSecretKeyExpDate,
+      refrechSecretKey,
+      refrechSecretKeyExpDate,
+    } = this.configService.get<TokenInfoConfig>('tokenInfos');
+
+    this.accessSecretKey = accessSecretKey;
+    this.accessSecretKeyExpDate = accessSecretKeyExpDate;
+    this.refrechSecretKey = refrechSecretKey;
+    this.refrechSecretKeyExpDate = refrechSecretKeyExpDate;
+  }
 
   async hash(string: string) {
-    const salt = 10;
-
-    return await bcrypt.hash(string, salt);
+    return await bcrypt.hash(string, 10);
   }
 
   async isHashValid(password, hashPassword): Promise<boolean> {
@@ -25,6 +42,7 @@ export class CommonService {
   }
 
   async encrypt(text: string) {
+    const PASSWORD = this.configService.get('PROMISIFY_PASSWORD');
     const iv = Buffer.alloc(IV_LENGTH, 0);
     const key = (await promisify(scrypt)(PASSWORD, 'salt', 32)) as Buffer;
     const cipher = createCipheriv('aes-256-cbc', key, iv);
@@ -36,6 +54,7 @@ export class CommonService {
   }
 
   async decrypt(text: string) {
+    const PASSWORD = this.configService.get('PROMISIFY_PASSWORD');
     const iv = Buffer.alloc(IV_LENGTH, 0);
     const key = (await promisify(scrypt)(PASSWORD, 'salt', 32)) as Buffer;
 
@@ -58,21 +77,21 @@ export class CommonService {
     return age;
   }
 
-  createAccessToken(payload: object) {
+  createAccessToken(payload: Record<string, string>) {
     // 시크릿키와 만료시간을 설정하여 token 생성
     const accessToken = this.jwtService.sign(payload, {
-      secret: process.env.ACCESS_TOKEN_SECRET_KEY,
-      expiresIn: process.env.ACCESS_TOKEN_EXPIRE_DATE,
+      secret: this.accessSecretKey,
+      expiresIn: this.accessSecretKeyExpDate,
     });
 
     return accessToken;
   }
 
-  createRefreshToken(payload: object) {
+  createRefreshToken(payload: Record<string, string>) {
     // 시크릿키와 만료시간을 설정하여 token 생성
     const refreshToken = this.jwtService.sign(payload, {
-      secret: process.env.REFRESH_TOKEN_SECRET_KEY,
-      expiresIn: process.env.REFRESH_TOKEN_EXPIRE_DATE,
+      secret: this.refrechSecretKey,
+      expiresIn: this.refrechSecretKeyExpDate,
     });
 
     return refreshToken;
@@ -80,9 +99,7 @@ export class CommonService {
 
   accessTokenErrorCheck(accessToken: string) {
     try {
-      this.jwtService.verify(accessToken, {
-        secret: process.env.ACCESS_TOKEN_SECRET_KEY,
-      });
+      this.jwtService.verify(accessToken, { secret: this.accessSecretKey });
 
       return true;
     } catch (error) {
@@ -96,9 +113,7 @@ export class CommonService {
 
   refreshTokenErrorCheck(refreshToken: string) {
     try {
-      this.jwtService.verify(refreshToken, {
-        secret: process.env.REFRESH_TOKEN_SECRET_KEY,
-      });
+      this.jwtService.verify(refreshToken, { secret: this.refrechSecretKey });
 
       return true;
     } catch (error) {
@@ -112,9 +127,7 @@ export class CommonService {
 
   refreshTokenExpireCheck(refreshToken: string) {
     try {
-      this.jwtService.verify(refreshToken, {
-        secret: process.env.REFRESH_TOKEN_SECRET_KEY,
-      });
+      this.jwtService.verify(refreshToken, { secret: this.refrechSecretKey });
 
       return true;
     } catch (error) {

@@ -47,7 +47,6 @@ export class AuthService {
     private readonly userRepo: Repository<User>,
     @InjectRepository(Account)
     private readonly accountRepo: Repository<Account>,
-
     private readonly authError: AuthError,
     private readonly jwtService: JwtService,
     private readonly commonService: CommonService,
@@ -160,76 +159,45 @@ export class AuthService {
     try {
       const { email, password } = body;
 
-      let account = await this.accountRepo.findOne({
+      const userAccount = await this.accountRepo.findOne({
         where: { email },
-        relations: {
-          user: { userState: true },
-        },
+        relations: { user: { userState: true } },
       });
 
-      if (!account) {
+      console.log(1, userAccount);
+
+      if (!userAccount)
         throw new NotFoundException(AUTH_ERROR.ACCOUNT_ACCOUNT_NOT_FOUND);
-      }
 
       // 비번 체크
-      const matchPassword = await bcrypt.compare(password, account.password);
+      const isPasswordMatched = await bcrypt.compare(
+        password,
+        userAccount.password,
+      );
 
-      if (!matchPassword) {
+      if (!isPasswordMatched)
         throw new BadRequestException(AUTH_ERROR.ACCOUNT_PASSWORD_WAS_WRONG);
-      }
 
       // 마지막 로그인 시간 업데이트
       await queryRunner.manager.update(
         UserState,
-        { id: account.user.userState.id },
+        { id: userAccount.user.userState.id },
         { lastLoginDate: new Date() },
       );
 
-      const payload = { id: account.uid };
+      const { accessToken, refreshToken } = this.getTokens({
+        id: userAccount.uid,
+      });
 
-      // 로그인할때마다 accessToken 새로 발급 후 프론트에 반환만 해줌
-      const newAccessToken = this.commonService.createAccessToken(payload);
-
-      // 로그인할때마다 refreshToken 새로 발급 후 DB 업데이트 및 반환
-      const newRefreshToken = this.commonService.createRefreshToken(payload);
-
-      // 기존에 발급된 refreshToken가 있을 경우
-      if (account.refreshToken) {
-        // 만료기한 체크
-        const refreshTokenExpireCheck =
-          this.commonService.refreshTokenExpireCheck(account.refreshToken);
-
-        // 만료됐을 경우
-        if (!refreshTokenExpireCheck) {
-          // 새로 발급한 refreshToken로 업데이트
-          await queryRunner.manager.update(
-            Account,
-            { id: account.id },
-            { refreshToken: newRefreshToken },
-          );
-        } else {
-          // 아직 만료되지 않았을 경우 로직 끝내기
-          await queryRunner.commitTransaction();
-
-          return {
-            accessToken: newAccessToken,
-          };
-        }
-      } else {
-        // 기존에 발급된 refreshToken가 없을 경우, 새로 발급한 refreshToken 저장
-        await queryRunner.manager.update(
-          Account,
-          { id: account.id },
-          { refreshToken: newRefreshToken },
-        );
-      }
+      await queryRunner.manager.update(
+        Account,
+        { id: userAccount.id },
+        { refreshToken },
+      );
 
       await queryRunner.commitTransaction();
 
-      return {
-        accessToken: newAccessToken,
-        refreshToken: newRefreshToken,
-      };
+      return { accessToken, refreshToken };
     } catch (error) {
       this.logger.error(error);
       await queryRunner.rollbackTransaction();
@@ -481,7 +449,6 @@ export class AuthService {
         this.authError.errorHandler(error.message),
         statusCode,
       );
-      console.log(error);
     } finally {
       await queryRunner.release();
     }
@@ -566,5 +533,12 @@ export class AuthService {
         statusCode,
       );
     }
+  }
+
+  getTokens(payload: Record<string, string>) {
+    return {
+      accessToken: this.commonService.createAccessToken(payload),
+      refreshToken: this.commonService.createRefreshToken(payload),
+    };
   }
 }
