@@ -407,6 +407,8 @@ export class AuthService {
   }
 
   async logout(userId: number): Promise<boolean> {
+    this.logger.log(`logout userId: ${userId}`);
+
     try {
       const account = await this.accountRepo.findOne({
         where: { user: { id: userId } },

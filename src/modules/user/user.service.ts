@@ -60,12 +60,8 @@ export class UserService {
 
     try {
       const user = await queryRunner.manager.findOne(User, {
-        where: {
-          id: userId,
-        },
-        relations: {
-          userState: true,
-        },
+        where: { id: userId },
+        relations: { userState: true },
       });
 
       let profileImage;

@@ -41,6 +41,7 @@ import {
 } from './dto/refresh-token.dto';
 
 import { GetUserId } from 'src/common/decorator/user.decorator';
+import { JwtAuthGuard } from './guard/jwt.guard';
 
 @ApiTags('AUTH')
 @Controller('auth')
@@ -96,7 +97,7 @@ export class AuthController {
     return await this.authService.checkNickname(body);
   }
 
-  @Get('access-token')
+  @Post('access-token')
   @SwaggerDefault('accessToken 재발급 ', AccessTokenOutputDto)
   async accessToken(
     @Body() body: AccessTokenQueryDto,
@@ -105,14 +106,16 @@ export class AuthController {
   }
 
   @Delete('withdrawal')
-  @RoleGuard(PermissionRole.USER)
+  // @RoleGuard(PermissionRole.USER)
+  @UseGuards(JwtAuthGuard)
   @SwaggerDefault('회원탈퇴', Boolean, '회원탈퇴')
   async withdrawAccount(@GetUserId() userId: number): Promise<boolean> {
     return await this.authService.withdrawAccount(userId);
   }
 
   @Patch('logout')
-  @RoleGuard(PermissionRole.USER)
+  @UseGuards(JwtAuthGuard)
+  // @RoleGuard(PermissionRole.USER)
   @SwaggerDefault('로그아웃', Boolean, '로그아웃')
   async logout(@GetUserId() userId: number): Promise<boolean> {
     return await this.authService.logout(userId);

@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsOptional, IsString, Matches } from 'class-validator';
+import { IsEmail, IsOptional, IsString } from 'class-validator';
 
 export class LocalLoginInputDto {
   @IsEmail()
@@ -7,9 +7,6 @@ export class LocalLoginInputDto {
   email: string;
 
   @IsString()
-  @Matches(
-    /^(?=.*[A-Za-z])(?=.*\d)(?=.*[~!@#$%^&*_+=-])[A-Za-z\d~!@#$%^&*_+=-]{8,}$/,
-  )
   @ApiProperty({ required: true })
   password: string;
 }
