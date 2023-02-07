@@ -3,23 +3,15 @@ import { IsEmail, IsOptional, IsString, Matches } from 'class-validator';
 
 export class LocalLoginInputDto {
   @IsEmail()
-  @IsOptional()
-  @ApiProperty({
-    description: '이메일, provider가 twitter, local일 때만 필요',
-    required: false,
-  })
-  email?: string;
+  @ApiProperty({ required: true })
+  email: string;
 
   @IsString()
-  @IsOptional()
   @Matches(
     /^(?=.*[A-Za-z])(?=.*\d)(?=.*[~!@#$%^&*_+=-])[A-Za-z\d~!@#$%^&*_+=-]{8,}$/,
   )
-  @ApiProperty({
-    description: '비밀번호, provider가 local 일때만 필요',
-    required: false,
-  })
-  password?: string;
+  @ApiProperty({ required: true })
+  password: string;
 }
 
 export class OAuthLoginInputDto {

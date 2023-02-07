@@ -6,6 +6,7 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  Matches,
 } from 'class-validator';
 import { Gender } from '../enum/user.enum';
 
@@ -17,6 +18,9 @@ export class SignupInputDto {
 
   @IsString()
   @IsNotEmpty()
+  @Matches(
+    /^(?=.*[A-Za-z])(?=.*\d)(?=.*[~!@#$%^&*_+=-])[A-Za-z\d~!@#$%^&*_+=-]{8,}$/,
+  )
   @ApiProperty({
     description: '비밀번호(알파벳+숫자+특수문자 8자리 이상',
     example: 'abcd1234!',
