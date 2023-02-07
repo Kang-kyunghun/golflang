@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsOptional } from 'class-validator';
+import { Provider } from 'src/modules/auth/enum/account.enum';
 import { Gender } from '../enum/user.enum';
 
 export class GetUserDetailOutputDto {
@@ -40,4 +41,8 @@ export class GetUserDetailOutputDto {
   @ApiProperty({ description: '프로필 이미지 url' })
   @IsOptional()
   photo: string;
+
+  @ApiProperty({ description: '로긴 provider' })
+  @IsOptional()
+  provider: Provider;
 }

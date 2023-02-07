@@ -46,6 +46,7 @@ export class UserService {
         photo: user.profileImage?.url,
         avgHitScore: user.userState ? user.userState.avgHitScore : 0,
         mannerScore: user.userState ? user.userState.mannerScore : 0,
+        provider: user.account.provider,
       };
     } catch (error) {
       this.logger.log('getUserDetail', error);
