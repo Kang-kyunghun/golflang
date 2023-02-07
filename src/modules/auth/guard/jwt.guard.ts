@@ -50,7 +50,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       return request;
     } catch (error) {
       console.error(error);
-      throw new UnauthorizedException(error.message);
+      throw new UnauthorizedException(AUTH_ERROR.ACCESS_TOKEN_ERROR);
     }
   }
 
