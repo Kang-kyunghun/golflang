@@ -37,14 +37,14 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
         });
 
         if (!account) {
-          throw new UnauthorizedException(AUTH_ERROR.INVALID_TOKEN);
+          throw new UnauthorizedException(AUTH_ERROR.ACCESS_TOKEN_ERROR);
         }
 
         request['userId'] = account.user.id;
         request['accountId'] = account.id;
         request['role'] = account.user.role;
       } else {
-        throw new UnauthorizedException(AUTH_ERROR.TOKEN_EMPTY);
+        throw new UnauthorizedException(AUTH_ERROR.ACCESS_TOKEN_ERROR);
       }
 
       return request;

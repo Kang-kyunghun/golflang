@@ -99,9 +99,9 @@ export class AuthController {
   @Get('access-token')
   @SwaggerDefault('accessToken 재발급 ', AccessTokenOutputDto)
   async accessToken(
-    @Query() query: AccessTokenQueryDto,
+    @Body() body: AccessTokenQueryDto,
   ): Promise<AccessTokenOutputDto> {
-    return await this.authService.accessToken(query);
+    return await this.authService.accessToken(body);
   }
 
   @Delete('withdrawal')

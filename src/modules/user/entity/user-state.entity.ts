@@ -1,14 +1,10 @@
 import { GuardCoreEntity } from '../../../common/entity/guard-core.entity';
-import { Column, CreateDateColumn, Entity, OneToOne } from 'typeorm';
+import { Column, Entity, OneToOne } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { User } from './user.entity';
 
 @Entity()
 export class UserState extends GuardCoreEntity {
-  @CreateDateColumn()
-  @ApiProperty({ description: '마지막 로그인 시간' })
-  lastLoginDate: Date;
-
   @Column({ nullable: true, default: 0 })
   @ApiProperty({ description: '평균타수', nullable: true, default: 0 })
   avgHitScore: number;

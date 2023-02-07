@@ -1,13 +1,13 @@
-import { ApiProperty, PartialType } from '@nestjs/swagger';
-import { Transform } from 'class-transformer';
-import { IsBoolean, IsString } from 'class-validator';
-import { transQueryToBoolean } from 'src/common/function/transQueryToBoolean';
+import { ApiProperty, PickType } from '@nestjs/swagger';
+import { IsString } from 'class-validator';
 import { LoginOutputDto } from 'src/modules/auth/dto/login-dto';
 
 export class RefreshTokenQueryDto {
   @IsString()
-  @ApiProperty({ description: '리프레시 토큰' })
+  @ApiProperty({ description: '리프레시 토큰', required: true })
   refreshToken: string;
 }
 
-export class RefreshTokenOutputDto extends PartialType(LoginOutputDto) {}
+export class RefreshTokenOutputDto extends PickType(LoginOutputDto, [
+  'accessToken',
+]) {}

@@ -12,8 +12,6 @@ export const AUTH_ERROR = {
   ACCESS_TOKEN_ERROR: 'accessTokenError',
   REFRESH_TOKEN_EXPIRED: 'refreshTokenExpired',
   REFRESH_TOKEN_NOT_FOUND: 'refreshTokenNotFound',
-  INVALID_TOKEN: 'tokenIsInvalid',
-  TOKEN_EMPTY: 'tokenIsEmpty',
 };
 
 export class AuthError extends CoreError {

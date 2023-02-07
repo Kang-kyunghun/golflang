@@ -6,6 +6,7 @@ import {
   Injectable,
   Logger,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 
 import * as bcrypt from 'bcrypt';
@@ -32,8 +33,8 @@ import {
 import { Provider } from './enum/account.enum';
 
 import {
-  RefreshTokenOutputDto,
-  RefreshTokenQueryDto,
+  RefreshTokenOutputDto as AcessTokenOutputDto,
+  RefreshTokenQueryDto as AccessTokenQueryDto,
 } from './dto/refresh-token.dto';
 import { SignupInputDto } from '../user/dto/signup-dto';
 
@@ -172,13 +173,6 @@ export class AuthService {
       if (!isPasswordMatched)
         throw new BadRequestException(AUTH_ERROR.ACCOUNT_PASSWORD_WAS_WRONG);
 
-      // 마지막 로그인 시간 업데이트
-      await queryRunner.manager.update(
-        UserState,
-        { id: userAccount.user.userState.id },
-        { lastLoginDate: new Date() },
-      );
-
       const { accessToken, refreshToken } = this.getTokens({
         id: userAccount.uid,
       });
@@ -247,12 +241,6 @@ export class AuthService {
         await queryRunner.manager.save(Account, account);
       }
 
-      await queryRunner.manager.update(
-        UserState,
-        { id: account.user.userState.id },
-        { lastLoginDate: new Date() },
-      );
-
       const { accessToken, refreshToken } = this.getTokens({
         id: account.uid,
       });
@@ -311,25 +299,22 @@ export class AuthService {
   }
 
   async accessToken(
-    query: RefreshTokenQueryDto,
-  ): Promise<RefreshTokenOutputDto | any> {
+    query: AccessTokenQueryDto,
+  ): Promise<AcessTokenOutputDto | any> {
+    if (!query.refreshToken) {
+      throw new UnauthorizedException(AUTH_ERROR.REFRESH_TOKEN_NOT_FOUND);
+    }
+
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
-    const date = new Date();
-    const lastLoginUpdateDate = new Date();
-    lastLoginUpdateDate.setMinutes(date.getMinutes() - 10);
-
     try {
       const { refreshToken } = query;
-
-      const decodeRefreshToken: any = this.jwtService.decode(refreshToken);
-
-      const payload = { accountUid: decodeRefreshToken.id };
+      const decodedRefreshToken: any = this.jwtService.decode(refreshToken);
 
       const account = await this.accountRepo.findOne({
-        where: { uid: decodeRefreshToken.id },
+        where: { uid: decodedRefreshToken.id },
         relations: { user: { userState: true } },
       });
 
@@ -337,58 +322,20 @@ export class AuthService {
         throw new NotFoundException(AUTH_ERROR.ACCOUNT_ACCOUNT_NOT_FOUND);
       }
 
-      // 새로운 accessToken 발급
-      const newAccessToken = this.commonService.createAccessToken(payload);
-
-      const refreshTokenExpireCheck =
+      const isValidRefreshToken =
         this.commonService.refreshTokenExpireCheck(refreshToken);
 
       // refreshToken이 만료됐을 경우
-      if (!refreshTokenExpireCheck) {
-        // 새로운 refreshToken 발급
-        const newRefreshToken = this.commonService.createRefreshToken(payload);
-
-        // 마지막 로그인 시간 업데이트 후
-        await queryRunner.manager.update(
-          UserState,
-          {
-            id: account.user.userState.id,
-            lastLoginDate: LessThan(lastLoginUpdateDate),
-          },
-          { lastLoginDate: new Date() },
-        );
-
-        await queryRunner.manager.update(
-          Account,
-          { id: account.id },
-          { refreshToken: newRefreshToken },
-        );
-
-        await queryRunner.commitTransaction();
-        // accessToken 와 refreshToken 둘 다 반환
-        return {
-          accessToken: newAccessToken,
-          refreshToken: newRefreshToken,
-        };
+      if (!isValidRefreshToken) {
+        throw new UnauthorizedException(AUTH_ERROR.REFRESH_TOKEN_EXPIRED);
       }
 
       // refreshToken이 만료되지 않았을 경우
-      // 마지막 로그인 시간 업데이트 후
-      await queryRunner.manager.update(
-        UserState,
-        {
-          id: account.user.userState.id,
-          lastLoginDate: LessThan(lastLoginUpdateDate),
-        },
-        { lastLoginDate: new Date() },
-      );
-
       await queryRunner.commitTransaction();
 
+      const payload = { accountUid: decodedRefreshToken.id };
       // accessToken만 반환
-      return {
-        accessToken: newAccessToken,
-      };
+      return { accessToken: this.commonService.createAccessToken(payload) };
     } catch (error) {
       this.logger.error(error);
       await queryRunner.rollbackTransaction();
