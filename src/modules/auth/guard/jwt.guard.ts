@@ -1,3 +1,4 @@
+import { AUTH_ERROR } from 'src/modules/auth/error/auth.error';
 import {
   ExecutionContext,
   Injectable,
@@ -36,14 +37,14 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
         });
 
         if (!account) {
-          throw new UnauthorizedException('유저를 찾을 수 없음');
+          throw new UnauthorizedException(AUTH_ERROR.INVALID_TOKEN);
         }
 
         request['userId'] = account.user.id;
         request['accountId'] = account.id;
         request['role'] = account.user.role;
       } else {
-        request['role'] = PermissionRole.PUBLIC;
+        throw new UnauthorizedException(AUTH_ERROR.TOKEN_EMPTY);
       }
 
       return request;
