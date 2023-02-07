@@ -1,5 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString } from 'class-validator';
 import { GuardCoreEntity } from 'src/common/entity/guard-core.entity';
 import { Provider } from 'src/modules/auth/enum/account.enum';
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
@@ -33,11 +32,6 @@ export class Account extends GuardCoreEntity {
     nullable: true,
   })
   refreshToken: string;
-
-  @Column({ default: null, nullable: true })
-  @IsString()
-  @ApiProperty({ description: 'account key값' })
-  accountKey: string;
 
   @ManyToOne(() => User, (user) => user.id)
   @JoinColumn()

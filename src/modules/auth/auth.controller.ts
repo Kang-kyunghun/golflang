@@ -36,8 +36,8 @@ import { UploadSingleImage } from '../upload-file/decorator/upload-file.decorato
 
 import { Provider } from './enum/account.enum';
 import {
-  RefreshTokenOutputDto,
-  RefreshTokenQueryDto,
+  RefreshTokenOutputDto as AccessTokenOutputDto,
+  RefreshTokenQueryDto as AccessTokenQueryDto,
 } from './dto/refresh-token.dto';
 
 import { GetUserId } from 'src/common/decorator/user.decorator';
@@ -80,8 +80,10 @@ export class AuthController {
     enum: Provider,
   })
   @ApiBody({ type: OAuthLoginInputDto })
-  async loginOAuth(@Req() req: Request): Promise<LoginOutputDto> {
-    return await this.authService.loginOAuth(req['guard'], req['body']);
+  async loginOAuth(
+    @Req() req: Request,
+  ): Promise<{ tokens: LoginOutputDto; email: string }> {
+    return await this.authService.loginOAuth(req['guard'], req['params']);
   }
 
   @Post('check/nickname')
@@ -96,16 +98,12 @@ export class AuthController {
     return await this.authService.checkNickname(body);
   }
 
-  @Get('refresh')
-  @SwaggerDefault(
-    'accessToken 재발급 & refreshToken 만료 여부 확인 후 재발급',
-    RefreshTokenOutputDto,
-    'accessToken 재발급 & refreshToken 만료 여부 확인 후 재발급',
-  )
-  async refreshToken(
-    @Query() query: RefreshTokenQueryDto,
-  ): Promise<RefreshTokenOutputDto> {
-    return await this.authService.refreshToken(query);
+  @Get('accessToken')
+  @SwaggerDefault('accessToken 재발급 ', AccessTokenOutputDto)
+  async accessToken(
+    @Query() query: AccessTokenQueryDto,
+  ): Promise<AccessTokenOutputDto> {
+    return await this.authService.accessToken(query);
   }
 
   @Delete('withdrawal')

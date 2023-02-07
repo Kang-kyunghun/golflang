@@ -30,9 +30,6 @@ import {
   CheckNicknameOutputDto,
 } from '../user/dto/check-nickname.dto';
 import { Provider } from './enum/account.enum';
-import * as jwt from 'jsonwebtoken';
-import { JwksClient } from 'jwks-rsa';
-import { AppleJwtTokenPayloadOutputDto } from './dto/verify-apple-token.dto';
 
 import {
   RefreshTokenOutputDto,
@@ -123,7 +120,6 @@ export class AuthService {
       const account = new Account();
       account.user = user;
       account.email = body.email;
-      account.accountKey = `l_${body.email}`;
       account.password = await this.commonService.hash(body.password);
       account.provider = Provider.LOCAL;
 
@@ -213,33 +209,32 @@ export class AuthService {
     }
   }
 
-  async loginOAuth(guard, body): Promise<LoginOutputDto | any> {
+  async loginOAuth(
+    guard: { email: string },
+    params: { provider: Provider.APPLE | Provider.KAKAO },
+  ): Promise<{ tokens: LoginOutputDto; email: string }> {
+    this.logger.log(`[loginOAuth] email: ${guard.email}`);
+
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
     try {
-      const { email, provider, nickname, gender } = guard;
-      const { kakaoAccessToken, kakaoRefreshToken, appleIdentityToken } = body;
-
-      const accountKey = `${provider.slice(0, 1)}_${email}`;
+      const { email } = guard;
+      const { provider } = params;
 
       let account = await this.accountRepo.findOne({
-        where: { accountKey },
-        relations: {
-          user: { userState: true },
-        },
+        where: { provider, email },
+        relations: { user: { userState: true } },
       });
 
+      // 없으면 회원가입 진행
       if (!account) {
         const userState = new UserState();
-
         await queryRunner.manager.save(UserState, userState);
 
         const user = new User();
         user.role = Role.USER;
-        user.nickname = nickname ? nickname : null;
-        user.gender = gender ? gender : null;
         user.userState = userState;
 
         await queryRunner.manager.save(User, user);
@@ -248,7 +243,6 @@ export class AuthService {
         account.email = email;
         account.provider = provider;
         account.user = user;
-        account.accountKey = `${provider.slice(0, 1)}_${email}`;
 
         await queryRunner.manager.save(Account, account);
       }
@@ -259,13 +253,8 @@ export class AuthService {
         { lastLoginDate: new Date() },
       );
 
-      const payload = { id: account.uid };
-
-      const accessToken = this.commonService.createAccessToken(payload);
-
-      const refreshToken = this.commonService.createRefreshToken({
+      const { accessToken, refreshToken } = this.getTokens({
         id: account.uid,
-        refreshToken: kakaoRefreshToken,
       });
 
       await queryRunner.manager.update(
@@ -276,14 +265,7 @@ export class AuthService {
 
       await queryRunner.commitTransaction();
 
-      return {
-        accessToken,
-        refreshToken,
-        account: {
-          email: account.email,
-          nickname: account.user.nickname,
-        },
-      };
+      return { tokens: { accessToken, refreshToken }, email };
     } catch (error) {
       this.logger.error(error);
       await queryRunner.rollbackTransaction();
@@ -328,35 +310,7 @@ export class AuthService {
     }
   }
 
-  async verifyAppleToken(
-    appleIdToken: string,
-  ): Promise<AppleJwtTokenPayloadOutputDto> {
-    const decodedToken = jwt.decode(appleIdToken, { complete: true }) as {
-      header: { kid: string; alg: jwt.Algorithm };
-      payload: { sub: string };
-    };
-
-    const keyIdFromToken = decodedToken.header.kid;
-
-    const applePublicKeyUrl = 'https://appleid.apple.com/auth/keys';
-
-    const jwksClient = new JwksClient({ jwksUri: applePublicKeyUrl });
-
-    const key = await jwksClient.getSigningKey(keyIdFromToken);
-    const publicKey = key.getPublicKey();
-
-    const verifiedDecodedToken: AppleJwtTokenPayloadOutputDto = jwt.verify(
-      appleIdToken,
-      publicKey,
-      {
-        algorithms: [decodedToken.header.alg],
-      },
-    ) as AppleJwtTokenPayloadOutputDto;
-
-    return verifiedDecodedToken;
-  }
-
-  async refreshToken(
+  async accessToken(
     query: RefreshTokenQueryDto,
   ): Promise<RefreshTokenOutputDto | any> {
     const queryRunner = this.dataSource.createQueryRunner();
