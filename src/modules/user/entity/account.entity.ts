@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { GuardCoreEntity } from 'src/common/entity/guard-core.entity';
 import { Provider } from 'src/modules/auth/enum/account.enum';
-import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
 import { User } from './user.entity';
 
 @Entity()
@@ -33,7 +33,7 @@ export class Account extends GuardCoreEntity {
   })
   refreshToken: string;
 
-  @ManyToOne(() => User, (user) => user.id)
+  @OneToOne(() => User, (user) => user.id)
   @JoinColumn()
   user: User;
 }

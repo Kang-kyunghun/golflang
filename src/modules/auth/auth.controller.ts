@@ -80,9 +80,7 @@ export class AuthController {
     enum: Provider,
   })
   @ApiBody({ type: OAuthLoginInputDto })
-  async loginOAuth(
-    @Req() req: Request,
-  ): Promise<{ tokens: LoginOutputDto; email: string }> {
+  async loginOAuth(@Req() req: Request): Promise<LoginOutputDto> {
     return await this.authService.loginOAuth(req['guard'], req['params']);
   }
 
@@ -98,7 +96,7 @@ export class AuthController {
     return await this.authService.checkNickname(body);
   }
 
-  @Get('accessToken')
+  @Get('access-token')
   @SwaggerDefault('accessToken 재발급 ', AccessTokenOutputDto)
   async accessToken(
     @Query() query: AccessTokenQueryDto,

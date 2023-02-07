@@ -46,7 +46,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
         request['role'] = PermissionRole.PUBLIC;
       }
 
-      return true;
+      return request;
     } catch (error) {
       console.error(error);
       throw new UnauthorizedException(error.message);

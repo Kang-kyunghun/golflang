@@ -1,3 +1,4 @@
+import { JwtAuthGuard } from './../auth/guard/jwt.guard';
 import {
   Body,
   Controller,
@@ -5,6 +6,7 @@ import {
   Patch,
   Query,
   UploadedFile,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
@@ -25,30 +27,29 @@ import { UserService } from './user.service';
 
 @ApiTags('USER')
 @Controller('user')
-@UseInterceptors(ResultFormatInterceptor)
+@UseGuards(JwtAuthGuard)
+// @UseInterceptors(ResultFormatInterceptor)
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get('detail')
-  @RoleGuard(PermissionRole.USER)
+  // @RoleGuard(PermissionRole.USER)
   @SwaggerDefault('회원 상세 정보 조회', GetUserDetailOutputDto)
-  async getUserDetail(
-    @GetUserId() userId: number,
-  ): Promise<GetUserDetailOutputDto> {
-    return await this.userService.getUserDetail(userId);
+  getUserDetail(@GetUserId() userId: number): Promise<GetUserDetailOutputDto> {
+    return this.userService.getUserDetail(userId);
   }
 
   @Patch()
-  @RoleGuard(PermissionRole.USER)
-  @SwaggerDefault('회원 정보 수정', 'done')
+  // @RoleGuard(PermissionRole.USER)
+  @SwaggerDefault('회원 정보 수정')
   @UploadSingleImage('profileImage')
   @ApiBody({ type: UpdateUserInfoInputDto })
-  async updateUserInfo(
+  updateUserInfo(
     @Body() body,
     @GetUserId() userId: number,
     @UploadedFile() file: Express.MulterS3.File,
   ) {
-    return await this.userService.updateUserInfo(userId, body, file);
+    return this.userService.updateUserInfo(userId, body, file);
   }
 
   @Get('search')
@@ -57,9 +58,9 @@ export class UserController {
     SearchUsersOutputDto,
     'id 또는 닉네임으로 이용자 검색',
   )
-  async searchUsers(
+  searchUsers(
     @Query() query: SearchUsersQueryDto,
   ): Promise<SearchUsersOutputDto> {
-    return await this.userService.searchUsers(query);
+    return this.userService.searchUsers(query);
   }
 }

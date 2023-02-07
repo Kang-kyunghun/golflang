@@ -1,11 +1,10 @@
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Module } from '@nestjs/common';
+import { Logger, Module } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UserController } from './user.controller';
 import { User } from './entity/user.entity';
 import { JwtModule } from '@nestjs/jwt';
 import { Account } from './entity/account.entity';
-import { AuthService } from 'src/modules/auth/auth.service';
 import { CommonService } from 'src/common/common.service';
 import { UserState } from './entity/user-state.entity';
 import { UploadFileService } from '../upload-file/upload-file.service';
@@ -19,7 +18,7 @@ import { UploadFileService } from '../upload-file/upload-file.service';
     }),
   ],
   controllers: [UserController],
-  providers: [UserService, CommonService, UploadFileService],
+  providers: [UserService, CommonService, UploadFileService, Logger],
   exports: [UserService],
 })
 export class UserModule {}

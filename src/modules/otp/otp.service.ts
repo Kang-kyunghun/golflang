@@ -166,12 +166,12 @@ export class OtpService {
 
       const user = await this.userRepo.findOne({
         where: { phone: encryptedPhone },
-        relations: { accounts: true },
+        relations: { account: true },
         select: {
           id: true,
           phone: true,
           nickname: true,
-          accounts: { email: true },
+          account: { email: true },
         },
       });
 
@@ -213,7 +213,7 @@ export class OtpService {
       newOtp.expireDate = expireDate;
       newOtp.action = OtpAction.FIND_ID;
       newOtp.phone = await this.commonService.encrypt(body.phone);
-      newOtp.email = user.accounts[0].email;
+      newOtp.email = user.account.email;
 
       await this.otpRepo.save(newOtp);
 

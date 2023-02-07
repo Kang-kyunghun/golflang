@@ -46,8 +46,8 @@ export class MailService {
     const accountLocalRepo: Repository<Account> = this.accountRepo;
     try {
       const user = await this.userRepo.findOne({
-        where: { accounts: { email: body.email } },
-        relations: { accounts: true },
+        where: { account: { email: body.email } },
+        relations: { account: true },
       });
 
       if (!user) {
@@ -71,7 +71,7 @@ export class MailService {
             console.log('임시비밀번호 이메일 발송 완료');
 
             const updateAccount = await accountLocalRepo.update(
-              { id: user.accounts[0].id },
+              { id: user.account.id },
               { password: encrytedPassword, isTempPassword: true },
             );
 

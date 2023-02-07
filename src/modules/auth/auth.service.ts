@@ -97,7 +97,7 @@ export class AuthService {
       user.nickname = body.nickname;
       user.birthday = body.birthday;
       user.gender = body.gender;
-      user.address = body.addressMain;
+      user.addressMain = body.addressMain;
       user.addressDetail = body.addressDetail;
       user.phone = await this.commonService.encrypt(body.phone);
 
@@ -212,7 +212,7 @@ export class AuthService {
   async loginOAuth(
     guard: { email: string },
     params: { provider: Provider.APPLE | Provider.KAKAO },
-  ): Promise<{ tokens: LoginOutputDto; email: string }> {
+  ): Promise<LoginOutputDto> {
     this.logger.log(`[loginOAuth] email: ${guard.email}`);
 
     const queryRunner = this.dataSource.createQueryRunner();
@@ -265,7 +265,7 @@ export class AuthService {
 
       await queryRunner.commitTransaction();
 
-      return { tokens: { accessToken, refreshToken }, email };
+      return { accessToken, refreshToken };
     } catch (error) {
       this.logger.error(error);
       await queryRunner.rollbackTransaction();

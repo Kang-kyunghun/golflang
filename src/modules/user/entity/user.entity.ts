@@ -42,7 +42,7 @@ export class User extends GuardCoreEntity {
 
   @Column({ nullable: true, default: null })
   @ApiProperty({ description: '메인 주소', nullable: true, default: null })
-  address: string;
+  addressMain: string;
 
   @Column({ nullable: true, default: null })
   @ApiProperty({ description: '상세 주소', nullable: true, default: null })
@@ -52,10 +52,12 @@ export class User extends GuardCoreEntity {
   @ApiProperty({ description: '전화번호', nullable: true, default: null })
   phone: string;
 
-  @OneToMany(() => Account, (account) => account.user)
-  accounts: Account[];
+  @OneToOne(() => Account, (account) => account.user, { onDelete: 'CASCADE' })
+  account: Account;
 
-  @OneToOne(() => UserState, (userState) => userState.user)
+  @OneToOne(() => UserState, (userState) => userState.user, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn()
   userState: UserState;
 
