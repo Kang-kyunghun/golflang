@@ -19,47 +19,47 @@ export class AuthError extends CoreError {
     super();
     this.errorHandle = {
       [AUTH_ERROR.ACCOUNT_EMAIL_ALREADY_EXIST]: {
-        id: 'Auth.email.already.exist',
+        id: AUTH_ERROR.ACCOUNT_EMAIL_ALREADY_EXIST,
         message: '중복된 이메일입니다.',
       },
       [AUTH_ERROR.ACCOUNT_NICKNAME_ALREADY_EXIST]: {
-        id: 'Auth.nickname.already.exist',
+        id: AUTH_ERROR.ACCOUNT_NICKNAME_ALREADY_EXIST,
         message: '중복된 닉네임입니다.',
       },
       [AUTH_ERROR.ACCOUNT_ACCOUNT_NOT_FOUND]: {
-        id: 'Auth.account.not.found',
+        id: AUTH_ERROR.ACCOUNT_ACCOUNT_NOT_FOUND,
         message: '사용자의 계정을 찾을 수 없습니다.',
       },
       [AUTH_ERROR.ACCOUNT_PASSWORD_WAS_WRONG]: {
-        id: 'Auth.password.was.wrong',
+        id: AUTH_ERROR.ACCOUNT_PASSWORD_WAS_WRONG,
         message: '비밀번호가 틀렸습니다.',
       },
       [AUTH_ERROR.ACCOUNT_SOCIAL_DATA_ERROR]: {
-        id: 'Auth.social.data.error',
+        id: AUTH_ERROR.ACCOUNT_SOCIAL_DATA_ERROR,
         message: '소셜 정보를 가져오는 도중 에러가 발생하였습니다',
       },
       [AUTH_ERROR.ACCOUNT_LOGIN_FAILED]: {
-        id: 'Auth.account.login.failed',
+        id: AUTH_ERROR.ACCOUNT_LOGIN_FAILED,
         message: '로그인을 하는 도중 오류가 발생하였습니다.',
       },
       [AUTH_ERROR.ACCOUNT_EMAIL_IS_NOT_EXIST]: {
-        id: 'Auth.account.email.is.not.exist',
+        id: AUTH_ERROR.ACCOUNT_EMAIL_IS_NOT_EXIST,
         message: '존재하지 않는 이메일입니다.',
       },
       [AUTH_ERROR.ACCOUNT_PHONE_ALREADY_EXIST]: {
-        id: 'Auth.phone.already.exist',
+        id: AUTH_ERROR.ACCOUNT_PHONE_ALREADY_EXIST,
         message: '이미 가입된 휴대폰 번호입니다.',
       },
       [AUTH_ERROR.ACCESS_TOKEN_ERROR]: {
-        id: 'Auth.access.token.error',
+        id: AUTH_ERROR.ACCESS_TOKEN_ERROR,
         message: '접근 권한이 없습니다.',
       },
       [AUTH_ERROR.REFRESH_TOKEN_EXPIRED]: {
-        id: 'Auth.refresh.token.expired',
+        id: AUTH_ERROR.REFRESH_TOKEN_EXPIRED,
         message: 'refreshToken이 만료되었습니다.',
       },
       [AUTH_ERROR.REFRESH_TOKEN_NOT_FOUND]: {
-        id: 'Auth.refresh.token.not.found',
+        id: AUTH_ERROR.REFRESH_TOKEN_NOT_FOUND,
         message: 'refreshToken이 존재하지 않습니다.',
       },
     };
