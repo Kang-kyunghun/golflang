@@ -36,7 +36,7 @@ export class UserService {
         user;
 
       return {
-        id,
+        userId: id,
         nickname,
         gender,
         birthday,

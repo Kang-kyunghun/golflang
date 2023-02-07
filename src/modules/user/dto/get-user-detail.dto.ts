@@ -4,7 +4,7 @@ import { Gender } from '../enum/user.enum';
 
 export class GetUserDetailOutputDto {
   @ApiProperty({ description: 'User ID' })
-  id: number;
+  userId: number;
 
   @ApiProperty({ description: '닉네임' })
   @IsOptional()
