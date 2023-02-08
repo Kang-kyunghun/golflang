@@ -8,6 +8,7 @@ import { Account } from './entity/account.entity';
 import { CommonService } from 'src/common/common.service';
 import { UserState } from './entity/user-state.entity';
 import { UploadFileService } from '../upload-file/upload-file.service';
+import { UserError } from './error/user.error';
 
 @Module({
   imports: [
@@ -18,7 +19,7 @@ import { UploadFileService } from '../upload-file/upload-file.service';
     }),
   ],
   controllers: [UserController],
-  providers: [UserService, CommonService, UploadFileService, Logger],
+  providers: [UserService, CommonService, UploadFileService, Logger, UserError],
   exports: [UserService],
 })
 export class UserModule {}

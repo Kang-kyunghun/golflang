@@ -1,3 +1,4 @@
+import { UserError } from './../user/error/user.error';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Logger, Module } from '@nestjs/common';
 import { AuthController } from './auth.controller';
@@ -24,6 +25,7 @@ import { UploadFileService } from '../upload-file/upload-file.service';
     AuthService,
     Logger,
     AuthError,
+    UserError,
     UploadFileService,
   ],
   exports: [UserService, AuthError],

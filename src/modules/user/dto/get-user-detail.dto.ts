@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsOptional } from 'class-validator';
 import { Provider } from 'src/modules/auth/enum/account.enum';
+import { User } from '../entity/user.entity';
 import { Gender } from '../enum/user.enum';
 
 export class GetUserDetailOutputDto {
@@ -21,6 +22,10 @@ export class GetUserDetailOutputDto {
   @ApiProperty({ description: '나이' })
   @IsOptional()
   birthday: string;
+
+  @ApiProperty({ description: '전화번호' })
+  @IsOptional()
+  phone: string;
 
   @ApiProperty({ description: '지역1' })
   @IsOptional()
@@ -45,4 +50,14 @@ export class GetUserDetailOutputDto {
   @ApiProperty({ description: '로긴 provider' })
   @IsOptional()
   provider: Provider;
+
+  constructor(private readonly user: User) {
+    Object.assign(this, user);
+
+    this.userId = user.id;
+    this.avgHitScore = user.userState.avgHitScore;
+    this.mannerScore = user.userState.mannerScore;
+    this.photo = user.profileImage?.url;
+    this.provider = user.account.provider;
+  }
 }

@@ -25,7 +25,7 @@ export class UpdateUserInfoInputDto {
   @IsString()
   @IsOptional()
   @ApiProperty({ description: '메인 주소' })
-  address: string;
+  adddressMain: string;
 
   @IsString()
   @IsOptional()

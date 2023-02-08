@@ -47,10 +47,10 @@ export class UserController {
   @UploadSingleImage('profileImage')
   @ApiBody({ type: UpdateUserInfoInputDto })
   updateUserInfo(
-    @Body() body,
+    @Body() body: UpdateUserInfoInputDto,
     @GetUserId() userId: number,
     @UploadedFile() file: Express.MulterS3.File,
-  ) {
+  ): Promise<GetUserDetailOutputDto> {
     return this.userService.updateUserInfo(userId, body, file);
   }
 
