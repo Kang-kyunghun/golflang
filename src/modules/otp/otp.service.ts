@@ -85,12 +85,6 @@ export class OtpService {
       const user = await this.userRepo.findOne({
         where: { phone: encryptedPhone },
         relations: { account: true },
-        select: {
-          id: true,
-          phone: true,
-          nickname: true,
-          account: { email: true },
-        },
       });
 
       if (!user) {
