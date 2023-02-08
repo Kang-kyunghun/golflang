@@ -35,7 +35,9 @@ export class UserController {
   @Get('detail')
   // @RoleGuard(PermissionRole.USER)
   @SwaggerDefault('회원 상세 정보 조회', GetUserDetailOutputDto)
-  getUserDetail(@GetUserId() userId: number): Promise<GetUserDetailOutputDto> {
+  getUserDetail(
+    @GetUserId() userId: number,
+  ): Promise<{ user: GetUserDetailOutputDto; hasTempPassword: boolean }> {
     return this.userService.getUserDetail(userId);
   }
 

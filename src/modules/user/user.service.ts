@@ -25,7 +25,9 @@ export class UserService {
     private readonly dataSource: DataSource,
   ) {}
 
-  async getUserDetail(userId: number): Promise<GetUserDetailOutputDto> {
+  async getUserDetail(
+    userId: number,
+  ): Promise<{ user: GetUserDetailOutputDto; hasTempPassword: boolean }> {
     try {
       const user = await this.userRepo.findOne({
         where: { id: userId },
@@ -36,17 +38,19 @@ export class UserService {
         user;
 
       return {
-        userId: id,
-        nickname,
-        gender,
-        birthday,
-        addressMain,
-        addressDetail,
-        email: user.account.email,
-        photo: user.profileImage?.url,
-        avgHitScore: user.userState ? user.userState.avgHitScore : 0,
-        mannerScore: user.userState ? user.userState.mannerScore : 0,
-        provider: user.account.provider,
+        user: {
+          userId: id,
+          nickname,
+          gender,
+          birthday,
+          addressMain,
+          addressDetail,
+          email: user.account.email,
+          photo: user.profileImage?.url,
+          avgHitScore: user.userState ? user.userState.avgHitScore : 0,
+          mannerScore: user.userState ? user.userState.mannerScore : 0,
+          provider: user.account.provider,
+        },
         hasTempPassword: user.account.isTempPassword,
       };
     } catch (error) {
@@ -66,6 +70,7 @@ export class UserService {
       });
 
       let profileImage;
+
       if (file) {
         profileImage = await this.uploadFileService.uploadSingleImageFile(file);
         await queryRunner.manager.save(UploadFile, profileImage);
