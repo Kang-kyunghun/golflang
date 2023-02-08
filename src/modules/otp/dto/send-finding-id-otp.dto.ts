@@ -1,9 +1,5 @@
-import { ApiProperty, PickType } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 import { IsString } from 'class-validator';
-import {
-  SendSignupOtpInputDto,
-  SendSignupOtpOutputDto,
-} from './send-signup-otp.dto';
 
 export class SendFindingIdOtpInputDto {
   @IsString()

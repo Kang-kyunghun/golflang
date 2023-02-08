@@ -10,8 +10,3 @@ export class CheckSignupOtpInputDto {
   @ApiProperty({ description: 'OTP 번호' })
   otp: string;
 }
-
-export class CheckSignupOtpOutputDto {
-  @ApiProperty({ description: '본인인증 결과' })
-  authentication: boolean;
-}

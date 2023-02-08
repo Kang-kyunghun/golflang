@@ -13,23 +13,23 @@ export class OtpError extends CoreError {
     super();
     this.errorHandle = {
       [OTP_ERROR.USER_NOT_FOUND]: {
-        id: 'Otp.user.not.found',
+        id: OTP_ERROR.USER_NOT_FOUND,
         message: '유저를 찾을 수 없습니다.',
       },
       [OTP_ERROR.USER_PHONE_NOT_FOUND]: {
-        id: 'Otp.user.phone.not.found',
+        id: OTP_ERROR.USER_PHONE_NOT_FOUND,
         message: '유저의 핸드폰 번호를 찾을 수 없습니다.',
       },
       [OTP_ERROR.OTP_NOT_FOUND]: {
-        id: 'Otp.not.found',
+        id: OTP_ERROR.OTP_NOT_FOUND,
         message: 'OTP 정보를 찾을 수 없습니다.',
       },
       [OTP_ERROR.OTP_NOT_MATCH]: {
-        id: 'Otp.not.match',
+        id: OTP_ERROR.OTP_NOT_MATCH,
         message: 'OTP 정보가 올바르지 않습니다.',
       },
       [OTP_ERROR.OTP_EXPIRE]: {
-        id: 'Otp.expire',
+        id: OTP_ERROR.OTP_EXPIRE,
         message: 'OTP의 만료시간이 지났습니다. 재요청 해주세요.',
       },
     };

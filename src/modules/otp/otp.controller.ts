@@ -6,10 +6,7 @@ import {
   CheckFindingIdOtpInputDto,
   CheckFindingIdOtpOutputDto,
 } from './dto/check-finding-id-otp.dto';
-import {
-  CheckSignupOtpInputDto,
-  CheckSignupOtpOutputDto,
-} from './dto/check-signup-otp.dto';
+import { CheckSignupOtpInputDto } from './dto/check-signup-otp.dto';
 import {
   SendFindingIdOtpInputDto,
   SendFindingIdOtpOutputDto,
@@ -35,19 +32,13 @@ export class OtpController {
   }
 
   @Post('signup/check')
-  @SwaggerDefault('회원가입 인증번호 검증', CheckSignupOtpOutputDto)
-  async checkSignupOTP(
-    @Body() body: CheckSignupOtpInputDto,
-  ): Promise<CheckSignupOtpOutputDto> {
+  @SwaggerDefault('회원가입 인증번호 검증')
+  async checkSignupOTP(@Body() body: CheckSignupOtpInputDto): Promise<boolean> {
     return await this.otpService.checkSignupOTP(body);
   }
 
   @Post('find-id')
-  @SwaggerDefault(
-    '아이디 찾기 인증번호 발송',
-    SendFindingIdOtpOutputDto,
-    '2. 아이디 찾기 인증번호 발송',
-  )
+  @SwaggerDefault('아이디 찾기 인증번호 발송', SendFindingIdOtpOutputDto)
   async sendFindingIdOtp(
     @Body() body: SendFindingIdOtpInputDto,
   ): Promise<SendFindingIdOtpOutputDto> {
@@ -55,11 +46,7 @@ export class OtpController {
   }
 
   @Post('find-id/check')
-  @SwaggerDefault(
-    '아이디 찾기 인증번호 검증',
-    CheckFindingIdOtpOutputDto,
-    '2. 아이디 찾기 인증번호 검증',
-  )
+  @SwaggerDefault('아이디 찾기 인증번호 검증', CheckFindingIdOtpOutputDto)
   async checkFindingIdOtp(
     @Body() body: CheckFindingIdOtpInputDto,
   ): Promise<CheckFindingIdOtpOutputDto> {

@@ -1,6 +1,5 @@
-import { ApiProperty, PickType } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 import { IsString } from 'class-validator';
-import { CheckSignupOtpInputDto } from './check-signup-otp.dto';
 
 export class CheckFindingIdOtpInputDto {
   @IsString()
