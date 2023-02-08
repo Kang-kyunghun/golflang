@@ -45,4 +45,8 @@ export class GetUserDetailOutputDto {
   @ApiProperty({ description: '로긴 provider' })
   @IsOptional()
   provider: Provider;
+
+  @ApiProperty({ description: '현재 임시 비번으로 로그인 했는지 여부' })
+  @IsOptional()
+  hasTempPassword: boolean;
 }

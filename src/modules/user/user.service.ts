@@ -47,6 +47,7 @@ export class UserService {
         avgHitScore: user.userState ? user.userState.avgHitScore : 0,
         mannerScore: user.userState ? user.userState.mannerScore : 0,
         provider: user.account.provider,
+        hasTempPassword: user.account.isTempPassword,
       };
     } catch (error) {
       this.logger.log('getUserDetail', error);
