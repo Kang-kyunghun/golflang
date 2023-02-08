@@ -22,16 +22,12 @@ import { OtpService } from './otp.service';
 
 @ApiTags('OTP')
 @Controller('otp')
-@UseInterceptors(ResultFormatInterceptor)
+// @UseInterceptors(ResultFormatInterceptor)
 export class OtpController {
   constructor(private readonly otpService: OtpService) {}
 
   @Post('signup')
-  @SwaggerDefault(
-    '회원가입 인증번호 발송',
-    SendSignupOtpOutputDto,
-    '1. 회원가입 인증번호 발송',
-  )
+  @SwaggerDefault('회원가입 인증번호 발송', SendSignupOtpOutputDto)
   async sendSignupOTP(
     @Body() body: SendSignupOtpInputDto,
   ): Promise<SendSignupOtpOutputDto> {
@@ -39,11 +35,7 @@ export class OtpController {
   }
 
   @Post('signup/check')
-  @SwaggerDefault(
-    '회원가입 인증번호 검증',
-    CheckSignupOtpOutputDto,
-    '1. 회원가입 인증번호 검증',
-  )
+  @SwaggerDefault('회원가입 인증번호 검증', CheckSignupOtpOutputDto)
   async checkSignupOTP(
     @Body() body: CheckSignupOtpInputDto,
   ): Promise<CheckSignupOtpOutputDto> {

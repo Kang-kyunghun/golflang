@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 import {
   BadRequestException,
   HttpException,
@@ -29,11 +30,13 @@ import {
 import { Otp } from './entities/otp.entity';
 import { OtpAction } from './enum/otp.enum';
 import { OtpError, OTP_ERROR } from './error/otp.error';
-
-const accountSid = process.env.TWILIO_ACCOUNT_SID;
-const authToken = process.env.TWILIO_AUTH_TOKEN;
-const client = require('twilio')(accountSid, authToken);
 const moment = require('moment');
+
+const PHONE_AUTH_ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID;
+const PHONE_AUTH_AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN;
+const AUTH_PHONE_NUMBER = process.env.TWILIO_MY_PHONE_NUMBER;
+const OTP_EXPIRE_MINUTE = process.env.OTP_EXPIRE_TIME_IN_MINUTE;
+const client = require('twilio')(PHONE_AUTH_ACCOUNT_SID, PHONE_AUTH_AUTH_TOKEN);
 
 @Injectable()
 export class OtpService {
@@ -42,49 +45,52 @@ export class OtpService {
     private readonly userRepo: Repository<User>,
     @InjectRepository(Otp)
     private readonly otpRepo: Repository<Otp>,
-
     private readonly commonService: CommonService,
     private readonly otpError: OtpError,
     private readonly logger: Logger,
   ) {}
 
-  private readonly EXPIRE_MINUTE = 10;
-
-  createOTP = () =>
+  private createOTP = () =>
     [0, 0, 0, 0, 0, 0].map(() => Math.floor(Math.random() * 10)).join('');
 
   async sendSignupOTP(
     body: SendSignupOtpInputDto,
   ): Promise<SendSignupOtpOutputDto> {
     try {
-      const expireDate = moment().add(this.EXPIRE_MINUTE, 'm').toDate();
-      const receiverNumber = `+82${body.phone}`;
+      const expireDate = moment().add(OTP_EXPIRE_MINUTE, 'm').toDate();
+
+      const trimedPhoneNumber = this.trimPhoneNumber(body.phone);
+
       const newOtpNumber = this.createOTP();
 
+      const encryptedPhone = await this.commonService.encrypt(
+        trimedPhoneNumber,
+      );
+
       const existingOtp = await this.otpRepo.findOne({
-        where: {
-          phone: body.phone,
-          action: OtpAction.SIGNUP,
-        },
+        where: { phone: encryptedPhone, action: OtpAction.SIGNUP },
       });
 
       if (existingOtp) {
+        await this.sendPhoneAuthNubmer(trimedPhoneNumber, newOtpNumber);
+
         await this.otpRepo.update(
-          { phone: body.phone, action: OtpAction.SIGNUP },
-          { reqCount: existingOtp.reqCount + 1, otp: newOtpNumber, expireDate },
+          { phone: encryptedPhone, action: OtpAction.SIGNUP },
+          {
+            reqCount: existingOtp.reqCount + 1,
+            otp: newOtpNumber,
+            expireDate,
+          },
         );
 
-        client.messages
-          .create({
-            from: process.env.TWILIO_MY_PHONE_NUMBER,
-            to: receiverNumber,
-            body: `골프랑 인증번호는 ${newOtpNumber} 입니다.`,
-          })
-          .then((message) => console.log('인증번호 재발급 완료'))
-          .done();
+        this.logger.log(
+          `회원가입 인증번호 재발송 완료 - phone(${trimedPhoneNumber})`,
+        );
 
         return { expireDate };
       }
+
+      await this.sendPhoneAuthNubmer(trimedPhoneNumber, newOtpNumber);
 
       const newOtp = new Otp();
       newOtp.otp = newOtpNumber;
@@ -94,14 +100,7 @@ export class OtpService {
 
       await this.otpRepo.save(newOtp);
 
-      client.messages
-        .create({
-          from: process.env.TWILIO_MY_PHONE_NUMBER,
-          to: receiverNumber,
-          body: `골프랑 인증번호는 ${newOtp.otp} 입니다.`,
-        })
-        .then((message) => console.log('새 인증번호 발급 완료'))
-        .done();
+      this.logger.log(`새 인증번호 발급 완료 phone(${trimedPhoneNumber})`);
 
       return { expireDate };
     } catch (error) {
@@ -118,11 +117,31 @@ export class OtpService {
     }
   }
 
+  private trimPhoneNumber(phone: string) {
+    return phone.replace(/[-,.+]/gi, '').replace(/\s*/g, '');
+  }
+
+  private async sendPhoneAuthNubmer(phone: string, otp: string) {
+    await client.verify.v2
+      .services('VA45e639ce9fd552e55923a2b56087300c')
+      .verifications.create({
+        from: AUTH_PHONE_NUMBER,
+        to: `+82${phone}`,
+        channel: 'sms',
+        body: `[골프랑 인증번호] ${otp} `,
+      })
+      .then((res) => console.log('sendPhoneAuthNubmer', res));
+  }
+
   async checkSignupOTP(
     body: CheckSignupOtpInputDto,
   ): Promise<CheckSignupOtpOutputDto> {
     try {
-      const encryptedPhone = await this.commonService.encrypt(body.phone);
+      const trimedPhoneNumber = this.trimPhoneNumber(body.phone);
+
+      const encryptedPhone = await this.commonService.encrypt(
+        trimedPhoneNumber,
+      );
 
       const existingOtp = await this.otpRepo.findOne({
         where: {
@@ -160,7 +179,7 @@ export class OtpService {
   ): Promise<SendFindingIdOtpOutputDto> {
     try {
       const encryptedPhone = await this.commonService.encrypt(body.phone);
-      const expireDate = moment().add(this.EXPIRE_MINUTE, 'm').toDate();
+      const expireDate = moment().add(OTP_EXPIRE_MINUTE, 'm').toDate();
       const receiverNumber = `+82${body.phone}`;
       const newOtpNumber = this.createOTP();
 

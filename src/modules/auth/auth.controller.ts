@@ -1,6 +1,5 @@
 import {
   Controller,
-  Get,
   Post,
   Body,
   Patch,
@@ -9,7 +8,6 @@ import {
   UseGuards,
   Req,
   Request,
-  Query,
   UploadedFile,
 } from '@nestjs/common';
 import { ApiBody, ApiParam, ApiTags } from '@nestjs/swagger';
