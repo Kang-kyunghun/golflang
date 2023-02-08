@@ -368,23 +368,13 @@ export class AuthService {
         throw new NotFoundException(AUTH_ERROR.ACCOUNT_ACCOUNT_NOT_FOUND);
       }
 
-      await queryRunner.manager.update(
-        Account,
-        { id: account.id },
-        { isActive: false },
-      );
+      await this.accountRepo.update({ id: account.id }, { refreshToken: null });
 
-      await queryRunner.manager.update(
-        User,
-        { id: userId },
-        { isActive: false },
-      );
-
-      await queryRunner.manager.update(
-        UserState,
-        { id: account.user.userState.id },
-        { isActive: false },
-      );
+      await queryRunner.manager.softDelete(Account, { id: account.id });
+      await queryRunner.manager.softDelete(User, { id: userId });
+      await queryRunner.manager.softDelete(UserState, {
+        id: account.user.userState.id,
+      });
 
       await queryRunner.commitTransaction();
 
@@ -436,7 +426,7 @@ export class AuthService {
     }
   }
 
-  getTokens(payload: Record<string, string>) {
+  private getTokens(payload: Record<string, string>) {
     return {
       accessToken: this.commonService.createAccessToken(payload),
       refreshToken: this.commonService.createRefreshToken(payload),
