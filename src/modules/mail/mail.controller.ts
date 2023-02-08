@@ -1,13 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  UseInterceptors,
-} from '@nestjs/common';
+import { Controller, Post, Body, UseInterceptors } from '@nestjs/common';
 import { MailService } from './mail.service';
 import { ApiTags } from '@nestjs/swagger';
 import { ResultFormatInterceptor } from 'src/common/interceptor/result-format.interceptor';
@@ -20,15 +11,11 @@ import { SwaggerDefault } from 'src/common/decorator/swagger.decorator';
 export class MailController {
   constructor(private readonly mailService: MailService) {}
 
-  @Post('reset-ps')
-  @SwaggerDefault(
-    '비밀번호 찾기 시 이메일 발송',
-    'done',
-    '비밀번호 찾기 시 이메일 발송',
-  )
+  @Post('reset-password')
+  @SwaggerDefault('비밀번호 찾기 시 이메일 발송')
   async sendResetPasswordEmail(
     @Body() body: SendResetPasswordEmailInputDto,
-  ): Promise<String> {
+  ): Promise<boolean> {
     return await this.mailService.sendResetPasswordEmail(body);
   }
 }

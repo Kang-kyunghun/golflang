@@ -31,19 +31,14 @@ export class MailService {
     private readonly userRepo: Repository<User>,
     @InjectRepository(Account)
     private readonly accountRepo: Repository<Account>,
-
     private readonly logger: Logger,
     private readonly mailError: MailError,
     private readonly commonService: CommonService,
   ) {}
 
-  createOTP = () =>
-    [0, 0, 0, 0, 0, 0].map(() => Math.floor(Math.random() * 10)).join('');
-
   async sendResetPasswordEmail(
     body: SendResetPasswordEmailInputDto,
-  ): Promise<String> {
-    const accountLocalRepo: Repository<Account> = this.accountRepo;
+  ): Promise<boolean> {
     try {
       const user = await this.userRepo.findOne({
         where: { account: { email: body.email } },
@@ -61,32 +56,28 @@ export class MailService {
       const data = {
         from: `mailgun@${MAILGUN_DOMAIN}`,
         to: body.email,
-        subject: '골프랑 임시비밀번호 발급 최종 테스트',
+        subject: '[골프랑 임시비밀번호]',
         text: `골프랑 로그인 임시 비밀번호는 ${tempPassword} 입니다`,
       };
 
-      mailgunClient.messages().send(data, async function (error, result) {
-        try {
-          if (result.message === 'Queued. Thank you.') {
-            console.log('임시비밀번호 이메일 발송 완료');
+      const result = await mailgunClient.messages().send(data);
 
-            const updateAccount = await accountLocalRepo.update(
-              { id: user.account.id },
-              { password: encrytedPassword, isTempPassword: true },
-            );
+      if (result) {
+        console.log(`임시비밀번호 이메일 발송 완료 to ${body.email}`);
 
-            if (updateAccount.affected === 1) {
-              console.log('임시비밀번호 업데이트 완료');
-            } else {
-              console.log('임시비밀번호 업데이트 실패');
-            }
-          }
-        } catch (error) {
-          console.log('error :', error);
+        const updateAccount = await this.accountRepo.update(
+          { id: user.account.id },
+          { password: encrytedPassword, isTempPassword: true },
+        );
+
+        if (updateAccount.affected !== 1) {
+          console.log(`임시비밀번호 업데이트 실패  ${body.email}`);
+          return false;
         }
-      });
+        return true;
+      }
 
-      return 'done';
+      return false;
     } catch (error) {
       this.logger.error(error);
 
