@@ -9,10 +9,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Account } from '../user/entity/account.entity';
 import { User } from '../user/entity/user.entity';
-import { MailError } from './error/mail.error';
+import { MailError, MAIL_ERROR } from './error/mail.error';
 import { SendResetPasswordEmailInputDto } from './dto/send-reset-ps-email.dto';
 import { CommonService } from 'src/common/common.service';
-import { AUTH_ERROR } from '../auth/error/auth.error';
 
 const mailgun = require('mailgun-js');
 
@@ -46,7 +45,7 @@ export class MailService {
       });
 
       if (!user) {
-        throw new NotFoundException(AUTH_ERROR.ACCOUNT_EMAIL_IS_NOT_EXIST);
+        throw new NotFoundException(MAIL_ERROR.ACCOUNT_EMAIL_IS_NOT_EXIST);
       }
 
       const randomString = Math.random().toString(36).slice(2);

@@ -7,7 +7,6 @@ export const AUTH_ERROR = {
   ACCOUNT_ACCOUNT_NOT_FOUND: 'authAccountNotFound',
   ACCOUNT_SOCIAL_DATA_ERROR: 'authSocialDataError',
   ACCOUNT_LOGIN_FAILED: 'authAccountLoginFailed',
-  ACCOUNT_EMAIL_IS_NOT_EXIST: 'authEmailIsNotExist',
   ACCOUNT_PHONE_ALREADY_EXIST: 'authPhoneAlreadyExist',
   ACCESS_TOKEN_ERROR: 'accessTokenError',
   REFRESH_TOKEN_EXPIRED: 'refreshTokenExpired',
@@ -41,10 +40,6 @@ export class AuthError extends CoreError {
       [AUTH_ERROR.ACCOUNT_LOGIN_FAILED]: {
         id: AUTH_ERROR.ACCOUNT_LOGIN_FAILED,
         message: '로그인을 하는 도중 오류가 발생하였습니다.',
-      },
-      [AUTH_ERROR.ACCOUNT_EMAIL_IS_NOT_EXIST]: {
-        id: AUTH_ERROR.ACCOUNT_EMAIL_IS_NOT_EXIST,
-        message: '존재하지 않는 이메일입니다.',
       },
       [AUTH_ERROR.ACCOUNT_PHONE_ALREADY_EXIST]: {
         id: AUTH_ERROR.ACCOUNT_PHONE_ALREADY_EXIST,

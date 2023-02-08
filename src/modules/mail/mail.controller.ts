@@ -7,7 +7,7 @@ import { SwaggerDefault } from 'src/common/decorator/swagger.decorator';
 
 @ApiTags('MAIL')
 @Controller('mail')
-@UseInterceptors(ResultFormatInterceptor)
+// @UseInterceptors(ResultFormatInterceptor)
 export class MailController {
   constructor(private readonly mailService: MailService) {}
 
