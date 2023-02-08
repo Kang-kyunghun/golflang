@@ -34,7 +34,7 @@ const moment = require('moment');
 
 const PHONE_AUTH_ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID;
 const PHONE_AUTH_AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN;
-const AUTH_PHONE_NUMBER = process.env.TWILIO_MY_PHONE_NUMBER;
+const TWILIO_PHONE_NUMBER_BOUGHT = process.env.TWILIO_PHONE_NUMBER_BOUGHT;
 const OTP_EXPIRE_MINUTE = process.env.OTP_EXPIRE_TIME_IN_MINUTE;
 const client = require('twilio')(PHONE_AUTH_ACCOUNT_SID, PHONE_AUTH_AUTH_TOKEN);
 
@@ -76,11 +76,7 @@ export class OtpService {
 
         await this.otpRepo.update(
           { phone: encryptedPhone, action: OtpAction.SIGNUP },
-          {
-            reqCount: existingOtp.reqCount + 1,
-            otp: newOtpNumber,
-            expireDate,
-          },
+          { reqCount: existingOtp.reqCount + 1, otp: newOtpNumber, expireDate },
         );
 
         this.logger.log(
@@ -122,15 +118,11 @@ export class OtpService {
   }
 
   private async sendPhoneAuthNubmer(phone: string, otp: string) {
-    await client.verify.v2
-      .services('VA45e639ce9fd552e55923a2b56087300c')
-      .verifications.create({
-        from: AUTH_PHONE_NUMBER,
-        to: `+82${phone}`,
-        channel: 'sms',
-        body: `[골프랑 인증번호] ${otp} `,
-      })
-      .then((res) => console.log('sendPhoneAuthNubmer', res));
+    await client.messages.create({
+      from: TWILIO_PHONE_NUMBER_BOUGHT,
+      to: `+82${phone}`,
+      body: `[골프랑 인증번호] ${otp} `,
+    });
   }
 
   async checkSignupOTP(
