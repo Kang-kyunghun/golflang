@@ -192,37 +192,22 @@ export class OtpService {
     otp: string,
     action: OtpAction,
   ): Promise<boolean> {
-    try {
-      const trimedPhoneNumber = this.trimPhoneNumber(phone);
-      const encryptedPhone = await this.commonService.encrypt(
-        trimedPhoneNumber,
-      );
+    const trimedPhoneNumber = this.trimPhoneNumber(phone);
+    const encryptedPhone = await this.commonService.encrypt(trimedPhoneNumber);
 
-      const existingOtp = await this.otpRepo.findOne({
-        where: { otp, phone: encryptedPhone, action },
-      });
+    const existingOtp = await this.otpRepo.findOne({
+      where: { otp, phone: encryptedPhone, action },
+    });
 
-      if (!existingOtp) {
-        throw new NotFoundException(OTP_ERROR.OTP_NOT_FOUND);
-      }
-
-      if (moment(existingOtp.expireDate).diff(moment()) < 0) {
-        throw new BadRequestException(OTP_ERROR.OTP_EXPIRE);
-      }
-
-      return true;
-    } catch (error) {
-      this.logger.error(error);
-
-      const statusCode = error.response
-        ? error.response.statusCode
-        : HttpStatus.BAD_REQUEST;
-
-      throw new HttpException(
-        this.otpError.errorHandler(error.message),
-        statusCode,
-      );
+    if (!existingOtp) {
+      throw new NotFoundException(OTP_ERROR.OTP_NOT_FOUND);
     }
+
+    if (moment(existingOtp.expireDate).diff(moment()) < 0) {
+      throw new BadRequestException(OTP_ERROR.OTP_EXPIRE);
+    }
+
+    return true;
   }
 
   private trimPhoneNumber(phone: string) {
