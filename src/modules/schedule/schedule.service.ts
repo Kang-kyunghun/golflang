@@ -10,7 +10,7 @@ import { CommonService } from 'src/common/common.service';
 
 import { Between, Repository, DataSource } from 'typeorm';
 import { User } from '../user/entity/user.entity';
-import { CreateRoundingScheduleInputDto } from './dto/create-rounding-schedule.dto';
+import { CreateScheduleInputDto } from './dto/create-schedule.dto';
 import {
   GetRoundingAcceptParticipantListOutputDto,
   GetRoundingWaitingParticipantListOutputDto,
@@ -22,7 +22,7 @@ import {
 } from './dto/get-rounding-schedule-list.dto';
 import { Schedule } from './entity/schedule.entity';
 import { NotHostUserScheduleMapping } from './entity/not-host-user-schedule-mapping.entity';
-import { ParticipationState, RoundingScheduleType } from './enum/schedule.enum';
+import { ParticipationState, ScheduleType } from './enum/schedule.enum';
 import { ScheduleError, SCHEDULE_ERROR } from './error/schedule.error';
 
 const moment = require('moment');
@@ -40,20 +40,17 @@ export class ScheduleService {
     private dataSource: DataSource,
     private readonly logger: Logger,
     private readonly scheduleError: ScheduleError,
-    private readonly commonService: CommonService,
   ) {}
 
-  async createSchedule(body: CreateRoundingScheduleInputDto, userId: number) {
+  async createSchedule(body: CreateScheduleInputDto, userId: number) {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
     try {
-      const user = await this.userRepo.findOne({
-        where: { id: userId },
-      });
+      const user = await this.userRepo.findOne({ where: { id: userId } });
 
-      if (user) {
+      if (!user) {
         throw new NotFoundException(SCHEDULE_ERROR.ROUNDING_USER_NOT_FOUND);
       }
 
@@ -64,14 +61,14 @@ export class ScheduleService {
       schedule.startTime = body.startTime;
       schedule.maxParticipant = body.maxParticipant;
       schedule.memo = body.memo;
-      schedule.type = RoundingScheduleType.PERSONAL;
+      schedule.type = body.scheduleType;
       schedule.hostUser = user;
 
       await queryRunner.manager.save(Schedule, schedule);
 
       await queryRunner.commitTransaction();
 
-      return true;
+      return schedule;
     } catch (error) {
       await queryRunner.rollbackTransaction();
       this.logger.error(error);

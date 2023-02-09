@@ -1,13 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsBoolean,
-  IsDate,
+  IsEnum,
   IsNumber,
   IsOptional,
   IsString,
 } from 'class-validator';
+import { ScheduleType } from '../enum/schedule.enum';
 
-export class CreateRoundingScheduleInputDto {
+export class CreateScheduleInputDto {
   @IsString()
   @ApiProperty({ description: '일정 이름' })
   title: string;
@@ -37,4 +38,8 @@ export class CreateRoundingScheduleInputDto {
   @IsOptional()
   @ApiProperty({ description: '공개 여부' })
   isPrivate: boolean;
+
+  @IsEnum(ScheduleType)
+  @ApiProperty({ description: '개인 or 클럽' })
+  scheduleType: ScheduleType;
 }

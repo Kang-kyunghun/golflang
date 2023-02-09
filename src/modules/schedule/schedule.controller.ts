@@ -13,7 +13,7 @@ import { ApiParam, ApiTags } from '@nestjs/swagger';
 import { ResultFormatInterceptor } from 'src/common/interceptor/result-format.interceptor';
 import { SwaggerDefault } from 'src/common/decorator/swagger.decorator';
 import { GetUserId } from 'src/common/decorator/user.decorator';
-import { CreateRoundingScheduleInputDto as CreateScheduleInputDto } from './dto/create-rounding-schedule.dto';
+import { CreateScheduleInputDto as CreateScheduleInputDto } from './dto/create-schedule.dto';
 import {
   GetRoundingScheduleListOutputDto,
   GetRoundingScheduleListQueryDto as GetScheduleListQueryDto,
@@ -34,27 +34,21 @@ export class ScheduleController {
   constructor(private readonly scheduleService: ScheduleService) {}
 
   @Post()
-  @SwaggerDefault('라운딩 일정 생성', 'done', '라운딩 일정 생성')
+  @SwaggerDefault('라운딩 일정 생성')
   async createSchedule(
     @Body() body: CreateScheduleInputDto,
     @GetUserId() userId: number,
-  ): Promise<boolean> {
-    return await this.scheduleService.createSchedule(body, 2);
+  ): Promise<Schedule> {
+    return await this.scheduleService.createSchedule(body, userId);
   }
 
   @Get('list')
-  @SwaggerDefault(
-    '라운딩 일정 리스트 조회',
-    GetRoundingScheduleListOutputDto,
-    '라운딩 일정 리스트 조회',
-    null,
-    true,
-  )
+  @SwaggerDefault('라운딩 일정 리스트 조회', GetRoundingScheduleListOutputDto)
   async getScheduleList(
     @Query() query: GetScheduleListQueryDto,
     @GetUserId() userId: number,
   ): Promise<Schedule[]> {
-    return await this.scheduleService.getScheduleList(query, 2);
+    return await this.scheduleService.getScheduleList(query, userId);
   }
 
   @Get(':scheduleId/participant/confirm')
@@ -63,11 +57,7 @@ export class ScheduleController {
     GetRoundingAcceptParticipantListOutputDto,
     '라운딩 확정 참가자 리스트 조회',
   )
-  @ApiParam({
-    name: 'scheduleId',
-    required: true,
-    description: 'Schedule id',
-  })
+  @ApiParam({ name: 'scheduleId', required: true })
   async getRoundingAcceptParticipantList(
     @Param('scheduleId') scheduleId: number,
   ): Promise<GetRoundingAcceptParticipantListOutputDto> {
@@ -80,7 +70,6 @@ export class ScheduleController {
   @SwaggerDefault(
     '라운딩 대기중인 참가자 리스트 조회',
     GetRoundingWaitingParticipantListOutputDto,
-    '라운딩 대기중인 참가자 리스트 조회',
   )
   @ApiParam({
     name: 'scheduleId',
@@ -96,11 +85,7 @@ export class ScheduleController {
   }
 
   @Get('detail/:scheduleId')
-  @SwaggerDefault(
-    '라운딩 일정 상세 조회',
-    GetScheduleDetailOutputDto,
-    '라운딩 일정 상세 조회',
-  )
+  @SwaggerDefault('라운딩 일정 상세 조회', GetScheduleDetailOutputDto)
   @ApiParam({
     name: 'scheduleId',
     required: true,

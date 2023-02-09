@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { CoreEntity } from 'src/common/entity/core.entity';
 import { User } from 'src/modules/user/entity/user.entity';
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
-import { RoundingScheduleType } from '../enum/schedule.enum';
+import { ScheduleType } from '../enum/schedule.enum';
 import { NotHostUserScheduleMapping } from './not-host-user-schedule-mapping.entity';
 
 @Entity()
@@ -37,17 +37,17 @@ export class Schedule extends CoreEntity {
 
   @Column({
     type: 'enum',
-    enum: RoundingScheduleType,
+    enum: ScheduleType,
     nullable: true,
     default: null,
   })
   @ApiProperty({
     description: '일정타입: 개인 or 클럽',
-    enum: RoundingScheduleType,
+    enum: ScheduleType,
     nullable: true,
     default: null,
   })
-  type: RoundingScheduleType;
+  type: ScheduleType;
 
   @OneToMany(
     () => NotHostUserScheduleMapping,

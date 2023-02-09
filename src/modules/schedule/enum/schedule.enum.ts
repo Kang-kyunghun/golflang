@@ -1,4 +1,4 @@
-export enum RoundingScheduleType {
+export enum ScheduleType {
   CLUB = 'CLUB',
   PERSONAL = 'PERSONAL',
 }
