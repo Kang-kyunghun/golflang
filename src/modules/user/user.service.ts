@@ -1,4 +1,5 @@
 import {
+  ConflictException,
   HttpException,
   HttpStatus,
   Injectable,
@@ -6,7 +7,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, Not, Repository } from 'typeorm';
 
 import { UserState } from './entity/user-state.entity';
 import { User } from './entity/user.entity';
@@ -39,7 +40,7 @@ export class UserService {
     try {
       const user = await this.userRepo.findOne({
         where: { id: userId },
-        relations: { userState: true, account: true },
+        relations: { userState: true, account: true, profileImage: true },
       });
 
       const phoneReplacedUser = user.phone
@@ -71,17 +72,29 @@ export class UserService {
     body: UpdateUserInfoInputDto,
     file: Express.MulterS3.File,
   ): Promise<GetUserDetailOutputDto> {
+    this.logger.log('updateUserInfo', userId, body, file);
+
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
-    await queryRunner.startTransaction();
 
     try {
-      const user = await queryRunner.manager.findOne(User, {
+      const user = await this.userRepo.findOne({
         where: { id: userId },
-        relations: { userState: true },
+        relations: { userState: true, profileImage: true, account: true },
       });
 
       if (!user) throw new NotFoundException(USER_ERROR.USER_NOT_FOUND);
+
+      if (body.nickname) {
+        const nickNameDuplicatedUser = await this.userRepo.findOne({
+          where: { nickname: body?.nickname, id: Not(userId) },
+        });
+
+        if (nickNameDuplicatedUser)
+          throw new ConflictException(USER_ERROR.USER_NICKNAME_ALREADY_EXIST);
+      }
+
+      await queryRunner.startTransaction();
 
       let profileImage: UploadFile;
 
@@ -105,7 +118,7 @@ export class UserService {
           nickname: body.nickname,
           birthday: body.birthday,
           gender: body.gender,
-          addressMain: body.adddressMain,
+          addressMain: body.addressMain,
           addressDetail: body.addressDetail,
           profileImage,
         },
@@ -113,17 +126,21 @@ export class UserService {
 
       await queryRunner.commitTransaction();
 
-      const newUser = await this.userRepo.findOne({ where: { id: userId } });
+      const newUser = await this.userRepo.findOne({
+        where: { id: userId },
+        relations: { account: true, userState: true, profileImage: true },
+      });
 
-      return new GetUserDetailOutputDto(
-        Object.assign(newUser, {
-          phone: await this.commonService.decrypt(user.phone),
-        }),
-      );
+      const phoneReplacedUser = user.phone
+        ? Object.assign(newUser, {
+            phone: await this.commonService.decrypt(newUser.phone),
+          })
+        : newUser;
+
+      return new GetUserDetailOutputDto(phoneReplacedUser);
     } catch (error) {
-      await queryRunner.rollbackTransaction();
-
       this.logger.error(error);
+      await queryRunner.rollbackTransaction();
 
       const statusCode = error.response
         ? error.response.statusCode

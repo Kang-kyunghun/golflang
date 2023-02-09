@@ -52,17 +52,17 @@ export class GetUserDetailOutputDto {
   provider: Provider;
 
   constructor(user: User) {
-    this.userId = user.id;
-    this.nickname = user.nickname;
-    this.email = user.account.email;
-    this.gender = user.gender;
-    this.birthday = user.birthday;
-    this.addressMain = user.addressMain;
-    this.addressDetail = user.addressDetail;
-    this.avgHitScore = user.userState.avgHitScore;
-    this.mannerScore = user.userState.mannerScore;
-    this.photo = user.profileImage?.url;
-    this.provider = user.account.provider;
-    this.phone = user.phone;
+    this.userId = user.id ?? undefined;
+    this.nickname = user.nickname ?? undefined;
+    this.email = user.account?.email ?? undefined;
+    this.gender = user.gender ?? undefined;
+    this.birthday = user.birthday ?? undefined;
+    this.addressMain = user.addressMain ?? undefined;
+    this.addressDetail = user.addressDetail ?? undefined;
+    this.avgHitScore = user.userState?.avgHitScore ?? undefined;
+    this.mannerScore = user.userState?.mannerScore ?? undefined;
+    this.photo = user.profileImage?.url ?? undefined;
+    this.provider = user.account?.provider ?? undefined;
+    this.phone = user.phone ?? undefined;
   }
 }
