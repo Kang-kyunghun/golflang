@@ -42,12 +42,14 @@ export class UserService {
         relations: { userState: true, account: true },
       });
 
-      return {
-        user: new GetUserDetailOutputDto(
-          Object.assign(user, {
+      const phoneReplacedUser = user.phone
+        ? Object.assign(user, {
             phone: await this.commonService.decrypt(user.phone),
-          }),
-        ),
+          })
+        : user;
+
+      return {
+        user: new GetUserDetailOutputDto(phoneReplacedUser),
         hasTempPassword: user.account.isTempPassword,
       };
     } catch (error) {

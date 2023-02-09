@@ -51,13 +51,18 @@ export class GetUserDetailOutputDto {
   @IsOptional()
   provider: Provider;
 
-  constructor(private readonly user: User) {
-    Object.assign(this, user);
-
+  constructor(user: User) {
     this.userId = user.id;
+    this.nickname = user.nickname;
+    this.email = user.account.email;
+    this.gender = user.gender;
+    this.birthday = user.birthday;
+    this.addressMain = user.addressMain;
+    this.addressDetail = user.addressDetail;
     this.avgHitScore = user.userState.avgHitScore;
     this.mannerScore = user.userState.mannerScore;
     this.photo = user.profileImage?.url;
     this.provider = user.account.provider;
+    this.phone = user.phone;
   }
 }
