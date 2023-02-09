@@ -9,19 +9,19 @@ import {
 
 export class CreateRoundingScheduleInputDto {
   @IsString()
-  @ApiProperty({ description: '라운딩 이름' })
-  roundingName: string;
+  @ApiProperty({ description: '일정 이름' })
+  title: string;
 
   @IsString()
-  @ApiProperty({ description: '라운딩 장소' })
+  @ApiProperty({ description: '일정 장소' })
   roundingPlace: string;
 
   @IsString()
-  @ApiProperty({ description: '라운딩 지역 위치' })
+  @ApiProperty({ description: '일정 지역 위치' })
   roundingLocation: string;
 
   @IsString()
-  @ApiProperty({ description: '라운딩 시작 시간' })
+  @ApiProperty({ description: '일정 시작 시간' })
   startTime: Date;
 
   @IsNumber()
@@ -36,5 +36,5 @@ export class CreateRoundingScheduleInputDto {
   @IsBoolean()
   @IsOptional()
   @ApiProperty({ description: '공개 여부' })
-  isOpen: boolean;
+  isPrivate: boolean;
 }

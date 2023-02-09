@@ -6,7 +6,7 @@ import { Gender, Role } from '../enum/user.enum';
 import { GuardCoreEntity } from '../../../common/entity/guard-core.entity';
 import { Account } from './account.entity';
 import { UserState } from './user-state.entity';
-import { UserScheduleMapping } from 'src/modules/schedule/entity/user-schedule-mapping.entity';
+import { NotHostUserScheduleMapping as NotHostUserScheduleMapping } from 'src/modules/schedule/entity/not-host-user-schedule-mapping.entity';
 
 @Entity()
 export class User extends GuardCoreEntity {
@@ -65,17 +65,12 @@ export class User extends GuardCoreEntity {
   @JoinColumn()
   profileImage: UploadFile;
 
+  //host가 아닌 참여자인 경우는 mappging 테이블을 거쳐서 관련 일정 검색 가능
   @OneToMany(
-    () => UserScheduleMapping,
-    (userScheduleMapping) => userScheduleMapping.hostUser,
+    () => NotHostUserScheduleMapping,
+    (userScheduleMapping) => userScheduleMapping.guestUser,
   )
-  scheduleHostUsers: UserScheduleMapping[];
-
-  @OneToMany(
-    () => UserScheduleMapping,
-    (userScheduleMapping) => userScheduleMapping.targetUser,
-  )
-  scheduleTargerUsers: UserScheduleMapping[];
+  notHostUserScheduleMappings: NotHostUserScheduleMapping[];
 
   @OneToMany(() => Schedule, (schedule) => schedule.hostUser)
   schedules: Schedule[];

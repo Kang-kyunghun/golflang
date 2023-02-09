@@ -1,15 +1,15 @@
 export enum RoundingScheduleType {
-  CLUB = 'club',
-  PERSONAL = 'personal',
+  CLUB = 'CLUB',
+  PERSONAL = 'PERSONAL',
 }
 
 export enum ParticipationType {
-  INVITATION = 'invitation',
-  APPLICATION = 'application',
+  INVITATION = 'INVITATION',
+  APPLICATION = 'APPLICATION',
 }
 
 export enum ParticipationState {
-  PENDING = 'pending',
-  CONFIRM = 'confirm',
-  REJECT = 'reject',
+  PENDING = 'PENDING',
+  CONFIRM = 'CONFIRM',
+  REJECT = 'REJECT',
 }

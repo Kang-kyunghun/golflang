@@ -3,24 +3,24 @@ import { CoreEntity } from 'src/common/entity/core.entity';
 import { User } from 'src/modules/user/entity/user.entity';
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { RoundingScheduleType } from '../enum/schedule.enum';
-import { UserScheduleMapping } from './user-schedule-mapping.entity';
+import { NotHostUserScheduleMapping } from './not-host-user-schedule-mapping.entity';
 
 @Entity()
 export class Schedule extends CoreEntity {
   @Column()
-  @ApiProperty({ description: '라운딩 이름' })
-  roundingName: string;
+  @ApiProperty({ description: '일정 이름' })
+  title: string;
 
   @Column()
-  @ApiProperty({ description: '라운딩 장소(골프장)' })
+  @ApiProperty({ description: '일정 장소(골프장)' })
   roundingPlace: string;
 
   @Column()
-  @ApiProperty({ description: '라운딩 지역 위치' })
+  @ApiProperty({ description: '일정 지역 위치' })
   roundingLocation: string;
 
   @Column()
-  @ApiProperty({ description: '라운딩 시작 시간' })
+  @ApiProperty({ description: '일정 시작 시간' })
   startTime: Date;
 
   @Column({ nullable: true, default: null })
@@ -38,22 +38,24 @@ export class Schedule extends CoreEntity {
   @Column({
     type: 'enum',
     enum: RoundingScheduleType,
-    default: RoundingScheduleType.PERSONAL,
+    nullable: true,
+    default: null,
   })
   @ApiProperty({
-    description: '라운딩 타입: 개인 or 클럽',
+    description: '일정타입: 개인 or 클럽',
     enum: RoundingScheduleType,
-    default: RoundingScheduleType.PERSONAL,
+    nullable: true,
+    default: null,
   })
   type: RoundingScheduleType;
 
   @OneToMany(
-    () => UserScheduleMapping,
+    () => NotHostUserScheduleMapping,
     (userScheduleMapping) => userScheduleMapping.schedule,
   )
-  userScheduleMappings: UserScheduleMapping[];
+  notHostUserScheduleMappings: NotHostUserScheduleMapping[];
 
-  @ManyToOne(() => User, (user) => user.scheduleHostUsers)
+  @ManyToOne(() => User, (user) => user)
   @JoinColumn()
   hostUser: User;
 }

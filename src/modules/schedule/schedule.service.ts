@@ -1,5 +1,4 @@
 import {
-  ConflictException,
   HttpException,
   HttpStatus,
   Injectable,
@@ -8,8 +7,8 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CommonService } from 'src/common/common.service';
-import { InvitationState } from 'src/common/enum/common.enum';
-import { Between, Connection, Repository } from 'typeorm';
+
+import { Between, Repository, DataSource } from 'typeorm';
 import { User } from '../user/entity/user.entity';
 import { CreateRoundingScheduleInputDto } from './dto/create-rounding-schedule.dto';
 import {
@@ -22,7 +21,7 @@ import {
   GetRoundingScheduleListQueryDto,
 } from './dto/get-rounding-schedule-list.dto';
 import { Schedule } from './entity/schedule.entity';
-import { UserScheduleMapping } from './entity/user-schedule-mapping.entity';
+import { NotHostUserScheduleMapping } from './entity/not-host-user-schedule-mapping.entity';
 import { ParticipationState, RoundingScheduleType } from './enum/schedule.enum';
 import { ScheduleError, SCHEDULE_ERROR } from './error/schedule.error';
 
@@ -35,20 +34,17 @@ export class ScheduleService {
     private readonly userRepo: Repository<User>,
     @InjectRepository(Schedule)
     private readonly scheduleRepo: Repository<Schedule>,
-    @InjectRepository(UserScheduleMapping)
-    private readonly userScheduleMappingRepo: Repository<UserScheduleMapping>,
+    @InjectRepository(NotHostUserScheduleMapping)
+    private readonly userScheduleMappingRepo: Repository<NotHostUserScheduleMapping>,
 
-    private connection: Connection,
+    private dataSource: DataSource,
     private readonly logger: Logger,
     private readonly scheduleError: ScheduleError,
     private readonly commonService: CommonService,
   ) {}
 
-  async createMyRoundingSchedule(
-    body: CreateRoundingScheduleInputDto,
-    userId: number,
-  ) {
-    const queryRunner = this.connection.createQueryRunner();
+  async createSchedule(body: CreateRoundingScheduleInputDto, userId: number) {
+    const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
@@ -62,7 +58,7 @@ export class ScheduleService {
       }
 
       const schedule = new Schedule();
-      schedule.roundingName = body.roundingName;
+      schedule.title = body.title;
       schedule.roundingPlace = body.roundingPlace;
       schedule.roundingLocation = body.roundingLocation;
       schedule.startTime = body.startTime;
@@ -93,7 +89,7 @@ export class ScheduleService {
     }
   }
 
-  async getRoundingScheduleList(
+  async getScheduleList(
     query: GetRoundingScheduleListQueryDto,
     userId: number,
   ): Promise<GetRoundingScheduleListOutputDto[] | any> {
@@ -141,26 +137,27 @@ export class ScheduleService {
           schedule: { id: scheduleId },
           participationState: ParticipationState.CONFIRM,
         },
-        relations: { targetUser: { userState: true, profileImage: true } },
+        // relations: { targetUser: { userState: true, profileImage: true } },
       });
 
-      const userInfos = await Promise.all(
-        participantList[0].map(async (v) => {
-          const age = await this.commonService.getAge(v.targetUser.birthday);
+      // const userInfos = await Promise.all(
+      //   participantList[0].map(async (v) => {
+      //     const age = await this.commonService.getAge(v.targetUser.birthday);
 
-          return {
-            profileImage: v.targetUser.profileImage.url,
-            nickname: v.targetUser.nickname,
-            gender: v.targetUser.gender,
-            age,
-            avgHitScore: v.targetUser.userState.avgHitScore,
-          };
-        }),
-      );
+      //     return {
+      //       profileImage: v.targetUser.profileImage.url,
+      //       nickname: v.targetUser.nickname,
+      //       gender: v.targetUser.gender,
+      //       age,
+      //       avgHitScore: v.targetUser.userState.avgHitScore,
+      //     };
+      //   }),
+      // );
 
       return {
         confirmParticipantCount: participantList[1],
-        users: userInfos,
+        users: [],
+        // users: userInfos,
       };
     } catch (error) {
       this.logger.error(error);
@@ -194,19 +191,19 @@ export class ScheduleService {
             schedule: { id: scheduleId },
             participationState: ParticipationState.PENDING,
           },
-          relations: { targetUser: { userState: true, profileImage: true } },
+          // relations: { targetUser: { userState: true, profileImage: true } },
         });
 
       const pendingUsers = await Promise.all(
         invitationPendingList[0].map(async (v) => {
-          const age = await this.commonService.getAge(v.targetUser.birthday);
+          // const age = await this.commonService.getAge(v.targetUser.birthday);
 
           return {
-            profileImage: v.targetUser.profileImage.url,
-            nickname: v.targetUser.nickname,
-            gender: v.targetUser.gender,
-            age,
-            avgHitScore: v.targetUser.userState.avgHitScore,
+            // profileImage: v.targetUser.profileImage.url,
+            // nickname: v.targetUser.nickname,
+            // gender: v.targetUser.gender,
+            // age,
+            // avgHitScore: v.targetUser.userState.avgHitScore,
           };
         }),
       );
@@ -217,19 +214,19 @@ export class ScheduleService {
             schedule: { id: scheduleId },
             participationState: ParticipationState.REJECT,
           },
-          relations: { targetUser: { userState: true, profileImage: true } },
+          // relations: { targetUser: { userState: true, profileImage: true } },
         });
 
       const rejectUsers = await Promise.all(
         invitationRejectList[0].map(async (v) => {
-          const age = await this.commonService.getAge(v.targetUser.birthday);
+          // const age = await this.commonService.getAge(v.targetUser.birthday);
 
           return {
-            profileImage: v.targetUser.profileImage.url,
-            nickname: v.targetUser.nickname,
-            gender: v.targetUser.gender,
-            age,
-            avgHitScore: v.targetUser.userState.avgHitScore,
+            // profileImage: v.targetUser.profileImage.url,
+            // nickname: v.targetUser.nickname,
+            // gender: v.targetUser.gender,
+            // age,
+            // avgHitScore: v.targetUser.userState.avgHitScore,
           };
         }),
       );
@@ -237,11 +234,13 @@ export class ScheduleService {
       return {
         pending: {
           count: invitationPendingList[1],
-          users: pendingUsers,
+          users: [],
+          // users: pendingUsers,
         },
         reject: {
           count: invitationRejectList[1],
-          users: rejectUsers,
+          users: [],
+          // users: rejectUsers,
         },
       };
     } catch (error) {
@@ -258,7 +257,7 @@ export class ScheduleService {
     }
   }
 
-  async getRoundingScheduleDetail(
+  async getScheduleDetail(
     scheduleId: number,
     userId: number,
   ): Promise<GetRoundingScheduleDetailOutputDto> {
@@ -274,26 +273,26 @@ export class ScheduleService {
       const participants = await this.userScheduleMappingRepo.find({
         where: { schedule: { id: scheduleId } },
         relations: {
-          targetUser: {
-            profileImage: true,
-          },
+          // targetUser: {
+          //   profileImage: true,
+          // },
         },
       });
 
-      const participantsProfileImage = participants.map((ele) => {
-        return ele.targetUser.profileImage.url;
-      });
+      // const participantsProfileImage = participants.map((ele) => {
+      //   return ele.targetUser.profileImage.url;
+      // });
 
       return {
         id: schedule.id,
-        roundingName: schedule.roundingName,
+        roundingName: schedule.title,
         roundingPlace: schedule.roundingPlace,
         roundingLocation: schedule.roundingLocation,
         startTime: schedule.startTime,
         memo: schedule.memo,
         participantCount: participants.length,
         maxParticipant: schedule.maxParticipant,
-        participantsProfileImage,
+        participantsProfileImage: [],
       };
     } catch (error) {
       this.logger.error(error);

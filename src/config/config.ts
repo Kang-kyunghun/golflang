@@ -22,7 +22,7 @@ import { UserState } from 'src/modules/user/entity/user-state.entity';
 import { User } from 'src/modules/user/entity/user.entity';
 import { UserModule } from 'src/modules/user/user.module';
 import { CommonModule } from '../common/common.module';
-import { UserScheduleMapping } from 'src/modules/schedule/entity/user-schedule-mapping.entity';
+import { NotHostUserScheduleMapping } from 'src/modules/schedule/entity/not-host-user-schedule-mapping.entity';
 import { Invitation } from 'src/modules/invitation/entities/invitation.entity';
 import { InvitationModule } from 'src/modules/invitation/invitation.module';
 
@@ -34,7 +34,7 @@ export const ENTITIES = [
   Post,
   Club,
   Schedule,
-  UserScheduleMapping,
+  NotHostUserScheduleMapping,
   Alarm,
   Chat,
   Auth,

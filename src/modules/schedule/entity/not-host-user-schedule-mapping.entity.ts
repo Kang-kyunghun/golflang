@@ -7,14 +7,14 @@ import { ParticipationState, ParticipationType } from '../enum/schedule.enum';
 import { Schedule } from './schedule.entity';
 
 @Entity()
-export class UserScheduleMapping extends CoreEntity {
+export class NotHostUserScheduleMapping extends CoreEntity {
   @Column({
     type: 'enum',
     enum: ParticipationState,
     default: ParticipationState.PENDING,
   })
   @ApiProperty({
-    description: '초대 진행 상태',
+    description: '초대/신청 진행 상태',
     enum: ParticipationState,
     default: ParticipationState.PENDING,
   })
@@ -25,7 +25,7 @@ export class UserScheduleMapping extends CoreEntity {
     enum: ParticipationType,
   })
   @ApiProperty({
-    description: '초대 진행 상태',
+    description: '초대 진행 유형',
     enum: ParticipationType,
   })
   participationType: ParticipationType;
@@ -34,11 +34,7 @@ export class UserScheduleMapping extends CoreEntity {
   @JoinColumn()
   schedule: Schedule;
 
-  @ManyToOne(() => User, (user) => user.scheduleHostUsers)
+  @ManyToOne(() => User, (user) => user.notHostUserScheduleMappings)
   @JoinColumn()
-  hostUser: User;
-
-  @ManyToOne(() => User, (user) => user.scheduleTargerUsers)
-  @JoinColumn()
-  targetUser: User;
+  guestUser: User;
 }

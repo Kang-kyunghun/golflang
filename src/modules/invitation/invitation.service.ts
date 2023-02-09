@@ -9,7 +9,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Schedule } from '../schedule/entity/schedule.entity';
-import { UserScheduleMapping } from '../schedule/entity/user-schedule-mapping.entity';
+import { NotHostUserScheduleMapping } from '../schedule/entity/not-host-user-schedule-mapping.entity';
 import {
   ParticipationState,
   ParticipationType,
@@ -28,14 +28,14 @@ export class InvitationService {
     private readonly userRepo: Repository<User>,
     @InjectRepository(Schedule)
     private readonly scheduleRepo: Repository<Schedule>,
-    @InjectRepository(UserScheduleMapping)
-    private readonly userScheduleMappingRepo: Repository<UserScheduleMapping>,
+    @InjectRepository(NotHostUserScheduleMapping)
+    private readonly userScheduleMappingRepo: Repository<NotHostUserScheduleMapping>,
 
     private readonly logger: Logger,
     private readonly invitationError: InvitationError,
   ) {}
 
-  async createRoundingInvitation(
+  async createScheduleInvitation(
     body: CreateRoundingInvitationInputDto,
     userId: number,
   ): Promise<boolean> {
@@ -53,9 +53,9 @@ export class InvitationService {
       for (const targetUserId of targetUserIds) {
         const checkInvitation = await this.userScheduleMappingRepo.findOne({
           where: {
-            targetUser: { id: targetUserId },
-            schedule: { id: schedule.id },
-            hostUser: { id: hostUser.id },
+            // targetUser: { id: targetUserId },
+            // schedule: { id: schedule.id },
+            // hostUser: { id: hostUser.id },
           },
         });
 
@@ -90,7 +90,7 @@ export class InvitationService {
     }
   }
 
-  async updateRoundingInvitation(
+  async updateScheduleInvitation(
     body: UpdateRoundingInvitationInputDto,
     userId: number,
   ): Promise<boolean> {
@@ -115,9 +115,9 @@ export class InvitationService {
 
       await this.userScheduleMappingRepo.update(
         {
-          hostUser: { id: hostUserId },
-          schedule: { id: scheduleId },
-          targetUser: { id: userId },
+          // hostUser: { id: hostUserId },
+          // schedule: { id: scheduleId },
+          // targetUser: { id: userId },
         },
         {
           participationState,

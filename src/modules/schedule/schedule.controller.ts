@@ -3,30 +3,31 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
-  Delete,
   UseInterceptors,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { ScheduleService } from './schedule.service';
 import { ApiParam, ApiTags } from '@nestjs/swagger';
 import { ResultFormatInterceptor } from 'src/common/interceptor/result-format.interceptor';
 import { SwaggerDefault } from 'src/common/decorator/swagger.decorator';
 import { GetUserId } from 'src/common/decorator/user.decorator';
-import { CreateRoundingScheduleInputDto } from './dto/create-rounding-schedule.dto';
+import { CreateRoundingScheduleInputDto as CreateScheduleInputDto } from './dto/create-rounding-schedule.dto';
 import {
   GetRoundingScheduleListOutputDto,
-  GetRoundingScheduleListQueryDto,
+  GetRoundingScheduleListQueryDto as GetScheduleListQueryDto,
 } from './dto/get-rounding-schedule-list.dto';
 import {
   GetRoundingAcceptParticipantListOutputDto,
   GetRoundingWaitingParticipantListOutputDto,
 } from './dto/get-rounding-participant-list.dto';
-import { GetRoundingScheduleDetailOutputDto } from './dto/get-rounding-schedule-detail.dto';
+import { GetRoundingScheduleDetailOutputDto as GetScheduleDetailOutputDto } from './dto/get-rounding-schedule-detail.dto';
 import { Schedule } from './entity/schedule.entity';
+import { JwtAuthGuard } from '../auth/guard/jwt.guard';
 
 @ApiTags('SCHEDULE')
+@UseGuards(JwtAuthGuard)
 @Controller('schedule')
 @UseInterceptors(ResultFormatInterceptor)
 export class ScheduleController {
@@ -34,11 +35,11 @@ export class ScheduleController {
 
   @Post()
   @SwaggerDefault('라운딩 일정 생성', 'done', '라운딩 일정 생성')
-  async createMyRoundingSchedule(
-    @Body() body: CreateRoundingScheduleInputDto,
+  async createSchedule(
+    @Body() body: CreateScheduleInputDto,
     @GetUserId() userId: number,
   ): Promise<boolean> {
-    return await this.scheduleService.createMyRoundingSchedule(body, 2);
+    return await this.scheduleService.createSchedule(body, 2);
   }
 
   @Get('list')
@@ -49,11 +50,11 @@ export class ScheduleController {
     null,
     true,
   )
-  async getRoundingScheduleList(
-    @Query() query: GetRoundingScheduleListQueryDto,
+  async getScheduleList(
+    @Query() query: GetScheduleListQueryDto,
     @GetUserId() userId: number,
   ): Promise<Schedule[]> {
-    return await this.scheduleService.getRoundingScheduleList(query, 2);
+    return await this.scheduleService.getScheduleList(query, 2);
   }
 
   @Get(':scheduleId/participant/confirm')
@@ -97,7 +98,7 @@ export class ScheduleController {
   @Get('detail/:scheduleId')
   @SwaggerDefault(
     '라운딩 일정 상세 조회',
-    GetRoundingScheduleDetailOutputDto,
+    GetScheduleDetailOutputDto,
     '라운딩 일정 상세 조회',
   )
   @ApiParam({
@@ -105,10 +106,10 @@ export class ScheduleController {
     required: true,
     description: 'Schedule id',
   })
-  async getRoundingScheduleDetail(
+  async getScheduleDetail(
     @Param('scheduleId') scheduleId: number,
     @GetUserId() userId: number,
-  ): Promise<GetRoundingScheduleDetailOutputDto> {
-    return await this.scheduleService.getRoundingScheduleDetail(scheduleId, 2);
+  ): Promise<GetScheduleDetailOutputDto> {
+    return await this.scheduleService.getScheduleDetail(scheduleId, 2);
   }
 }
