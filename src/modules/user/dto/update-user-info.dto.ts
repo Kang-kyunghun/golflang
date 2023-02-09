@@ -36,4 +36,9 @@ export class UpdateUserInfoInputDto {
   @IsOptional()
   @ApiProperty({ description: '평균 타수', nullable: true, default: 0 })
   avgHitScore: number;
+
+  @IsString()
+  @IsOptional()
+  @ApiProperty({ description: '비밀번호' })
+  password: string;
 }

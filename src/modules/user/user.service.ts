@@ -21,6 +21,7 @@ import {
 } from './dto/search-users.dto';
 import { GetUserDetailOutputDto } from './dto/get-user-detail.dto';
 import { UserError, USER_ERROR } from './error/user.error';
+import { Account } from './entity/account.entity';
 
 @Injectable()
 export class UserService {
@@ -72,7 +73,7 @@ export class UserService {
     body: UpdateUserInfoInputDto,
     file: Express.MulterS3.File,
   ): Promise<GetUserDetailOutputDto> {
-    this.logger.log('updateUserInfo', userId, body, file);
+    this.logger.log(`updateUserInfo ${userId}, ${body},isWithFile:${!!file}`);
 
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
@@ -108,6 +109,17 @@ export class UserService {
           UserState,
           { id: user.userState.id },
           { avgHitScore: body.avgHitScore },
+        );
+      }
+
+      if (body.password) {
+        await queryRunner.manager.update(
+          Account,
+          { id: user.account.id },
+          {
+            password: await this.commonService.hash(body.password),
+            isTempPassword: false,
+          },
         );
       }
 
