@@ -56,9 +56,11 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 
   async validateToken(token: string) {
     try {
-      const verify = this.jwtService.verify(token).id;
+      const verify = this.jwtService.verify(token, {
+        secret: process.env.ACCESS_TOKEN_SECRET_KEY,
+      });
 
-      return verify;
+      return verify.accountUid;
     } catch (error) {
       console.error(error);
       throw new UnauthorizedException(error.message);
