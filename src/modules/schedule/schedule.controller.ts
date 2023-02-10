@@ -13,7 +13,10 @@ import { ApiParam, ApiTags } from '@nestjs/swagger';
 import { ResultFormatInterceptor } from 'src/common/interceptor/result-format.interceptor';
 import { SwaggerDefault } from 'src/common/decorator/swagger.decorator';
 import { GetUserId } from 'src/common/decorator/user.decorator';
-import { CreateScheduleInputDto as CreateScheduleInputDto } from './dto/create-schedule.dto';
+import {
+  CreateScheduleInputDto as CreateScheduleInputDto,
+  CreateScheduleOutput,
+} from './dto/create-schedule.dto';
 import {
   GetRoundingScheduleListOutputDto,
   GetRoundingScheduleListQueryDto as GetScheduleListQueryDto,
@@ -29,16 +32,15 @@ import { JwtAuthGuard } from '../auth/guard/jwt.guard';
 @ApiTags('SCHEDULE')
 @UseGuards(JwtAuthGuard)
 @Controller('schedule')
-@UseInterceptors(ResultFormatInterceptor)
+// @UseInterceptors(ResultFormatInterceptor)
 export class ScheduleController {
   constructor(private readonly scheduleService: ScheduleService) {}
-
   @Post()
   @SwaggerDefault('라운딩 일정 생성')
   async createSchedule(
     @Body() body: CreateScheduleInputDto,
     @GetUserId() userId: number,
-  ): Promise<Schedule> {
+  ): Promise<CreateScheduleOutput> {
     return await this.scheduleService.createSchedule(body, userId);
   }
 

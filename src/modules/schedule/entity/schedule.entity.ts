@@ -25,7 +25,7 @@ export class Schedule extends CoreEntity {
 
   @Column({ nullable: true, default: null })
   @ApiProperty({ description: '최대 참여자 수', nullable: true, default: null })
-  maxParticipant: number;
+  maxParticipants: number;
 
   @Column({ nullable: true, default: null })
   @ApiProperty({ description: '메모', nullable: true, default: null })

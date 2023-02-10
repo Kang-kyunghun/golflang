@@ -14,6 +14,7 @@ async function bootstrap() {
     new ValidationPipe({
       whitelist: true, // 엔티티 데코레이터에 없는 프로퍼티 값은 무조건 거름
       forbidNonWhitelisted: false, // 엔티티 데코레이터에 없는 값 인입시 그 값에 대한 에러메세지 알려주지 않음
+      transform: true,
       transformOptions: { enableImplicitConversion: true },
     }),
   );

@@ -8,10 +8,16 @@ import { Schedule } from './entity/schedule.entity';
 
 import { JwtService } from '@nestjs/jwt';
 import { ScheduleError } from './error/schedule.error';
+import { Account } from '../user/entity/account.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, NotHostUserScheduleMapping, Schedule]),
+    TypeOrmModule.forFeature([
+      User,
+      NotHostUserScheduleMapping,
+      Schedule,
+      Account,
+    ]),
   ],
   controllers: [ScheduleController],
   providers: [ScheduleService, JwtService, Logger, ScheduleError],

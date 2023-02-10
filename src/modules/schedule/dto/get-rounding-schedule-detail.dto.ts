@@ -23,7 +23,7 @@ export class GetRoundingScheduleDetailOutputDto {
   memo: string;
 
   @ApiProperty({ description: '최대 참여자 수' })
-  maxParticipant: number;
+  maxParticipants: number;
 
   @ApiProperty({ description: '참가자 프로필 이미지 URL' })
   participantsProfileImage: string[];

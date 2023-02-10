@@ -36,6 +36,7 @@ import { DataSource } from 'typeorm';
       // jwt 전역 설정으로 수정
       ...JwtModule.register({
         secret: process.env.ACCESS_TOKEN_SECRET_KEY,
+        signOptions: { expiresIn: process.env.ACCESS_TOKEN_EXPIRE_DATE },
       }),
       global: true,
     },

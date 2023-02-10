@@ -10,7 +10,10 @@ import { CommonService } from 'src/common/common.service';
 
 import { Between, Repository, DataSource } from 'typeorm';
 import { User } from '../user/entity/user.entity';
-import { CreateScheduleInputDto } from './dto/create-schedule.dto';
+import {
+  CreateScheduleInputDto,
+  CreateScheduleOutput,
+} from './dto/create-schedule.dto';
 import {
   GetRoundingAcceptParticipantListOutputDto,
   GetRoundingWaitingParticipantListOutputDto,
@@ -59,7 +62,7 @@ export class ScheduleService {
       schedule.roundingPlace = body.roundingPlace;
       schedule.roundingLocation = body.roundingLocation;
       schedule.startTime = body.startTime;
-      schedule.maxParticipant = body.maxParticipant;
+      schedule.maxParticipants = body.maxParticipants;
       schedule.memo = body.memo;
       schedule.type = body.scheduleType;
       schedule.hostUser = user;
@@ -68,7 +71,7 @@ export class ScheduleService {
 
       await queryRunner.commitTransaction();
 
-      return schedule;
+      return new CreateScheduleOutput(schedule);
     } catch (error) {
       await queryRunner.rollbackTransaction();
       this.logger.error(error);
@@ -288,7 +291,7 @@ export class ScheduleService {
         startTime: schedule.startTime,
         memo: schedule.memo,
         participantCount: participants.length,
-        maxParticipant: schedule.maxParticipant,
+        maxParticipants: schedule.maxParticipants,
         participantsProfileImage: [],
       };
     } catch (error) {
