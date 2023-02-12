@@ -27,9 +27,13 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       const request = context.switchToHttp().getRequest();
       const { authorization } = context.switchToHttp().getRequest().headers;
 
+      console.log(1, authorization);
+
       if (authorization) {
         const access_token = authorization?.split(' ');
         const accountUid = await this.validateToken(access_token[1]);
+
+        console.log(2, accountUid);
 
         const account = await this.accountRepository.findOne({
           where: { uid: accountUid },

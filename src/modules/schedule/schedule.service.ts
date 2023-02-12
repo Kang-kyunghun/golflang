@@ -6,7 +6,6 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CommonService } from 'src/common/common.service';
 
 import { Between, Repository, DataSource } from 'typeorm';
 import { User } from '../user/entity/user.entity';
@@ -17,17 +16,18 @@ import {
 import {
   GetRoundingAcceptParticipantListOutputDto,
   GetRoundingWaitingParticipantListOutputDto,
-} from './dto/get-rounding-participant-list.dto';
-import { GetRoundingScheduleDetailOutputDto } from './dto/get-rounding-schedule-detail.dto';
+} from './dto/get-participant-list.dto';
+import { GetRoundingScheduleDetailOutputDto } from './dto/get-schedule-detail.dto';
 import {
-  GetRoundingScheduleListOutputDto,
-  GetRoundingScheduleListQueryDto,
-} from './dto/get-rounding-schedule-list.dto';
+  GetSchedulesOutputDto,
+  GetSchedulesQueryDto,
+} from './dto/get-schedules.dto';
 import { Schedule } from './entity/schedule.entity';
 import { NotHostUserScheduleMapping } from './entity/not-host-user-schedule-mapping.entity';
-import { ParticipationState, ScheduleType } from './enum/schedule.enum';
+import { ParticipationState } from './enum/schedule.enum';
 import { ScheduleError, SCHEDULE_ERROR } from './error/schedule.error';
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const moment = require('moment');
 
 @Injectable()
@@ -89,31 +89,41 @@ export class ScheduleService {
     }
   }
 
-  async getScheduleList(
-    query: GetRoundingScheduleListQueryDto,
+  async getSchedules(
+    query: GetSchedulesQueryDto,
     userId: number,
-  ): Promise<GetRoundingScheduleListOutputDto[] | any> {
+  ): Promise<GetSchedulesOutputDto[]> {
     try {
       const { date } = query;
 
-      const daysInMonth = moment(date).daysInMonth();
-
-      const startDayOfThisMonth = moment(`${date}-01`)
-        .startOf('d')
+      const startDayOfThisMonth = moment(new Date(date))
+        .startOf('month')
         .format('YYYY-MM-DD HH:mm:ss');
 
-      const endDayOfThisMonth = moment(`${date}-${daysInMonth}`)
-        .endOf('d')
+      const endDayOfThisMonth = moment(new Date(date))
+        .endOf('month')
         .format('YYYY-MM-DD HH:mm:ss');
 
-      const schedules = await this.scheduleRepo.find({
+      // host가 본인인 것
+      const schedulesAsHost = await this.scheduleRepo.find({
         where: {
           hostUser: { id: userId },
           startTime: Between(startDayOfThisMonth, endDayOfThisMonth),
         },
+        relations: ['hostUser', 'notHostUserScheduleMappings'],
       });
 
-      return schedules;
+      console.log(userId, schedulesAsHost);
+
+      //TODO: participants가 본인인 것 추가하기
+      // const shedulesAsParticipants = await this.scheduleRepo
+
+      //TODO: 추후 본인이 가입한 클럽의 스케쥴 포함시키기
+
+      return schedulesAsHost.map(
+        // TODO: 마지막 인자는 참여자 수 계산해서 추후 업데이트 필요
+        (schedule) => new GetSchedulesOutputDto(schedule, userId, 4),
+      );
     } catch (error) {
       this.logger.error(error);
 

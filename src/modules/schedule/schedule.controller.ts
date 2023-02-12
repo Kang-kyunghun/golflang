@@ -14,18 +14,18 @@ import { ResultFormatInterceptor } from 'src/common/interceptor/result-format.in
 import { SwaggerDefault } from 'src/common/decorator/swagger.decorator';
 import { GetUserId } from 'src/common/decorator/user.decorator';
 import {
-  CreateScheduleInputDto as CreateScheduleInputDto,
+  CreateScheduleInputDto,
   CreateScheduleOutput,
 } from './dto/create-schedule.dto';
 import {
-  GetRoundingScheduleListOutputDto,
-  GetRoundingScheduleListQueryDto as GetScheduleListQueryDto,
-} from './dto/get-rounding-schedule-list.dto';
+  GetSchedulesOutputDto,
+  GetSchedulesQueryDto,
+} from './dto/get-schedules.dto';
 import {
   GetRoundingAcceptParticipantListOutputDto,
   GetRoundingWaitingParticipantListOutputDto,
-} from './dto/get-rounding-participant-list.dto';
-import { GetRoundingScheduleDetailOutputDto as GetScheduleDetailOutputDto } from './dto/get-rounding-schedule-detail.dto';
+} from './dto/get-participant-list.dto';
+import { GetRoundingScheduleDetailOutputDto as GetScheduleDetailOutputDto } from './dto/get-schedule-detail.dto';
 import { Schedule } from './entity/schedule.entity';
 import { JwtAuthGuard } from '../auth/guard/jwt.guard';
 
@@ -44,13 +44,26 @@ export class ScheduleController {
     return await this.scheduleService.createSchedule(body, userId);
   }
 
-  @Get('list')
-  @SwaggerDefault('라운딩 일정 리스트 조회', GetRoundingScheduleListOutputDto)
-  async getScheduleList(
-    @Query() query: GetScheduleListQueryDto,
+  @Get('detail/:scheduleId')
+  @SwaggerDefault('라운딩 일정 상세 조회', GetScheduleDetailOutputDto)
+  @ApiParam({ name: 'scheduleId', required: true })
+  async getScheduleDetail(
+    @Param('scheduleId') scheduleId: number,
     @GetUserId() userId: number,
-  ): Promise<Schedule[]> {
-    return await this.scheduleService.getScheduleList(query, userId);
+  ): Promise<GetScheduleDetailOutputDto> {
+    return await this.scheduleService.getScheduleDetail(scheduleId, userId);
+  }
+
+  @Get('schedules')
+  @SwaggerDefault(
+    '본인 관련 라운딩 일정(호스트, 참여, 클럽) 리스트 조회',
+    GetSchedulesOutputDto,
+  )
+  async getSchedules(
+    @Query() query: GetSchedulesQueryDto,
+    @GetUserId() userId: number,
+  ): Promise<GetSchedulesOutputDto[]> {
+    return await this.scheduleService.getSchedules(query, userId);
   }
 
   @Get(':scheduleId/participant/confirm')
@@ -84,19 +97,5 @@ export class ScheduleController {
     return await this.scheduleService.getRoundingWaitingParticipantList(
       scheduleId,
     );
-  }
-
-  @Get('detail/:scheduleId')
-  @SwaggerDefault('라운딩 일정 상세 조회', GetScheduleDetailOutputDto)
-  @ApiParam({
-    name: 'scheduleId',
-    required: true,
-    description: 'Schedule id',
-  })
-  async getScheduleDetail(
-    @Param('scheduleId') scheduleId: number,
-    @GetUserId() userId: number,
-  ): Promise<GetScheduleDetailOutputDto> {
-    return await this.scheduleService.getScheduleDetail(scheduleId, 2);
   }
 }
