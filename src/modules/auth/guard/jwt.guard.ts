@@ -27,13 +27,10 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       const request = context.switchToHttp().getRequest();
       const { authorization } = context.switchToHttp().getRequest().headers;
 
-      console.log(1, authorization);
-
       if (authorization) {
         const access_token = authorization?.split(' ');
-        const accountUid = await this.validateToken(access_token[1]);
 
-        console.log(2, accountUid);
+        const accountUid = await this.validateToken(access_token[1]);
 
         const account = await this.accountRepository.findOne({
           where: { uid: accountUid },
@@ -64,7 +61,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
         secret: process.env.ACCESS_TOKEN_SECRET_KEY,
       });
 
-      return verify.accountUid;
+      return verify.id;
     } catch (error) {
       console.error(error);
       throw new UnauthorizedException(error.message);

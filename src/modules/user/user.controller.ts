@@ -38,7 +38,6 @@ export class UserController {
   getUserDetail(
     @GetUserId() userId: number,
   ): Promise<{ user: GetUserDetailOutputDto; hasTempPassword: boolean }> {
-    console.log(3, userId);
     return this.userService.getUserDetail(userId);
   }
 
