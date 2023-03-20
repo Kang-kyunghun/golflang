@@ -25,6 +25,7 @@ import { CommonModule } from '../common/common.module';
 import { NotHostUserScheduleMapping } from 'src/modules/schedule/entity/not-host-user-schedule-mapping.entity';
 import { Invitation } from 'src/modules/invitation/entities/invitation.entity';
 import { InvitationModule } from 'src/modules/invitation/invitation.module';
+import { PingModule } from 'src/modules/ping/ping.module';
 
 export const ENTITIES = [
   User,
@@ -57,6 +58,7 @@ export const MODULES = [
   OtpModule,
   MailModule,
   InvitationModule,
+  PingModule,
 ];
 
 export interface DatabaseConfig {
