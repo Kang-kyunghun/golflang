@@ -26,6 +26,7 @@ import { NotHostUserScheduleMapping } from 'src/modules/schedule/entity/not-host
 import { Invitation } from 'src/modules/invitation/entities/invitation.entity';
 import { InvitationModule } from 'src/modules/invitation/invitation.module';
 import { PingModule } from 'src/modules/ping/ping.module';
+import { ScheduleType } from 'src/modules/schedule/entity/schedule-type.entity';
 
 export const ENTITIES = [
   User,
@@ -35,6 +36,7 @@ export const ENTITIES = [
   Post,
   Club,
   Schedule,
+  ScheduleType,
   NotHostUserScheduleMapping,
   Alarm,
   Chat,

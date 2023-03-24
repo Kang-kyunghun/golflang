@@ -53,7 +53,7 @@ export class CreateScheduleOutput extends CreateScheduleInputDto {
     this.memo = schedule.memo;
     this.roundingLocation = schedule.roundingLocation;
     this.roundingPlace = schedule.roundingPlace;
-    this.scheduleType = schedule.type;
+    this.scheduleType = ScheduleType.value(schedule.type);
     this.startTime = schedule.startTime;
     this.title = schedule.title;
   }
