@@ -1,20 +1,20 @@
-export enum ScheduleType {
+export enum ScheduleTypeEnum {
   CLUB = 'CLUB',
   PERSONAL = 'PERSONAL',
 }
 
-export namespace ScheduleType {
-  export function id(type: ScheduleType) {
+export namespace ScheduleTypeEnum {
+  export function id(type: ScheduleTypeEnum) {
     return {
-      [ScheduleType.CLUB]: 1,
-      [ScheduleType.PERSONAL]: 2,
+      [ScheduleTypeEnum.CLUB]: 1,
+      [ScheduleTypeEnum.PERSONAL]: 2,
     }[type];
   }
 
   export function value(id: number) {
     return {
-      1: ScheduleType.CLUB,
-      2: ScheduleType.PERSONAL,
+      1: ScheduleTypeEnum.CLUB,
+      2: ScheduleTypeEnum.PERSONAL,
     }[id];
   }
 }
