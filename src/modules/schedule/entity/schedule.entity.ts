@@ -1,9 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
+
 import { CoreEntity } from 'src/common/entity/core.entity';
 import { User } from 'src/modules/user/entity/user.entity';
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
-import { ScheduleType } from '../enum/schedule.enum';
-import { NotHostUserScheduleMapping } from './not-host-user-schedule-mapping.entity';
+import { Club } from 'src/modules/club/entity/club.entity';
+import { ScheduleType } from './schedule-type.entity';
 
 @Entity()
 export class Schedule extends CoreEntity {
@@ -35,27 +36,15 @@ export class Schedule extends CoreEntity {
   @ApiProperty({ description: '비공개 여부', default: true })
   isPrivate: boolean;
 
-  @Column({
-    type: 'enum',
-    enum: ScheduleType,
-    nullable: true,
-    default: null,
-  })
-  @ApiProperty({
-    description: '일정타입: 개인 or 클럽',
-    enum: ScheduleType,
-    nullable: true,
-    default: null,
-  })
-  type: ScheduleType;
+  @ManyToOne(() => ScheduleType, (scheduleType) => scheduleType.schedules)
+  @JoinColumn()
+  type: number;
 
-  @OneToMany(
-    () => NotHostUserScheduleMapping,
-    (userScheduleMapping) => userScheduleMapping.schedule,
-  )
-  notHostUserScheduleMappings: NotHostUserScheduleMapping[];
-
-  @ManyToOne(() => User, (user) => user)
+  @ManyToOne(() => User, (user) => user.schedules)
   @JoinColumn()
   hostUser: User;
+
+  @ManyToOne(() => Club, (club) => club.schedules, { nullable: true })
+  @JoinColumn()
+  club: Club;
 }

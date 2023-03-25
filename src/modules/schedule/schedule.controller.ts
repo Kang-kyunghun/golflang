@@ -44,58 +44,58 @@ export class ScheduleController {
     return await this.scheduleService.createSchedule(body, userId);
   }
 
-  @Get('detail/:scheduleId')
-  @SwaggerDefault('라운딩 일정 상세 조회', GetScheduleDetailOutputDto)
-  @ApiParam({ name: 'scheduleId', required: true })
-  async getScheduleDetail(
-    @Param('scheduleId') scheduleId: number,
-    @GetUserId() userId: number,
-  ): Promise<GetScheduleDetailOutputDto> {
-    return await this.scheduleService.getScheduleDetail(scheduleId, userId);
-  }
+  // @Get('detail/:scheduleId')
+  // @SwaggerDefault('라운딩 일정 상세 조회', GetScheduleDetailOutputDto)
+  // @ApiParam({ name: 'scheduleId', required: true })
+  // async getScheduleDetail(
+  //   @Param('scheduleId') scheduleId: number,
+  //   @GetUserId() userId: number,
+  // ): Promise<GetScheduleDetailOutputDto> {
+  //   return await this.scheduleService.getScheduleDetail(scheduleId, userId);
+  // }
 
-  @Get('schedules')
-  @SwaggerDefault(
-    '본인 관련 라운딩 일정(호스트, 참여, 클럽) 리스트 조회',
-    GetSchedulesOutputDto,
-  )
-  async getSchedules(
-    @Query() query: GetSchedulesQueryDto,
-    @GetUserId() userId: number,
-  ): Promise<GetSchedulesOutputDto[]> {
-    return await this.scheduleService.getSchedules(query, userId);
-  }
+  // @Get('schedules')
+  // @SwaggerDefault(
+  //   '본인 관련 라운딩 일정(호스트, 참여, 클럽) 리스트 조회',
+  //   GetSchedulesOutputDto,
+  // )
+  // async getSchedules(
+  //   @Query() query: GetSchedulesQueryDto,
+  //   @GetUserId() userId: number,
+  // ): Promise<GetSchedulesOutputDto[]> {
+  //   return await this.scheduleService.getSchedules(query, userId);
+  // }
 
-  @Get(':scheduleId/participant/confirm')
-  @SwaggerDefault(
-    '라운딩 확정 참가자 리스트 조회',
-    GetRoundingAcceptParticipantListOutputDto,
-    '라운딩 확정 참가자 리스트 조회',
-  )
-  @ApiParam({ name: 'scheduleId', required: true })
-  async getRoundingAcceptParticipantList(
-    @Param('scheduleId') scheduleId: number,
-  ): Promise<GetRoundingAcceptParticipantListOutputDto> {
-    return await this.scheduleService.getRoundingAcceptParticipantList(
-      scheduleId,
-    );
-  }
+  // @Get(':scheduleId/participant/confirm')
+  // @SwaggerDefault(
+  //   '라운딩 확정 참가자 리스트 조회',
+  //   GetRoundingAcceptParticipantListOutputDto,
+  //   '라운딩 확정 참가자 리스트 조회',
+  // )
+  // @ApiParam({ name: 'scheduleId', required: true })
+  // async getRoundingAcceptParticipantList(
+  //   @Param('scheduleId') scheduleId: number,
+  // ): Promise<GetRoundingAcceptParticipantListOutputDto> {
+  //   return await this.scheduleService.getRoundingAcceptParticipantList(
+  //     scheduleId,
+  //   );
+  // }
 
-  @Get(':scheduleId/participant/waiting')
-  @SwaggerDefault(
-    '라운딩 대기중인 참가자 리스트 조회',
-    GetRoundingWaitingParticipantListOutputDto,
-  )
-  @ApiParam({
-    name: 'scheduleId',
-    required: true,
-    description: 'Schedule id',
-  })
-  async getRoundingWaitingParticipantList(
-    @Param('scheduleId') scheduleId: number,
-  ): Promise<GetRoundingWaitingParticipantListOutputDto> {
-    return await this.scheduleService.getRoundingWaitingParticipantList(
-      scheduleId,
-    );
-  }
+  // @Get(':scheduleId/participant/waiting')
+  // @SwaggerDefault(
+  //   '라운딩 대기중인 참가자 리스트 조회',
+  //   GetRoundingWaitingParticipantListOutputDto,
+  // )
+  // @ApiParam({
+  //   name: 'scheduleId',
+  //   required: true,
+  //   description: 'Schedule id',
+  // })
+  // async getRoundingWaitingParticipantList(
+  //   @Param('scheduleId') scheduleId: number,
+  // ): Promise<GetRoundingWaitingParticipantListOutputDto> {
+  //   return await this.scheduleService.getRoundingWaitingParticipantList(
+  //     scheduleId,
+  //   );
+  // }
 }

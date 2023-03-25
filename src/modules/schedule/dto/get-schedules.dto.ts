@@ -38,7 +38,7 @@ export class GetSchedulesOutputDto {
   ) {
     this.id = schedule?.id;
     this.isHost = schedule.hostUser?.id === selfUserId;
-    this.scheduleType = schedule.type;
+    this.scheduleType = ScheduleType.value(schedule.type);
     this.title = schedule.title;
     this.roundingLocation = schedule.roundingLocation;
     this.startTime = schedule.startTime;

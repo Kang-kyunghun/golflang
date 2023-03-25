@@ -1,12 +1,14 @@
-import { Schedule } from 'src/modules/schedule/entity/schedule.entity';
 import { ApiProperty } from '@nestjs/swagger';
-import { UploadFile } from 'src/modules/upload-file/entity/upload-file.entity';
 import { Column, Entity, JoinColumn, OneToMany, OneToOne } from 'typeorm';
+
+import { UploadFile } from 'src/modules/upload-file/entity/upload-file.entity';
 import { Gender, Role } from '../enum/user.enum';
 import { GuardCoreEntity } from '../../../common/entity/guard-core.entity';
 import { Account } from './account.entity';
 import { UserState } from './user-state.entity';
-import { NotHostUserScheduleMapping as NotHostUserScheduleMapping } from 'src/modules/schedule/entity/not-host-user-schedule-mapping.entity';
+import { Schedule } from 'src/modules/schedule/entity/schedule.entity';
+import { Club } from 'src/modules/club/entity/club.entity';
+import { NotHostUserScheduleMapping } from 'src/modules/schedule/entity/not-host-user-schedule-mapping.entity';
 
 @Entity()
 export class User extends GuardCoreEntity {
@@ -74,4 +76,7 @@ export class User extends GuardCoreEntity {
 
   @OneToMany(() => Schedule, (schedule) => schedule.hostUser)
   schedules: Schedule[];
+
+  @OneToMany(() => Club, (club) => club.host)
+  clubs: Club[];
 }
