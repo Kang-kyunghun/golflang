@@ -27,6 +27,10 @@ import { Invitation } from 'src/modules/invitation/entities/invitation.entity';
 import { InvitationModule } from 'src/modules/invitation/invitation.module';
 import { PingModule } from 'src/modules/ping/ping.module';
 import { ScheduleType } from 'src/modules/schedule/entity/schedule-type.entity';
+import { PreParticipationModule } from 'src/modules/pre-participation/pre-participation.module';
+import { PreParticipation } from 'src/modules/pre-participation/entity/pre-participation.entity';
+import { ParticipationType } from 'src/modules/pre-participation/entity/participation-type.entity';
+import { ParticipationState } from 'src/modules/pre-participation/entity/participation-state.entity';
 
 export const ENTITIES = [
   User,
@@ -44,6 +48,9 @@ export const ENTITIES = [
   Like,
   Otp,
   Invitation,
+  PreParticipation,
+  ParticipationType,
+  ParticipationState,
 ];
 
 export const MODULES = [
@@ -61,6 +68,7 @@ export const MODULES = [
   MailModule,
   InvitationModule,
   PingModule,
+  PreParticipationModule,
 ];
 
 export interface DatabaseConfig {

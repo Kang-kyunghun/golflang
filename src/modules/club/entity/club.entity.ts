@@ -1,5 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  JoinTable,
+  ManyToOne,
+  OneToMany,
+  ManyToMany,
+} from 'typeorm';
 
 import { CoreEntity } from 'src/common/entity/core.entity';
 import { User } from 'src/modules/user/entity/user.entity';
@@ -39,10 +47,18 @@ export class Club extends CoreEntity {
   @ApiProperty({ description: '클럽 대표 이미지' })
   clubProfileImage: string;
 
-  @ManyToOne(() => User, (user) => user.clubs)
+  @ManyToOne(() => User, (user) => user.hostClubs)
   @JoinColumn()
   host: User;
 
   @OneToMany(() => Schedule, (schedule) => schedule.club)
   schedules: Schedule[];
+
+  @ManyToMany(() => User, (user) => user.clubs)
+  @JoinTable({
+    name: 'clubs_users',
+    joinColumns: [{ name: 'club_id' }],
+    inverseJoinColumns: [{ name: 'user_id' }],
+  })
+  users: User[];
 }

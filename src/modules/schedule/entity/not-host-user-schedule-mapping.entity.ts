@@ -33,8 +33,4 @@ export class NotHostUserScheduleMapping extends CoreEntity {
   @ManyToOne(() => Schedule, (schedule) => schedule.id)
   @JoinColumn()
   schedule: Schedule;
-
-  @ManyToOne(() => User, (user) => user.notHostUserScheduleMappings)
-  @JoinColumn()
-  guestUser: User;
 }

@@ -1,10 +1,19 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  JoinTable,
+  ManyToOne,
+  OneToMany,
+  ManyToMany,
+} from 'typeorm';
 
 import { CoreEntity } from 'src/common/entity/core.entity';
 import { User } from 'src/modules/user/entity/user.entity';
 import { Club } from 'src/modules/club/entity/club.entity';
 import { ScheduleType } from './schedule-type.entity';
+import { PreParticipation } from 'src/modules/pre-participation/entity/pre-participation.entity';
 
 @Entity()
 export class Schedule extends CoreEntity {
@@ -38,13 +47,27 @@ export class Schedule extends CoreEntity {
 
   @ManyToOne(() => ScheduleType, (scheduleType) => scheduleType.schedules)
   @JoinColumn()
-  type: number;
+  type: ScheduleType;
 
-  @ManyToOne(() => User, (user) => user.schedules)
+  @ManyToOne(() => User, (user) => user.hostschedules)
   @JoinColumn()
   hostUser: User;
 
   @ManyToOne(() => Club, (club) => club.schedules, { nullable: true })
   @JoinColumn()
   club: Club;
+
+  @OneToMany(
+    () => PreParticipation,
+    (preParticipation) => preParticipation.schedule,
+  )
+  preParticipations: PreParticipation[];
+
+  @ManyToMany(() => User, (user) => user.schedules)
+  @JoinTable({
+    name: 'schedules_users',
+    joinColumns: [{ name: 'schedule_id' }],
+    inverseJoinColumns: [{ name: 'user_id' }],
+  })
+  users: User[];
 }

@@ -18,14 +18,14 @@ import {
   CreateScheduleOutput,
 } from './dto/create-schedule.dto';
 import {
-  GetSchedulesOutputDto,
+  GetScheduleOutputDto,
+  GetScheduleListDto,
   GetSchedulesQueryDto,
-} from './dto/get-schedules.dto';
+} from './dto/schedule.dto';
 import {
   GetRoundingAcceptParticipantListOutputDto,
   GetRoundingWaitingParticipantListOutputDto,
 } from './dto/get-participant-list.dto';
-import { GetRoundingScheduleDetailOutputDto as GetScheduleDetailOutputDto } from './dto/get-schedule-detail.dto';
 import { Schedule } from './entity/schedule.entity';
 import { JwtAuthGuard } from '../auth/guard/jwt.guard';
 
@@ -44,27 +44,27 @@ export class ScheduleController {
     return await this.scheduleService.createSchedule(body, userId);
   }
 
-  // @Get('detail/:scheduleId')
-  // @SwaggerDefault('라운딩 일정 상세 조회', GetScheduleDetailOutputDto)
-  // @ApiParam({ name: 'scheduleId', required: true })
-  // async getScheduleDetail(
-  //   @Param('scheduleId') scheduleId: number,
-  //   @GetUserId() userId: number,
-  // ): Promise<GetScheduleDetailOutputDto> {
-  //   return await this.scheduleService.getScheduleDetail(scheduleId, userId);
-  // }
+  @Get('detail/:scheduleId')
+  @SwaggerDefault('라운딩 일정 상세 조회', GetScheduleOutputDto)
+  @ApiParam({ name: 'scheduleId', required: true })
+  async getScheduleDetail(
+    @Param('scheduleId') scheduleId: number,
+    @GetUserId() userId: number,
+  ): Promise<GetScheduleOutputDto> {
+    return await this.scheduleService.getScheduleDetail(scheduleId, userId);
+  }
 
-  // @Get('schedules')
-  // @SwaggerDefault(
-  //   '본인 관련 라운딩 일정(호스트, 참여, 클럽) 리스트 조회',
-  //   GetSchedulesOutputDto,
-  // )
-  // async getSchedules(
-  //   @Query() query: GetSchedulesQueryDto,
-  //   @GetUserId() userId: number,
-  // ): Promise<GetSchedulesOutputDto[]> {
-  //   return await this.scheduleService.getSchedules(query, userId);
-  // }
+  @Get('list')
+  @SwaggerDefault(
+    '본인 관련 라운딩 일정(호스트, 참여, 클럽) 리스트 조회',
+    GetScheduleListDto,
+  )
+  async getSchedules(
+    @Query() query: GetSchedulesQueryDto,
+    @GetUserId() userId: number,
+  ): Promise<GetScheduleListDto> {
+    return await this.scheduleService.getSchedules(query, userId);
+  }
 
   // @Get(':scheduleId/participant/confirm')
   // @SwaggerDefault(
