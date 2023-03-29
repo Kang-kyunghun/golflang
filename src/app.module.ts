@@ -28,6 +28,7 @@ import { DataSource } from 'typeorm';
       password: process.env.GL_DB_PASSWORD,
       database: process.env.GL_DB_NAME,
       synchronize: process.env.NODE_ENV !== 'production',
+      logging: process.env.NODE_ENV !== 'production',
       namingStrategy: new SnakeNamingStrategy(),
       entities: ENTITIES,
       charset: 'utf8mb4',

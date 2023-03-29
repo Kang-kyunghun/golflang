@@ -1,7 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Column, Entity, OneToOne } from 'typeorm';
+
 import { CoreEntity } from 'src/common/entity/core.entity';
 import { User } from 'src/modules/user/entity/user.entity';
-import { Column, Entity, OneToOne } from 'typeorm';
 
 @Entity()
 export class UploadFile extends CoreEntity {
@@ -30,5 +31,5 @@ export class UploadFile extends CoreEntity {
   hash: string;
 
   @OneToOne(() => User, (user) => user.profileImage)
-  userProfileImage: User;
+  user: User;
 }

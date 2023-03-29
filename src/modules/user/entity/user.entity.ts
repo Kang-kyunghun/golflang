@@ -1,5 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Column, Entity, JoinColumn, OneToMany, OneToOne } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  OneToMany,
+  OneToOne,
+  ManyToMany,
+} from 'typeorm';
 
 import { UploadFile } from 'src/modules/upload-file/entity/upload-file.entity';
 import { Gender, Role } from '../enum/user.enum';
@@ -8,7 +15,7 @@ import { Account } from './account.entity';
 import { UserState } from './user-state.entity';
 import { Schedule } from 'src/modules/schedule/entity/schedule.entity';
 import { Club } from 'src/modules/club/entity/club.entity';
-import { NotHostUserScheduleMapping } from 'src/modules/schedule/entity/not-host-user-schedule-mapping.entity';
+import { PreParticipation } from 'src/modules/pre-participation/entity/pre-participation.entity';
 
 @Entity()
 export class User extends GuardCoreEntity {
@@ -63,20 +70,25 @@ export class User extends GuardCoreEntity {
   @JoinColumn()
   userState: UserState;
 
-  @OneToOne(() => UploadFile, (uploadFile) => uploadFile.userProfileImage)
+  @OneToOne(() => UploadFile, (uploadFile) => uploadFile.user)
   @JoinColumn()
   profileImage: UploadFile;
 
-  //host가 아닌 참여자인 경우는 mappging 테이블을 거쳐서 관련 일정 검색 가능
-  @OneToMany(
-    () => NotHostUserScheduleMapping,
-    (userScheduleMapping) => userScheduleMapping.guestUser,
-  )
-  notHostUserScheduleMappings: NotHostUserScheduleMapping[];
-
   @OneToMany(() => Schedule, (schedule) => schedule.hostUser)
-  schedules: Schedule[];
+  hostschedules: Schedule[];
 
   @OneToMany(() => Club, (club) => club.host)
-  clubs: Club[];
+  hostClubs: Club[];
+
+  @OneToMany(
+    () => PreParticipation,
+    (preParticipation) => preParticipation.gestUser,
+  )
+  preParticipations: PreParticipation[];
+
+  @ManyToMany(() => Schedule, (schedule) => schedule.users)
+  schedules: Schedule[];
+
+  @ManyToMany(() => Club, (club) => club.users)
+  clubs: Schedule[];
 }
