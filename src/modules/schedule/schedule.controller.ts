@@ -2,31 +2,32 @@ import {
   Controller,
   Get,
   Post,
+  Patch,
+  Delete,
   Body,
   Param,
   UseInterceptors,
   Query,
   UseGuards,
+  HttpCode,
 } from '@nestjs/common';
 import { ScheduleService } from './schedule.service';
-import { ApiParam, ApiTags } from '@nestjs/swagger';
+import {
+  ApiParam,
+  ApiTags,
+  ApiCreatedResponse,
+  ApiNoContentResponse,
+} from '@nestjs/swagger';
 import { ResultFormatInterceptor } from 'src/common/interceptor/result-format.interceptor';
 import { SwaggerDefault } from 'src/common/decorator/swagger.decorator';
 import { GetUserId } from 'src/common/decorator/user.decorator';
 import {
   CreateScheduleInputDto,
-  CreateScheduleOutput,
-} from './dto/create-schedule.dto';
-import {
-  GetScheduleOutputDto,
+  ScheduleOutputDto,
   GetScheduleListDto,
   GetSchedulesQueryDto,
-} from './dto/schedule.dto';
-import {
-  GetRoundingAcceptParticipantListOutputDto,
-  GetRoundingWaitingParticipantListOutputDto,
-} from './dto/get-participant-list.dto';
-import { Schedule } from './entity/schedule.entity';
+  UpdateScheduleInputDto,
+} from './dto';
 import { JwtAuthGuard } from '../auth/guard/jwt.guard';
 
 @ApiTags('SCHEDULE')
@@ -36,21 +37,24 @@ import { JwtAuthGuard } from '../auth/guard/jwt.guard';
 export class ScheduleController {
   constructor(private readonly scheduleService: ScheduleService) {}
   @Post()
-  @SwaggerDefault('라운딩 일정 생성')
+  @ApiCreatedResponse({
+    description: '라운딩 일정 생성',
+    type: ScheduleOutputDto,
+  })
   async createSchedule(
     @Body() body: CreateScheduleInputDto,
     @GetUserId() userId: number,
-  ): Promise<CreateScheduleOutput> {
+  ): Promise<ScheduleOutputDto> {
     return await this.scheduleService.createSchedule(body, userId);
   }
 
   @Get('detail/:scheduleId')
-  @SwaggerDefault('라운딩 일정 상세 조회', GetScheduleOutputDto)
+  @SwaggerDefault('라운딩 일정 상세 조회', ScheduleOutputDto)
   @ApiParam({ name: 'scheduleId', required: true })
   async getScheduleDetail(
     @Param('scheduleId') scheduleId: number,
     @GetUserId() userId: number,
-  ): Promise<GetScheduleOutputDto> {
+  ): Promise<ScheduleOutputDto> {
     return await this.scheduleService.getScheduleDetail(scheduleId, userId);
   }
 
@@ -64,6 +68,28 @@ export class ScheduleController {
     @GetUserId() userId: number,
   ): Promise<GetScheduleListDto> {
     return await this.scheduleService.getSchedules(query, userId);
+  }
+
+  @Patch(':scheduleId')
+  @SwaggerDefault('라운딩 일정 수정', ScheduleOutputDto)
+  @ApiParam({ name: 'scheduleId', required: true })
+  async updateSchedule(
+    @Param('scheduleId') scheduleId: number,
+    @Body() body: UpdateScheduleInputDto,
+    @GetUserId() userId: number,
+  ): Promise<ScheduleOutputDto> {
+    return await this.scheduleService.updateSchedule(body, scheduleId, userId);
+  }
+
+  @Delete(':scheduleId')
+  @HttpCode(204)
+  @ApiNoContentResponse({ description: '라운딩 일정 삭제' })
+  @ApiParam({ name: 'scheduleId', required: true })
+  async deleteSchedule(
+    @Param('scheduleId') scheduleId: number,
+    @GetUserId() userId: number,
+  ) {
+    await this.scheduleService.deleteSchedule(scheduleId, userId);
   }
 
   // @Get(':scheduleId/participant/confirm')

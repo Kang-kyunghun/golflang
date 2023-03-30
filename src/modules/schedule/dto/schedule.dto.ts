@@ -10,9 +10,9 @@ import {
 } from 'class-validator';
 import { Schedule } from '../entity/schedule.entity';
 import { User } from '../../user/entity/user.entity';
-import { ScheduleType } from '../enum/schedule.enum';
+import { ScheduleTypeEnum } from '../enum/schedule.enum';
 
-export class GetScheduleOutputDto {
+export class ScheduleOutputDto {
   @ApiProperty({ description: '스케쥴 id' })
   id: number;
 
@@ -20,9 +20,9 @@ export class GetScheduleOutputDto {
   @ApiProperty({ description: '주최자 여부' })
   isHost: boolean;
 
-  @IsEnum(ScheduleType)
+  @IsEnum(ScheduleTypeEnum)
   @ApiProperty({ description: '개인 or 클럽' })
-  scheduleType: ScheduleType;
+  scheduleType: ScheduleTypeEnum;
 
   @IsString()
   @ApiProperty({ description: '일정 이름' })
@@ -69,7 +69,7 @@ export class GetScheduleOutputDto {
   ) {
     this.id = schedule.id;
     this.isHost = schedule.hostUser?.id === selfUserId;
-    this.scheduleType = ScheduleType.value(schedule.type.id);
+    this.scheduleType = ScheduleTypeEnum.value(schedule.type.id);
     this.title = schedule.title;
     this.roundingLocation = schedule.roundingLocation;
     this.roundingPlace = schedule.roundingPlace;
@@ -84,14 +84,14 @@ export class GetScheduleOutputDto {
 
 export class GetScheduleListDto {
   @ApiProperty({ description: '개인 스케줄' })
-  personalSchedules: GetScheduleOutputDto[];
+  personalSchedules: ScheduleOutputDto[];
 
   @ApiProperty({ description: '클럽 스케줄' })
-  clubSchedules: GetScheduleOutputDto[];
+  clubSchedules: ScheduleOutputDto[];
 
   constructor(
-    personalSchedules: GetScheduleOutputDto[],
-    clubSchedules: GetScheduleOutputDto[],
+    personalSchedules: ScheduleOutputDto[],
+    clubSchedules: ScheduleOutputDto[],
   ) {
     this.personalSchedules = personalSchedules;
     this.clubSchedules = clubSchedules;

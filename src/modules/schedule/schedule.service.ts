@@ -11,19 +11,14 @@ import { Between, Repository, DataSource } from 'typeorm';
 import { User } from '../user/entity/user.entity';
 import {
   CreateScheduleInputDto,
-  CreateScheduleOutput,
-} from './dto/create-schedule.dto';
-import {
-  GetRoundingAcceptParticipantListOutputDto,
-  GetRoundingWaitingParticipantListOutputDto,
-} from './dto/get-participant-list.dto';
-import {
-  GetScheduleOutputDto,
+  ScheduleOutputDto,
   GetScheduleListDto,
   GetSchedulesQueryDto,
-} from './dto/schedule.dto';
+  UpdateScheduleInputDto,
+} from './dto';
 import { Schedule } from './entity/schedule.entity';
-import { ScheduleType } from './enum/schedule.enum';
+import { ScheduleType } from './entity/schedule-type.entity';
+import { ScheduleTypeEnum } from './enum/schedule.enum';
 import { ParticipationState } from './enum/schedule.enum';
 import { ScheduleError, SCHEDULE_ERROR } from './error/schedule.error';
 
@@ -47,7 +42,6 @@ export class ScheduleService {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
-
     try {
       const user = await this.userRepo.findOne({ where: { id: userId } });
 
@@ -56,20 +50,20 @@ export class ScheduleService {
       }
 
       const schedule = new Schedule();
+      schedule.type = new ScheduleType();
+
       schedule.title = body.title;
       schedule.roundingPlace = body.roundingPlace;
       schedule.roundingLocation = body.roundingLocation;
       schedule.startTime = body.startTime;
       schedule.maxParticipants = body.maxParticipants;
       schedule.memo = body.memo;
-      schedule.type.id = ScheduleType.id(body.scheduleType);
+      schedule.type.id = ScheduleTypeEnum.id(body.scheduleType);
       schedule.hostUser = user;
-
-      await queryRunner.manager.save(Schedule, schedule);
 
       await queryRunner.commitTransaction();
 
-      return new CreateScheduleOutput(schedule);
+      return new ScheduleOutputDto(schedule, userId, []);
     } catch (error) {
       await queryRunner.rollbackTransaction();
       this.logger.error(error);
@@ -90,7 +84,7 @@ export class ScheduleService {
   async getScheduleDetail(
     scheduleId: number,
     userId: number,
-  ): Promise<GetScheduleOutputDto> {
+  ): Promise<ScheduleOutputDto> {
     try {
       const schedule = await this.scheduleRepo
         .createQueryBuilder('schedule')
@@ -111,7 +105,7 @@ export class ScheduleService {
         return participant.profileImage?.url;
       });
       console.log(schedule);
-      return new GetScheduleOutputDto(
+      return new ScheduleOutputDto(
         schedule,
         userId,
         participants,
@@ -172,8 +166,7 @@ export class ScheduleService {
         .getMany();
 
       const personalSchedules = schedules.map(
-        (schedule) =>
-          new GetScheduleOutputDto(schedule, userId, schedule.users),
+        (schedule) => new ScheduleOutputDto(schedule, userId, schedule.users),
       );
       const excludedScheduleIds = schedules.map((schedule) => schedule.id);
 
@@ -195,10 +188,95 @@ export class ScheduleService {
         .getMany();
 
       const clubSchedules = schedules.map(
-        (schedule) =>
-          new GetScheduleOutputDto(schedule, userId, schedule.users),
+        (schedule) => new ScheduleOutputDto(schedule, userId, schedule.users),
       );
       return new GetScheduleListDto(personalSchedules, clubSchedules);
+    } catch (error) {
+      this.logger.error(error);
+
+      const statusCode = error.response
+        ? error.response.statusCode
+        : HttpStatus.BAD_REQUEST;
+
+      throw new HttpException(
+        this.scheduleError.errorHandler(error.message),
+        statusCode,
+      );
+    }
+  }
+
+  async updateSchedule(
+    body: UpdateScheduleInputDto,
+    scheduleId: number,
+    userId: number,
+  ) {
+    try {
+      const user = await this.userRepo.findOne({ where: { id: userId } });
+
+      if (!user) {
+        throw new NotFoundException(SCHEDULE_ERROR.ROUNDING_USER_NOT_FOUND);
+      }
+
+      const schedule = await this.scheduleRepo.findOne({
+        where: { id: scheduleId, hostUser: { id: userId } },
+      });
+
+      if (!schedule) {
+        throw new NotFoundException(SCHEDULE_ERROR.ROUNDING_SCHEDULE_NOT_FOUND);
+      }
+
+      const bodyKeys = Object.keys(body);
+      const updateData: Partial<Schedule> = {};
+
+      bodyKeys.forEach((key) => {
+        if (body[key] !== undefined) {
+          updateData[key] = body[key];
+        }
+      });
+
+      await this.scheduleRepo.update(schedule.id, updateData);
+
+      const updatedSchedule = await this.scheduleRepo.findOne({
+        where: { id: scheduleId, hostUser: { id: user.id } },
+        relations: ['hostUser', 'type', 'users'],
+      });
+
+      return new ScheduleOutputDto(
+        updatedSchedule,
+        userId,
+        updatedSchedule.users,
+      );
+    } catch (error) {
+      this.logger.error(error);
+
+      const statusCode = error.response
+        ? error.response.statusCode
+        : HttpStatus.BAD_REQUEST;
+
+      throw new HttpException(
+        this.scheduleError.errorHandler(error.message),
+        statusCode,
+      );
+    }
+  }
+
+  async deleteSchedule(scheduleId: number, userId: number) {
+    try {
+      const user = await this.userRepo.findOne({ where: { id: userId } });
+
+      if (!user) {
+        throw new NotFoundException(SCHEDULE_ERROR.ROUNDING_USER_NOT_FOUND);
+      }
+
+      const schedule = await this.scheduleRepo.findOne({
+        where: { id: scheduleId, hostUser: { id: userId } },
+      });
+
+      if (!schedule) {
+        throw new NotFoundException(SCHEDULE_ERROR.ROUNDING_SCHEDULE_NOT_FOUND);
+      }
+
+      await this.scheduleRepo.softDelete(schedule.id);
     } catch (error) {
       this.logger.error(error);
 
