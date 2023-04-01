@@ -36,6 +36,7 @@
     "@types/multer-s3": "^2.7.11",
     "@types/passport-jwt": "^3.0.7",
     "@types/twilio": "^3.19.3",
+    "@types/uuid": "^9.0.1",
     "argon2": "^0.30.3",
     "aws-sdk": "^2.1258.0",
     "axios": "^0.27.2",

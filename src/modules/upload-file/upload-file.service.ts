@@ -17,7 +17,6 @@ export class UploadFileService {
       image.url = file.location;
       image.ext = path.extname(file.originalname);
       image.mime = file.mimetype;
-
       return image;
     } catch (error) {
       throw new BadRequestException('image upload failed');

@@ -4,6 +4,7 @@ import {
   Entity,
   JoinColumn,
   JoinTable,
+  OneToOne,
   ManyToOne,
   OneToMany,
   ManyToMany,
@@ -11,6 +12,7 @@ import {
 
 import { CoreEntity } from 'src/common/entity/core.entity';
 import { User } from 'src/modules/user/entity/user.entity';
+import { UploadFile } from 'src/modules/upload-file/entity/upload-file.entity';
 import { Schedule } from 'src/modules/schedule/entity/schedule.entity';
 
 @Entity()
@@ -23,11 +25,7 @@ export class Club extends CoreEntity {
   @ApiProperty({ description: '주 활동지역' })
   region: string;
 
-  @Column()
-  @ApiProperty({ description: '클럽 총원' })
-  memberTotal: number;
-
-  @Column()
+  @Column({ default: 0 })
   @ApiProperty({ description: '클럽 매너 점수' })
   mennerScore: number;
 
@@ -43,9 +41,9 @@ export class Club extends CoreEntity {
   @ApiProperty({ description: '클럽소개' })
   introduction: string;
 
-  @Column({ length: 2000 })
-  @ApiProperty({ description: '클럽 대표 이미지' })
-  clubProfileImage: string;
+  @OneToOne(() => UploadFile, (uploadFile) => uploadFile.club)
+  @JoinColumn()
+  profileImage: UploadFile;
 
   @ManyToOne(() => User, (user) => user.hostClubs)
   @JoinColumn()

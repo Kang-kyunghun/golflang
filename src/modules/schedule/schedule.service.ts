@@ -104,7 +104,7 @@ export class ScheduleService {
       const participantsProfileImage = participants.map((participant) => {
         return participant.profileImage?.url;
       });
-      console.log(schedule);
+
       return new ScheduleOutputDto(
         schedule,
         userId,
