@@ -7,6 +7,7 @@ import {
   IsOptional,
   IsString,
   IsArray,
+  Matches,
 } from 'class-validator';
 
 export class CreateClubInputDto {
@@ -18,12 +19,16 @@ export class CreateClubInputDto {
   @ApiProperty({ description: '주 활동지역' })
   region: string;
 
-  @IsString()
-  @ApiProperty({ description: '가입조건' })
+  @Matches(/^[a-zA-Z가-힣0-9]+([,][\s]*[a-zA-Z가-힣0-9]+)*$/g)
+  @ApiProperty({
+    description: `가입조건 (조건이 1개일 때는 ', '가 없고, 1개 이상일 때는 단어 사이에 ', '를 추가하여 조건 구분)`,
+  })
   joinCondition: string;
 
-  @IsString()
-  @ApiProperty({ description: '키워드' })
+  @Matches(/^[a-zA-Z가-힣0-9]+([,][\s]*[a-zA-Z가-힣0-9]+)*$/g)
+  @ApiProperty({
+    description: `키워드 (키워드가 1개일 때는 ', '가 없고, 1개 이상일 때는 단어 사이에 ', '를 추가하여 조건 구분)`,
+  })
   searchKeyword: string;
 
   @IsString()

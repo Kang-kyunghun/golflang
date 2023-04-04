@@ -53,7 +53,7 @@ export class ClubService {
       club.name = body.name;
       club.region = body.region;
       club.joinCondition = body.joinCondition;
-      club.searchKeyword = body.searchKeyword.split(',');
+      club.searchKeyword = body.searchKeyword.split(', ');
       club.introduction = body.introduction;
       club.users = [user];
       club.host = user;
