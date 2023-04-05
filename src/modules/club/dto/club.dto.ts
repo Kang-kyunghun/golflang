@@ -80,7 +80,7 @@ export class ClubOutputDto {
     this.memberProfileImages = this.getProfileImage(club.users);
     this.mennerScore = club.mennerScore;
     this.joinCondition = club.joinCondition;
-    this.searchKeyword = club.searchKeyword;
+    this.searchKeyword = club.searchKeyword.split(', ');
     this.introduction = club.introduction;
     this.profileImage = club.profileImage?.url;
   }

@@ -2,6 +2,7 @@ import {
   HttpException,
   HttpStatus,
   NotFoundException,
+  ForbiddenException,
   Injectable,
   Logger,
 } from '@nestjs/common';
@@ -10,8 +11,7 @@ import { Repository, DataSource } from 'typeorm';
 
 import { UploadFileService } from '../upload-file/upload-file.service';
 import { ClubOutputDto } from './dto/club.dto';
-import { CreateClubInputDto } from './dto/create-club.dto';
-import { UpdateClubDto } from './dto/update-club.dto';
+import { CreateClubInputDto, UpdateClubInputDto } from './dto';
 import { Club } from './entity/club.entity';
 import { UploadFile } from '../upload-file/entity/upload-file.entity';
 import { User } from '../user/entity/user.entity';
@@ -53,7 +53,7 @@ export class ClubService {
       club.name = body.name;
       club.region = body.region;
       club.joinCondition = body.joinCondition;
-      club.searchKeyword = body.searchKeyword.split(', ');
+      club.searchKeyword = body.searchKeyword;
       club.introduction = body.introduction;
       club.users = [user];
       club.host = user;
@@ -115,11 +115,104 @@ export class ClubService {
     }
   }
 
-  update(id: number, updateClubDto: UpdateClubDto) {
-    return `This action updates a #${id} club`;
+  async updateClub(
+    body: UpdateClubInputDto,
+    clubId: number,
+    userId: number,
+    file?: Express.MulterS3.File,
+  ) {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      const club = await this.clubRepo.findOne({
+        where: { id: clubId },
+        relations: ['host'],
+      });
+
+      if (!club) {
+        throw new NotFoundException(CLUB_ERROR.CLUB_NOT_FOUND);
+      }
+
+      if (club.host.id !== userId) {
+        throw new ForbiddenException(CLUB_ERROR.CLUB_PERMISSION_DENIED);
+      }
+
+      const bodyKeys = Object.keys(body);
+      const updateData: Partial<Club> = {};
+
+      bodyKeys.forEach((key) => {
+        if (body[key] !== undefined) {
+          updateData[key] = body[key];
+        }
+      });
+
+      if (file) {
+        const profileImage = await this.uploadFileService.uploadSingleImageFile(
+          file,
+        );
+
+        await queryRunner.manager.save(UploadFile, profileImage);
+        updateData.profileImage = profileImage;
+      }
+
+      await queryRunner.manager.update(Club, { id: clubId }, updateData);
+      await queryRunner.commitTransaction();
+
+      const updatedClub = await this.clubRepo
+        .createQueryBuilder('club')
+        .innerJoinAndSelect('club.users', 'user')
+        .leftJoinAndSelect('user.profileImage', 'profileImage')
+        .leftJoinAndSelect('club.host', 'hostUser')
+        .leftJoinAndSelect('hostUser.profileImage', 'hostProfileImage')
+        .where('club.id = :clubId', { clubId })
+        .getOne();
+      return new ClubOutputDto(updatedClub, userId);
+    } catch (error) {
+      this.logger.error(error);
+      await queryRunner.rollbackTransaction();
+
+      const statusCode = error.response
+        ? error.response.statusCode
+        : HttpStatus.BAD_REQUEST;
+
+      throw new HttpException(
+        this.clubError.errorHandler(error.message),
+        statusCode,
+      );
+    } finally {
+      await queryRunner.release();
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} club`;
+  async deleteClub(clubId: number, userId: number) {
+    try {
+      const club = await this.clubRepo.findOne({
+        where: { id: clubId },
+        relations: ['host'],
+      });
+
+      if (!club) {
+        throw new NotFoundException(CLUB_ERROR.CLUB_NOT_FOUND);
+      }
+
+      if (club.host.id !== userId) {
+        throw new ForbiddenException(CLUB_ERROR.CLUB_PERMISSION_DENIED);
+      }
+
+      await this.clubRepo.softDelete(clubId);
+    } catch (error) {
+      this.logger.error(error);
+
+      const statusCode = error.response
+        ? error.response.statusCode
+        : HttpStatus.BAD_REQUEST;
+
+      throw new HttpException(
+        this.clubError.errorHandler(error.message),
+        statusCode,
+      );
+    }
   }
 }
