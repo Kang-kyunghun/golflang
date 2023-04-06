@@ -33,9 +33,9 @@ export class Club extends CoreEntity {
   @ApiProperty({ description: '가입조건' })
   joinCondition: string;
 
-  @Column('simple-array')
+  @Column()
   @ApiProperty({ description: '키워드' })
-  searchKeyword: string[];
+  searchKeyword: string;
 
   @Column('text')
   @ApiProperty({ description: '클럽소개' })
