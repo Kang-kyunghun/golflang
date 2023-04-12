@@ -19,16 +19,13 @@ import { ResultFormatInterceptor } from 'src/common/interceptor/result-format.in
 import {
   CheckNicknameInputDto,
   CheckNicknameOutputDto,
-} from 'src/modules/user/dto/check-nickname.dto';
+} from 'src/modules/user/dto';
 import {
   LocalLoginInputDto,
   LoginOutputDto,
   OAuthLoginInputDto,
 } from 'src/modules/auth/dto/login-dto';
-import {
-  SignupInputDto,
-  SignupOutputDto,
-} from 'src/modules/user/dto/signup-dto';
+import { SignupInputDto, SignupOutputDto } from 'src/modules/user/dto';
 import { AuthService } from './auth.service';
 import { UploadSingleImage } from '../upload-file/decorator/upload-file.decorator';
 

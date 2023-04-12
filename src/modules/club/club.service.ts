@@ -15,7 +15,10 @@ import {
   UpdateClubInputDto,
   GetClubMemberListQueryDto,
   ClubOutputDto,
+  ClubListOutPutDto,
   ClubMemberOutPutDto,
+  ClubMemberListOutPutDto,
+  GetMyClubListQueryDto,
 } from './dto';
 import { Club } from './entity/club.entity';
 import { UploadFile } from '../upload-file/entity/upload-file.entity';
@@ -23,6 +26,7 @@ import { User } from '../user/entity/user.entity';
 import { ClubError, CLUB_ERROR } from './error/club.error';
 import { Gender } from '../user/enum/user.enum';
 import { UserClub } from '../user/entity/user-club.entity';
+import { SortOrderEnum } from 'src/common/enum/common.enum';
 
 @Injectable()
 export class ClubService {
@@ -238,15 +242,41 @@ export class ClubService {
     clubId: number,
     userId: number,
     query: GetClubMemberListQueryDto,
-  ): Promise<ClubMemberOutPutDto[]> {
+  ): Promise<ClubMemberListOutPutDto> {
     try {
-      const { minAge, maxAge, minHitScore, maxHitScore, gender } = query;
+      const {
+        minAge,
+        maxAge,
+        minHitScore,
+        maxHitScore,
+        gender,
+        sortField,
+        sortOrder,
+        offset,
+        limit,
+      } = query;
+      const sortOrderValue = SortOrderEnum.value(sortOrder);
+      let orderBy = {};
 
       //한국 나이로 보정
       const maxYear = new Date().getFullYear() - minAge + 2;
       const minYear = new Date().getFullYear() - maxAge + 1;
 
-      const members = await this.userRepo.find({
+      switch (sortField) {
+        case 'nickName':
+          orderBy['nickname'] = sortOrderValue;
+          break;
+        case 'age':
+          orderBy['birthday'] = sortOrderValue * -1;
+          break;
+        case 'clubHitScore':
+          orderBy['userClubs'] = { clubHitScore: sortOrderValue };
+          break;
+        default:
+          orderBy['id'] = SortOrderEnum.ASC;
+      }
+
+      const [members, totalCount] = await this.userRepo.findAndCount({
         relations: ['userClubs', 'profileImage'],
         where: {
           birthday: Between(minYear.toString(), maxYear.toString()),
@@ -258,9 +288,16 @@ export class ClubService {
             },
           },
         },
+        order: orderBy,
+        skip: offset,
+        take: limit,
       });
 
-      return members.map((member) => new ClubMemberOutPutDto(member));
+      const memberList = members.map(
+        (member) => new ClubMemberOutPutDto(member),
+      );
+
+      return new ClubMemberListOutPutDto(totalCount, memberList);
     } catch (error) {
       this.logger.error(error);
 
@@ -275,9 +312,27 @@ export class ClubService {
     }
   }
 
-  async getMyClubList(userId: number): Promise<ClubOutputDto[]> {
+  async getMyClubList(
+    userId: number,
+    query: GetMyClubListQueryDto,
+  ): Promise<ClubListOutPutDto> {
     try {
-      const clubs = await this.clubRepo.find({
+      const { sortField, sortOrder, offset, limit } = query;
+      const sortOrderValue = SortOrderEnum.value(sortOrder);
+      let orderBy = {};
+
+      switch (sortField) {
+        case 'name':
+          orderBy['name'] = sortOrderValue;
+          break;
+        case 'mennerScore':
+          orderBy['mennerScore'] = sortOrderValue;
+          break;
+        default:
+          orderBy['id'] = SortOrderEnum.ASC;
+      }
+
+      const [clubs, totalCount] = await this.clubRepo.findAndCount({
         relations: [
           'profileImage',
           'userClubs',
@@ -292,9 +347,14 @@ export class ClubService {
             },
           },
         },
+        order: orderBy,
+        skip: offset,
+        take: limit,
       });
 
-      return clubs.map((club) => new ClubOutputDto(club, userId));
+      const clubList = clubs.map((club) => new ClubOutputDto(club, userId));
+
+      return new ClubListOutPutDto(totalCount, clubList);
     } catch (error) {
       this.logger.error(error);
 

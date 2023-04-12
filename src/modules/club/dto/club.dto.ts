@@ -1,7 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsBoolean,
-  IsDate,
   IsEnum,
   IsString,
   IsNumber,
@@ -11,8 +10,8 @@ import {
 } from 'class-validator';
 
 import { Club } from '../entity/club.entity';
-import { User } from 'src/modules/user/entity/user.entity';
 import { UserClub } from 'src/modules/user/entity/user-club.entity';
+import { SortOrderEnum } from 'src/common/enum/common.enum';
 
 export class ClubOutputDto {
   @ApiProperty({ description: '클럽 id' })
@@ -95,4 +94,39 @@ export class ClubOutputDto {
 
     return profileImage;
   }
+}
+
+export class ClubListOutPutDto {
+  @ApiProperty({ description: '조건에 맞는 총 클럽 수' })
+  totalClubCount: number;
+
+  @ApiProperty({ description: '클럽 목록' })
+  clubs: ClubOutputDto[];
+
+  constructor(totalClubCount: number, clubs: ClubOutputDto[]) {
+    this.totalClubCount = totalClubCount;
+    this.clubs = clubs;
+  }
+}
+
+export class GetMyClubListQueryDto {
+  @IsString()
+  @IsOptional()
+  @ApiProperty({ description: '정렬 기준', required: true })
+  sortField: string;
+
+  @IsEnum(SortOrderEnum)
+  @IsOptional()
+  @ApiProperty({ description: 'ASC or DESC', required: true })
+  sortOrder: SortOrderEnum = SortOrderEnum.ASC;
+
+  @IsNumber()
+  @IsOptional()
+  @ApiProperty({ description: 'offset', required: true })
+  offset: number = 0;
+
+  @IsNumber()
+  @IsOptional()
+  @ApiProperty({ description: 'limit', required: true })
+  limit: number = 10;
 }

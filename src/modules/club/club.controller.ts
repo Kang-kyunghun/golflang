@@ -30,8 +30,11 @@ import {
   CreateClubInputDto,
   UpdateClubInputDto,
   ClubOutputDto,
+  ClubListOutPutDto,
   ClubMemberOutPutDto,
+  ClubMemberListOutPutDto,
   GetClubMemberListQueryDto,
+  GetMyClubListQueryDto,
 } from './dto/';
 
 @ApiTags('CLUB')
@@ -130,7 +133,7 @@ export class ClubController {
     @Query() query: GetClubMemberListQueryDto,
     @Param('clubId') clubId: number,
     @GetUserId() userId: number,
-  ): Promise<ClubMemberOutPutDto[]> {
+  ): Promise<ClubMemberListOutPutDto> {
     return await this.clubService.getClubMemberList(clubId, userId, query);
   }
 
@@ -144,7 +147,10 @@ export class ClubController {
     type: [ClubOutputDto],
     isArray: false,
   })
-  async getMyClubList(@GetUserId() userId: number): Promise<ClubOutputDto[]> {
-    return await this.clubService.getMyClubList(userId);
+  async getMyClubList(
+    @Query() query: GetMyClubListQueryDto,
+    @GetUserId() userId: number,
+  ): Promise<ClubListOutPutDto> {
+    return await this.clubService.getMyClubList(userId, query);
   }
 }
