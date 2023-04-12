@@ -1,14 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsBoolean,
-  IsDate,
-  IsEnum,
-  IsNumber,
-  IsOptional,
-  IsString,
-  IsArray,
-  Matches,
-} from 'class-validator';
+import { IsOptional, IsString, Matches } from 'class-validator';
 
 export class CreateClubInputDto {
   @IsString()

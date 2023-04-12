@@ -9,6 +9,7 @@ import {
   UploadedFile,
   UseGuards,
   HttpCode,
+  Query,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -25,7 +26,13 @@ import { JwtAuthGuard } from '../auth/guard/jwt.guard';
 import { UploadSingleImage } from '../upload-file/decorator/upload-file.decorator';
 import { GetUserId } from 'src/common/decorator/user.decorator';
 import { ClubService } from './club.service';
-import { CreateClubInputDto, UpdateClubInputDto, ClubOutputDto } from './dto/';
+import {
+  CreateClubInputDto,
+  UpdateClubInputDto,
+  ClubOutputDto,
+  ClubMemberOutPutDto,
+  GetClubMemberListQueryDto,
+} from './dto/';
 
 @ApiTags('CLUB')
 @UseGuards(JwtAuthGuard)
@@ -106,5 +113,38 @@ export class ClubController {
     @GetUserId() userId: number,
   ) {
     return this.clubService.deleteClub(clubId, userId);
+  }
+
+  @Get('/:clubId/member/list')
+  @ApiOperation({
+    summary: '클럽 회원 목록 조회',
+    description: '클럽 회원 목록를 조회합니다.',
+  })
+  @ApiOkResponse({
+    description: '요청 성공 응답',
+    type: [ClubMemberOutPutDto],
+    isArray: false,
+  })
+  @ApiParam({ name: 'clubId', required: true })
+  async getClubMemberList(
+    @Query() query: GetClubMemberListQueryDto,
+    @Param('clubId') clubId: number,
+    @GetUserId() userId: number,
+  ): Promise<ClubMemberOutPutDto[]> {
+    return await this.clubService.getClubMemberList(clubId, userId, query);
+  }
+
+  @Get('/list/my')
+  @ApiOperation({
+    summary: '내가 가입한 클럽 목록 조회',
+    description: '내가 가입한 클럽의 목록을 조회합니다.',
+  })
+  @ApiOkResponse({
+    description: '요청 성공 응답',
+    type: [ClubOutputDto],
+    isArray: false,
+  })
+  async getMyClubList(@GetUserId() userId: number): Promise<ClubOutputDto[]> {
+    return await this.clubService.getMyClubList(userId);
   }
 }

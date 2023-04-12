@@ -12,6 +12,7 @@ import {
 
 import { Club } from '../entity/club.entity';
 import { User } from 'src/modules/user/entity/user.entity';
+import { UserClub } from 'src/modules/user/entity/user-club.entity';
 
 export class ClubOutputDto {
   @ApiProperty({ description: '클럽 id' })
@@ -73,11 +74,13 @@ export class ClubOutputDto {
       profileImage: club.host?.profileImage?.url,
     };
     this.isHost = club.host?.id === userId;
-    this.isMember = club.users.some((user) => user.id === userId);
+    this.isMember = club.userClubs.some(
+      (userClub) => userClub.user.id === userId,
+    );
     this.name = club.name;
     this.region = club.region;
-    this.memberTotal = club.users.length;
-    this.memberProfileImages = this.getProfileImage(club.users);
+    this.memberTotal = club.userClubs.length;
+    this.memberProfileImages = this.getProfileImage(club.userClubs);
     this.mennerScore = club.mennerScore;
     this.joinCondition = club.joinCondition;
     this.searchKeyword = club.searchKeyword.split(', ');
@@ -85,9 +88,9 @@ export class ClubOutputDto {
     this.profileImage = club.profileImage?.url;
   }
 
-  private getProfileImage(members: User[]) {
-    const profileImage = members.map((member) => {
-      return member.profileImage?.url;
+  private getProfileImage(clubMembers: UserClub[]) {
+    const profileImage = clubMembers.map((clubMember) => {
+      return clubMember.user.profileImage?.url;
     });
 
     return profileImage;
