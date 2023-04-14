@@ -16,6 +16,7 @@ import { UserState } from './user-state.entity';
 import { Schedule } from 'src/modules/schedule/entity/schedule.entity';
 import { Club } from 'src/modules/club/entity/club.entity';
 import { PreParticipation } from 'src/modules/pre-participation/entity/pre-participation.entity';
+import { UserClub } from './user-club.entity';
 
 @Entity()
 export class User extends GuardCoreEntity {
@@ -89,6 +90,6 @@ export class User extends GuardCoreEntity {
   @ManyToMany(() => Schedule, (schedule) => schedule.users)
   schedules: Schedule[];
 
-  @ManyToMany(() => Club, (club) => club.users)
-  clubs: Schedule[];
+  @OneToMany(() => UserClub, (userClub) => userClub.user)
+  userClubs: UserClub[];
 }

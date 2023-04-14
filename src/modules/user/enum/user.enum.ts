@@ -1,12 +1,19 @@
-enum Role {
+export enum Role {
   USER = 'user',
   ADMIN = 'admin',
   LEADER = 'leader',
 }
 
-enum Gender {
+export enum Gender {
   MALE = 'male',
   FEMALE = 'female',
 }
 
-export { Role, Gender };
+export namespace Gender {
+  export function value(gender: string) {
+    return {
+      male: Gender.MALE,
+      female: Gender.FEMALE,
+    }[gender];
+  }
+}

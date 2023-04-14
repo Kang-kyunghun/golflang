@@ -7,15 +7,22 @@ import {
   Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DataSource } from 'typeorm';
+import { Repository, DataSource, Between } from 'typeorm';
 
 import { UploadFileService } from '../upload-file/upload-file.service';
-import { ClubOutputDto } from './dto/club.dto';
-import { CreateClubInputDto, UpdateClubInputDto } from './dto';
+import {
+  CreateClubInputDto,
+  UpdateClubInputDto,
+  GetClubMemberListQueryDto,
+  ClubOutputDto,
+  ClubMemberOutPutDto,
+} from './dto';
 import { Club } from './entity/club.entity';
 import { UploadFile } from '../upload-file/entity/upload-file.entity';
 import { User } from '../user/entity/user.entity';
 import { ClubError, CLUB_ERROR } from './error/club.error';
+import { Gender } from '../user/enum/user.enum';
+import { UserClub } from '../user/entity/user-club.entity';
 
 @Injectable()
 export class ClubService {
@@ -55,7 +62,6 @@ export class ClubService {
       club.joinCondition = body.joinCondition;
       club.searchKeyword = body.searchKeyword;
       club.introduction = body.introduction;
-      club.users = [user];
       club.host = user;
 
       if (file) {
@@ -68,6 +74,13 @@ export class ClubService {
       }
 
       await queryRunner.manager.save(Club, club);
+
+      const userClub = new UserClub();
+      userClub.user = user;
+      userClub.club = club;
+      club.userClubs = [userClub];
+
+      await queryRunner.manager.save(UserClub, userClub);
       await queryRunner.commitTransaction();
 
       return new ClubOutputDto(club, userId);
@@ -89,8 +102,10 @@ export class ClubService {
     try {
       const club = await this.clubRepo
         .createQueryBuilder('club')
-        .innerJoinAndSelect('club.users', 'user')
-        .leftJoinAndSelect('user.profileImage', 'profileImage')
+        .innerJoinAndSelect('club.profileImage', 'profileImage')
+        .innerJoinAndSelect('club.userClubs', 'userClubs')
+        .innerJoinAndSelect('userClubs.user', 'user')
+        .leftJoinAndSelect('user.profileImage', 'userProfileImage')
         .leftJoinAndSelect('club.host', 'hostUser')
         .leftJoinAndSelect('hostUser.profileImage', 'hostProfileImage')
         .where('club.id = :clubId', { clubId })
@@ -162,12 +177,15 @@ export class ClubService {
 
       const updatedClub = await this.clubRepo
         .createQueryBuilder('club')
-        .innerJoinAndSelect('club.users', 'user')
-        .leftJoinAndSelect('user.profileImage', 'profileImage')
+        .innerJoinAndSelect('club.profileImage', 'profileImage')
+        .innerJoinAndSelect('club.userClubs', 'userClubs')
+        .innerJoinAndSelect('userClubs.user', 'user')
+        .leftJoinAndSelect('user.profileImage', 'userProfileImage')
         .leftJoinAndSelect('club.host', 'hostUser')
         .leftJoinAndSelect('hostUser.profileImage', 'hostProfileImage')
         .where('club.id = :clubId', { clubId })
         .getOne();
+
       return new ClubOutputDto(updatedClub, userId);
     } catch (error) {
       this.logger.error(error);
@@ -202,6 +220,81 @@ export class ClubService {
       }
 
       await this.clubRepo.softDelete(clubId);
+    } catch (error) {
+      this.logger.error(error);
+
+      const statusCode = error.response
+        ? error.response.statusCode
+        : HttpStatus.BAD_REQUEST;
+
+      throw new HttpException(
+        this.clubError.errorHandler(error.message),
+        statusCode,
+      );
+    }
+  }
+
+  async getClubMemberList(
+    clubId: number,
+    userId: number,
+    query: GetClubMemberListQueryDto,
+  ): Promise<ClubMemberOutPutDto[]> {
+    try {
+      const { minAge, maxAge, minHitScore, maxHitScore, gender } = query;
+
+      //한국 나이로 보정
+      const maxYear = new Date().getFullYear() - minAge + 2;
+      const minYear = new Date().getFullYear() - maxAge + 1;
+
+      const members = await this.userRepo.find({
+        relations: ['userClubs', 'profileImage'],
+        where: {
+          birthday: Between(minYear.toString(), maxYear.toString()),
+          gender: Gender.value(gender),
+          userClubs: {
+            clubHitScore: Between(minHitScore, maxHitScore),
+            club: {
+              id: clubId,
+            },
+          },
+        },
+      });
+
+      return members.map((member) => new ClubMemberOutPutDto(member));
+    } catch (error) {
+      this.logger.error(error);
+
+      const statusCode = error.response
+        ? error.response.statusCode
+        : HttpStatus.BAD_REQUEST;
+
+      throw new HttpException(
+        this.clubError.errorHandler(error.message),
+        statusCode,
+      );
+    }
+  }
+
+  async getMyClubList(userId: number): Promise<ClubOutputDto[]> {
+    try {
+      const clubs = await this.clubRepo.find({
+        relations: [
+          'profileImage',
+          'userClubs',
+          'host',
+          'host.profileImage',
+          'userClubs.user.profileImage',
+        ],
+        where: {
+          userClubs: {
+            user: {
+              id: userId,
+            },
+          },
+        },
+      });
+
+      return clubs.map((club) => new ClubOutputDto(club, userId));
     } catch (error) {
       this.logger.error(error);
 

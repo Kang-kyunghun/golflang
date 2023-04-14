@@ -31,6 +31,7 @@ import { PreParticipationModule } from 'src/modules/pre-participation/pre-partic
 import { PreParticipation } from 'src/modules/pre-participation/entity/pre-participation.entity';
 import { ParticipationType } from 'src/modules/pre-participation/entity/participation-type.entity';
 import { ParticipationState } from 'src/modules/pre-participation/entity/participation-state.entity';
+import { UserClub } from 'src/modules/user/entity/user-club.entity';
 
 export const ENTITIES = [
   User,
@@ -51,6 +52,7 @@ export const ENTITIES = [
   PreParticipation,
   ParticipationType,
   ParticipationState,
+  UserClub,
 ];
 
 export const MODULES = [

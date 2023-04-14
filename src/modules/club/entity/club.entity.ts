@@ -3,17 +3,16 @@ import {
   Column,
   Entity,
   JoinColumn,
-  JoinTable,
   OneToOne,
   ManyToOne,
   OneToMany,
-  ManyToMany,
 } from 'typeorm';
 
 import { CoreEntity } from 'src/common/entity/core.entity';
 import { User } from 'src/modules/user/entity/user.entity';
 import { UploadFile } from 'src/modules/upload-file/entity/upload-file.entity';
 import { Schedule } from 'src/modules/schedule/entity/schedule.entity';
+import { UserClub } from 'src/modules/user/entity/user-club.entity';
 
 @Entity()
 export class Club extends CoreEntity {
@@ -52,11 +51,6 @@ export class Club extends CoreEntity {
   @OneToMany(() => Schedule, (schedule) => schedule.club)
   schedules: Schedule[];
 
-  @ManyToMany(() => User, (user) => user.clubs)
-  @JoinTable({
-    name: 'clubs_users',
-    joinColumns: [{ name: 'club_id' }],
-    inverseJoinColumns: [{ name: 'user_id' }],
-  })
-  users: User[];
+  @OneToMany(() => UserClub, (userClub) => userClub.club)
+  userClubs: UserClub[];
 }
