@@ -9,20 +9,20 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { ApiBody, ApiTags } from '@nestjs/swagger';
+import { ApiTags, ApiBody, ApiOperation, ApiOkResponse } from '@nestjs/swagger';
 import { RoleGuard } from 'src/common/decorator/role.decorator';
 import { SwaggerDefault } from 'src/common/decorator/swagger.decorator';
 import { GetUserId } from 'src/common/decorator/user.decorator';
 import { PermissionRole } from 'src/common/enum/common.enum';
 import { ResultFormatInterceptor } from 'src/common/interceptor/result-format.interceptor';
-
-import { UploadSingleImage } from '../upload-file/decorator/upload-file.decorator';
-import { GetUserDetailOutputDto } from './dto/get-user-detail.dto';
 import {
-  SearchUsersOutputDto,
-  SearchUsersQueryDto,
-} from './dto/search-users.dto';
-import { UpdateUserInfoInputDto } from './dto/update-user-info.dto';
+  GetUserDetailOutputDto,
+  GetUserListQueryDto,
+  UserOutputDto,
+  UserListOutputDto,
+  UpdateUserInfoInputDto,
+} from './dto';
+import { UploadSingleImage } from '../upload-file/decorator/upload-file.decorator';
 import { UserService } from './user.service';
 
 @ApiTags('USER')
@@ -54,15 +54,19 @@ export class UserController {
     return this.userService.updateUserInfo(userId, body, file);
   }
 
-  @Get('search')
-  @SwaggerDefault(
-    '유저 검색',
-    SearchUsersOutputDto,
-    'id 또는 닉네임으로 이용자 검색',
-  )
-  searchUsers(
-    @Query() query: SearchUsersQueryDto,
-  ): Promise<SearchUsersOutputDto> {
-    return this.userService.searchUsers(query);
+  @Get('list')
+  @ApiOperation({
+    summary: '서비스 이용자 목록 조회',
+    description: 'id 또는 닉네임으로 서비스 이용자 목록를 조회합니다.',
+  })
+  @ApiOkResponse({
+    description: '요청 성공 응답',
+    type: [UserOutputDto],
+    isArray: false,
+  })
+  async getUserList(
+    @Query() query: GetUserListQueryDto,
+  ): Promise<UserListOutputDto> {
+    return await this.userService.getUserList(query);
   }
 }

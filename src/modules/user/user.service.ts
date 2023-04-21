@@ -7,21 +7,23 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Not, Repository } from 'typeorm';
+import { DataSource, Not, Repository, Like } from 'typeorm';
 
 import { UserState } from './entity/user-state.entity';
 import { User } from './entity/user.entity';
 import { CommonService } from 'src/common/common.service';
-import { UpdateUserInfoInputDto } from './dto/update-user-info.dto';
 import { UploadFileService } from '../upload-file/upload-file.service';
 import { UploadFile } from '../upload-file/entity/upload-file.entity';
 import {
-  SearchUsersOutputDto,
-  SearchUsersQueryDto,
-} from './dto/search-users.dto';
-import { GetUserDetailOutputDto } from './dto/get-user-detail.dto';
+  GetUserDetailOutputDto,
+  GetUserListQueryDto,
+  UserOutputDto,
+  UserListOutputDto,
+  UpdateUserInfoInputDto,
+} from './dto';
 import { UserError, USER_ERROR } from './error/user.error';
 import { Account } from './entity/account.entity';
+import { SortOrderEnum } from 'src/common/enum/common.enum';
 
 @Injectable()
 export class UserService {
@@ -167,55 +169,51 @@ export class UserService {
     }
   }
 
-  async searchUsers(query: SearchUsersQueryDto): Promise<SearchUsersOutputDto> {
+  async getUserList(query: GetUserListQueryDto): Promise<UserListOutputDto> {
     try {
-      const { keyword } = query;
+      const { keyword, sortField, sortOrder, offset, limit } = query;
+      const sortOrderValue = SortOrderEnum.value(sortOrder);
+      let orderBy = {};
 
-      const resultQuery = this.userRepo
-        .createQueryBuilder('user')
-        .innerJoin('user.userState', 'userState')
-        .innerJoin('user.accounts', 'account')
-        .innerJoin('user.profileImage', 'profileImage')
-        .select([
-          'user.id',
-          'user.uid',
-          'user.gender',
-          'user.birthday',
-          'account.email',
-          'user.nickname',
-          'profileImage.url',
-          'userState.avgHitScore',
-        ]);
-
-      let result;
-      if (keyword) {
-        result = await resultQuery
-          .where('user.nickname like :nickname', { nickname: `%${keyword}%` })
-          .orWhere('account.email like :email', { email: `%${keyword}%` })
-          .getManyAndCount();
-      } else {
-        result = await resultQuery.getManyAndCount();
+      switch (sortField) {
+        case 'nickName':
+          orderBy['nickname'] = sortOrderValue;
+          break;
+        case 'age':
+          orderBy['birthday'] = sortOrderValue * -1;
+          break;
+        case 'avgHitScore':
+          orderBy['userState'] = { avgHitScore: sortOrderValue };
+          break;
+        default:
+          orderBy['id'] = SortOrderEnum.ASC;
       }
 
-      const participants = await Promise.all(
-        result[0].map(async (v) => {
-          return {
-            id: v.id,
-            profileImage: v.profileImage.url,
-            nickname: v.nickname,
-            gender: v.gender,
-            age: await this.commonService.getAge(v.birthday),
-            avgHitScore: v.userState.avgHitScore,
-          };
-        }),
-      );
+      const [users, totalCount] = await this.userRepo.findAndCount({
+        relations: ['userState', 'profileImage', 'account'],
+        where: [
+          { account: { email: Like(`%${keyword || ''}%`) } },
+          { nickname: Like(`%${keyword || ''}%`) },
+        ],
+        order: orderBy,
+        skip: offset,
+        take: limit,
+      });
 
-      return {
-        participantCount: result[1],
-        participants,
-      };
+      const userList = users.map((user) => new UserOutputDto(user));
+
+      return new UserListOutputDto(totalCount, userList);
     } catch (error) {
-      console.log(error);
+      this.logger.error(error);
+
+      const statusCode = error.response
+        ? error.response.statusCode
+        : HttpStatus.BAD_REQUEST;
+
+      throw new HttpException(
+        this.userError.errorHandler(error.message),
+        statusCode,
+      );
     }
   }
 }

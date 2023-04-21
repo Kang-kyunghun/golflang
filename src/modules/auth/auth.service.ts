@@ -26,17 +26,14 @@ import {
 import { AuthError, AUTH_ERROR } from 'src/modules/auth/error/auth.error';
 import { UploadFileService } from '../upload-file/upload-file.service';
 import { UploadFile } from '../upload-file/entity/upload-file.entity';
-import {
-  CheckNicknameInputDto,
-  CheckNicknameOutputDto,
-} from '../user/dto/check-nickname.dto';
+import { CheckNicknameInputDto, CheckNicknameOutputDto } from '../user/dto';
 import { Provider } from './enum/account.enum';
 
 import {
   RefreshTokenOutputDto as AcessTokenOutputDto,
   RefreshTokenQueryDto as AccessTokenQueryDto,
 } from './dto/refresh-token.dto';
-import { SignupInputDto } from '../user/dto/signup-dto';
+import { SignupInputDto } from '../user/dto';
 
 @Injectable()
 export class AuthService {

@@ -3,6 +3,7 @@ import { IsEnum, IsString, IsNumber, IsOptional } from 'class-validator';
 
 import { User } from 'src/modules/user/entity/user.entity';
 import { Gender } from 'src/modules/user/enum/user.enum';
+import { SortOrderEnum } from 'src/common/enum/common.enum';
 
 export class ClubMemberOutPutDto {
   @IsNumber()
@@ -49,6 +50,19 @@ export class ClubMemberOutPutDto {
   }
 }
 
+export class ClubMemberListOutPutDto {
+  @ApiProperty({ description: '조건에 맞는 총 맴버 수' })
+  totalMemberCount: number;
+
+  @ApiProperty({ description: '클럽 맴버 목록' })
+  clubMembers: ClubMemberOutPutDto[];
+
+  constructor(totalMemberCount: number, clubMembers: ClubMemberOutPutDto[]) {
+    this.totalMemberCount = totalMemberCount;
+    this.clubMembers = clubMembers;
+  }
+}
+
 export class GetClubMemberListQueryDto {
   @IsOptional()
   @IsNumber()
@@ -89,4 +103,24 @@ export class GetClubMemberListQueryDto {
   @IsOptional()
   @ApiProperty({ description: '성별', enum: Gender })
   gender: string;
+
+  @IsString()
+  @IsOptional()
+  @ApiProperty({ description: '정렬 기준', required: true })
+  sortField: string;
+
+  @IsEnum(SortOrderEnum)
+  @IsOptional()
+  @ApiProperty({ description: 'ASC or DESC', required: true })
+  sortOrder: SortOrderEnum = SortOrderEnum.ASC;
+
+  @IsNumber()
+  @IsOptional()
+  @ApiProperty({ description: 'offset', required: true })
+  offset: number = 0;
+
+  @IsNumber()
+  @IsOptional()
+  @ApiProperty({ description: 'limit', required: true })
+  limit: number = 10;
 }
