@@ -4,6 +4,7 @@ import { Column, Entity, OneToOne } from 'typeorm';
 import { CoreEntity } from 'src/common/entity/core.entity';
 import { User } from 'src/modules/user/entity/user.entity';
 import { Club } from 'src/modules/club/entity/club.entity';
+import { ClubPostImage } from 'src/modules/club-post/entity';
 
 @Entity()
 export class UploadFile extends CoreEntity {
@@ -36,4 +37,7 @@ export class UploadFile extends CoreEntity {
 
   @OneToOne(() => Club, (club) => club.profileImage)
   club: Club;
+
+  @OneToOne(() => ClubPostImage, (clubPostImage) => clubPostImage.clubPostImage)
+  clubPostImage: ClubPostImage;
 }
