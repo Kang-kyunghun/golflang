@@ -13,6 +13,7 @@ import { User } from 'src/modules/user/entity/user.entity';
 import { UploadFile } from 'src/modules/upload-file/entity/upload-file.entity';
 import { Schedule } from 'src/modules/schedule/entity/schedule.entity';
 import { UserClub } from 'src/modules/user/entity/user-club.entity';
+import { ClubPost } from 'src/modules/club-post/entity/club-post.entity';
 
 @Entity()
 export class Club extends CoreEntity {
@@ -53,4 +54,7 @@ export class Club extends CoreEntity {
 
   @OneToMany(() => UserClub, (userClub) => userClub.club)
   userClubs: UserClub[];
+
+  @OneToMany(() => ClubPost, (clubPost) => clubPost.club)
+  posts: ClubPost[];
 }

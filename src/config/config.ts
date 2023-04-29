@@ -32,6 +32,14 @@ import { PreParticipation } from 'src/modules/pre-participation/entity/pre-parti
 import { ParticipationType } from 'src/modules/pre-participation/entity/participation-type.entity';
 import { ParticipationState } from 'src/modules/pre-participation/entity/participation-state.entity';
 import { UserClub } from 'src/modules/user/entity/user-club.entity';
+import { ClubPostModule } from 'src/modules/club-post/club-post.module';
+import {
+  ClubPostCategory,
+  HandyApproveState,
+  ClubPost,
+  ClubPostComment,
+  ClubPostImage,
+} from 'src/modules/club-post/entity';
 
 export const ENTITIES = [
   User,
@@ -53,6 +61,11 @@ export const ENTITIES = [
   ParticipationType,
   ParticipationState,
   UserClub,
+  ClubPostCategory,
+  HandyApproveState,
+  ClubPost,
+  ClubPostComment,
+  ClubPostImage,
 ];
 
 export const MODULES = [
@@ -71,6 +84,7 @@ export const MODULES = [
   InvitationModule,
   PingModule,
   PreParticipationModule,
+  ClubPostModule,
 ];
 
 export interface DatabaseConfig {
