@@ -22,4 +22,23 @@ export class UploadFileService {
       throw new BadRequestException('image upload failed');
     }
   }
+
+  async uploadMultipleImageFile(files: Express.MulterS3.File[]) {
+    try {
+      const uploadFiles = files.map((file) => {
+        const image = new UploadFile();
+        image.name = file.originalname;
+        image.hash = file.filename;
+        image.size = file.size;
+        image.url = file.location;
+        image.ext = path.extname(file.originalname);
+        image.mime = file.mimetype;
+        return image;
+      });
+
+      return uploadFiles;
+    } catch (error) {
+      throw new BadRequestException('image upload failed');
+    }
+  }
 }

@@ -1,5 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Column, Entity, JoinColumn, OneToMany, ManyToOne } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  OneToMany,
+  ManyToOne,
+  OneToOne,
+} from 'typeorm';
 
 import { CoreEntity } from 'src/common/entity/core.entity';
 import { User } from 'src/modules/user/entity/user.entity';
@@ -44,6 +51,6 @@ export class ClubPost extends CoreEntity {
   @OneToMany(() => ClubPostImage, (clubPostImage) => clubPostImage.clubPost)
   images: ClubPostImage[];
 
-  @OneToMany(() => HandyApproveState, (state) => state.clubPost)
-  handyApproveState: HandyApproveState[];
+  @OneToOne(() => HandyApproveState, (state) => state.clubPost)
+  handyApproveState: HandyApproveState;
 }
