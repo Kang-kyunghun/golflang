@@ -99,7 +99,6 @@ export class ClubController {
     @GetUserId() userId: number,
     @UploadedFile() file?: Express.MulterS3.File,
   ): Promise<ClubOutputDto> {
-    console.log(body);
     return this.clubService.updateClub(body, clubId, userId, file);
   }
 

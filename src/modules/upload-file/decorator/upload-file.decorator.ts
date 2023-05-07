@@ -2,7 +2,7 @@
 import 'dotenv/config';
 
 import { applyDecorators, UseInterceptors } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 
 import { v4 as uuid } from 'uuid';
 import * as AWS from 'aws-sdk';
@@ -30,6 +30,17 @@ export function UploadSingleImage(fieldName: string) {
   return applyDecorators(
     UseInterceptors(
       FileInterceptor(fieldName, {
+        storage: storage,
+        limits: {},
+      }),
+    ),
+  );
+}
+
+export function UploadMultipleImages(fieldName: string, maxCount: number) {
+  return applyDecorators(
+    UseInterceptors(
+      FilesInterceptor(fieldName, maxCount, {
         storage: storage,
         limits: {},
       }),

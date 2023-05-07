@@ -2,15 +2,14 @@ import { ApiProperty } from '@nestjs/swagger';
 import {
   BaseEntity,
   PrimaryGeneratedColumn,
-  OneToMany,
-  ManyToOne,
+  OneToOne,
   Column,
   Entity,
-  JoinColumn
+  JoinColumn,
 } from 'typeorm';
 
 import { ClubPost } from './club-post.entity';
-import { HandyState } from '../enum/hand_state'
+import { HandyState } from '../enum/club-post.enum';
 
 @Entity()
 export class HandyApproveState extends BaseEntity {
@@ -22,7 +21,7 @@ export class HandyApproveState extends BaseEntity {
   @ApiProperty({ description: '요청 타수 인정 상태' })
   state: HandyState;
 
-  @ManyToOne(() => ClubPost, (clubPost) => clubPost.handyApproveState)
+  @OneToOne(() => ClubPost, (clubPost) => clubPost.handyApproveState)
   @JoinColumn()
   @ApiProperty({ description: '클럽 게시글' })
   clubPost: ClubPost;
