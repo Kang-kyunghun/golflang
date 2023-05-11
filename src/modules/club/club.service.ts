@@ -26,7 +26,7 @@ import { User } from '../user/entity/user.entity';
 import { ClubError, CLUB_ERROR } from './error/club.error';
 import { Gender } from '../user/enum/user.enum';
 import { UserClub } from '../user/entity/user-club.entity';
-import { SortOrderEnum } from 'src/common/enum/common.enum';
+import { SortOrderEnum } from 'src/common/enum/sortField.enum';
 
 @Injectable()
 export class ClubService {
@@ -263,9 +263,6 @@ export class ClubService {
       const minYear = new Date().getFullYear() - maxAge + 1;
 
       switch (sortField) {
-        case 'nickName':
-          orderBy['nickname'] = sortOrderValue;
-          break;
         case 'age':
           orderBy['birthday'] = sortOrderValue * -1;
           break;
@@ -273,7 +270,7 @@ export class ClubService {
           orderBy['userClubs'] = { clubHitScore: sortOrderValue };
           break;
         default:
-          orderBy['id'] = SortOrderEnum.ASC;
+          orderBy['nickname'] = sortOrderValue;
       }
 
       const [members, totalCount] = await this.userRepo.findAndCount({
@@ -322,14 +319,11 @@ export class ClubService {
       let orderBy = {};
 
       switch (sortField) {
-        case 'name':
-          orderBy['name'] = sortOrderValue;
-          break;
         case 'mennerScore':
           orderBy['mennerScore'] = sortOrderValue;
           break;
         default:
-          orderBy['id'] = SortOrderEnum.ASC;
+          orderBy['name'] = sortOrderValue;
       }
 
       const [clubs, totalCount] = await this.clubRepo.findAndCount({

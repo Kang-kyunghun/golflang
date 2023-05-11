@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsOptional, IsString, IsNumber, IsEnum } from 'class-validator';
-import { SortOrderEnum } from 'src/common/enum/common.enum';
+import { SortOrderEnum, UserSortField } from 'src/common/enum/sortField.enum';
 import { User } from '../entity/user.entity';
 import { Gender } from '../enum/user.enum';
 
@@ -12,22 +12,31 @@ export class GetUserListQueryDto {
 
   @IsString()
   @IsOptional()
-  @ApiProperty({ description: '정렬 기준', required: true })
-  sortField: string;
+  @ApiProperty({
+    description: '정렬 기준',
+    enum: UserSortField,
+    default: 'nickname',
+    required: false,
+  })
+  sortField: UserSortField;
 
   @IsEnum(SortOrderEnum)
   @IsOptional()
-  @ApiProperty({ description: 'ASC or DESC', required: true })
+  @ApiProperty({
+    description: 'ASC or DESC',
+    default: 'ASC',
+    required: false,
+  })
   sortOrder: SortOrderEnum = SortOrderEnum.ASC;
 
   @IsNumber()
   @IsOptional()
-  @ApiProperty({ description: 'offset', required: true })
+  @ApiProperty({ description: 'offset', default: 0, required: false })
   offset: number = 0;
 
   @IsNumber()
   @IsOptional()
-  @ApiProperty({ description: 'limit', required: true })
+  @ApiProperty({ description: 'limit', default: 10, required: false })
   limit: number = 10;
 }
 

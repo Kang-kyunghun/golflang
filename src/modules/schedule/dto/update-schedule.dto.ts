@@ -10,36 +10,36 @@ import {
 export class UpdateScheduleInputDto {
   @IsString()
   @IsOptional()
-  @ApiProperty({ description: '일정 이름' })
+  @ApiProperty({ description: '일정 이름', required: false })
   title: string;
 
   @IsString()
   @IsOptional()
-  @ApiProperty({ description: '일정 장소' })
+  @ApiProperty({ description: '일정 장소', required: false })
   roundingPlace: string;
 
   @IsString()
   @IsOptional()
-  @ApiProperty({ description: '일정 지역 위치' })
+  @ApiProperty({ description: '일정 지역 위치', required: false })
   roundingLocation: string;
 
   @IsDate()
   @IsOptional()
-  @ApiProperty({ description: '일정 시작 시간' })
+  @ApiProperty({ description: '일정 시작 시간', required: false })
   startTime: string;
 
   @IsNumber()
   @IsOptional()
-  @ApiProperty({ description: '최대 참여자 수' })
+  @ApiProperty({ description: '최대 참여자 수', required: false })
   maxParticipants: number;
 
   @IsString()
   @IsOptional()
-  @ApiProperty({ description: '메모' })
+  @ApiProperty({ description: '메모', required: false })
   memo: string;
 
   @IsBoolean()
   @IsOptional()
-  @ApiProperty({ description: '공개 여부' })
+  @ApiProperty({ description: '공개 여부', required: false })
   isPrivate: boolean;
 }

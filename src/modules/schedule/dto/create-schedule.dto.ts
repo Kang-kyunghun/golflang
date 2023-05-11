@@ -32,7 +32,7 @@ export class CreateScheduleInputDto {
 
   @IsString()
   @IsOptional()
-  @ApiProperty({ description: '메모' })
+  @ApiProperty({ description: '메모', required: false })
   memo: string;
 
   @IsBoolean()

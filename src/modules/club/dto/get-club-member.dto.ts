@@ -3,7 +3,10 @@ import { IsEnum, IsString, IsNumber, IsOptional } from 'class-validator';
 
 import { User } from 'src/modules/user/entity/user.entity';
 import { Gender } from 'src/modules/user/enum/user.enum';
-import { SortOrderEnum } from 'src/common/enum/common.enum';
+import {
+  SortOrderEnum,
+  ClubMemberSortField,
+} from 'src/common/enum/sortField.enum';
 
 export class ClubMemberOutPutDto {
   @IsNumber()
@@ -70,6 +73,7 @@ export class GetClubMemberListQueryDto {
     description: '최소 나이',
     example: '1',
     default: '1',
+    required: false,
   })
   minAge: number = 0;
 
@@ -79,6 +83,7 @@ export class GetClubMemberListQueryDto {
     description: '최대 나이',
     example: '100',
     default: '100',
+    required: false,
   })
   maxAge: number = 100;
 
@@ -88,6 +93,7 @@ export class GetClubMemberListQueryDto {
     description: '최저 클럽 인정 타수',
     example: '0',
     default: '0',
+    required: false,
   })
   minHitScore: number = 0;
 
@@ -97,30 +103,40 @@ export class GetClubMemberListQueryDto {
     description: '최고 클럽 인정 타수',
     example: '200',
     default: '200',
+    required: false,
   })
   maxHitScore: number = 200;
 
   @IsOptional()
-  @ApiProperty({ description: '성별', enum: Gender })
+  @ApiProperty({ description: '성별', enum: Gender, required: false })
   gender: string;
 
   @IsString()
   @IsOptional()
-  @ApiProperty({ description: '정렬 기준', required: true })
-  sortField: string;
+  @ApiProperty({
+    description: '정렬 기준',
+    enum: ClubMemberSortField,
+    default: 'nickname',
+    required: false,
+  })
+  sortField: ClubMemberSortField;
 
   @IsEnum(SortOrderEnum)
   @IsOptional()
-  @ApiProperty({ description: 'ASC or DESC', required: true })
+  @ApiProperty({
+    description: 'ASC or DESC',
+    default: 'ACS',
+    required: false,
+  })
   sortOrder: SortOrderEnum = SortOrderEnum.ASC;
 
   @IsNumber()
   @IsOptional()
-  @ApiProperty({ description: 'offset', required: true })
+  @ApiProperty({ description: 'offset', default: 0, required: false })
   offset: number = 0;
 
   @IsNumber()
   @IsOptional()
-  @ApiProperty({ description: 'limit', required: true })
+  @ApiProperty({ description: 'limit', default: 10, required: false })
   limit: number = 10;
 }

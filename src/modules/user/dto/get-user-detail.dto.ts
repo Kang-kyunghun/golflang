@@ -8,47 +8,47 @@ export class GetUserDetailOutputDto {
   @ApiProperty({ description: 'User ID' })
   userId: number;
 
-  @ApiProperty({ description: '닉네임' })
   @IsOptional()
+  @ApiProperty({ description: '닉네임', required: false })
   nickname: string;
 
-  @ApiProperty({ description: '이메일' })
+  @ApiProperty({ description: '이메일', required: false })
   email: string;
 
-  @ApiProperty({ description: '성별' })
   @IsOptional()
+  @ApiProperty({ description: '성별', required: false })
   gender: Gender;
 
-  @ApiProperty({ description: '나이' })
   @IsOptional()
+  @ApiProperty({ description: '나이', required: false })
   birthday: string;
 
-  @ApiProperty({ description: '전화번호' })
   @IsOptional()
+  @ApiProperty({ description: '전화번호', required: false })
   phone: string;
 
-  @ApiProperty({ description: '지역1' })
   @IsOptional()
+  @ApiProperty({ description: '지역1', required: false })
   addressMain: string;
 
-  @ApiProperty({ description: '지역2' })
   @IsOptional()
+  @ApiProperty({ description: '지역2', required: false })
   addressDetail: string;
 
-  @ApiProperty({ description: '평균타수' })
   @IsOptional()
+  @ApiProperty({ description: '평균타수', required: false })
   avgHitScore: number;
 
-  @ApiProperty({ description: '매너지수' })
   @IsOptional()
+  @ApiProperty({ description: '매너지수', required: false })
   mannerScore: number;
 
-  @ApiProperty({ description: '프로필 이미지 url' })
   @IsOptional()
+  @ApiProperty({ description: '프로필 이미지 url', required: false })
   photo: string;
 
-  @ApiProperty({ description: '로긴 provider' })
   @IsOptional()
+  @ApiProperty({ description: '로긴 provider', required: false })
   provider: Provider;
 
   constructor(user: User) {

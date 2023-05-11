@@ -23,7 +23,7 @@ import {
 } from './dto';
 import { UserError, USER_ERROR } from './error/user.error';
 import { Account } from './entity/account.entity';
-import { SortOrderEnum } from 'src/common/enum/common.enum';
+import { SortOrderEnum } from 'src/common/enum/sortField.enum';
 
 @Injectable()
 export class UserService {
@@ -176,9 +176,6 @@ export class UserService {
       let orderBy = {};
 
       switch (sortField) {
-        case 'nickName':
-          orderBy['nickname'] = sortOrderValue;
-          break;
         case 'age':
           orderBy['birthday'] = sortOrderValue * -1;
           break;
@@ -186,7 +183,7 @@ export class UserService {
           orderBy['userState'] = { avgHitScore: sortOrderValue };
           break;
         default:
-          orderBy['id'] = SortOrderEnum.ASC;
+          orderBy['nickname'] = sortOrderValue;
       }
 
       const [users, totalCount] = await this.userRepo.findAndCount({
