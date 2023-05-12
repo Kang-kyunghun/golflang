@@ -11,7 +11,7 @@ import {
 
 import { Club } from '../entity/club.entity';
 import { UserClub } from 'src/modules/user/entity/user-club.entity';
-import { SortOrderEnum } from 'src/common/enum/common.enum';
+import { SortOrderEnum, ClubSortField } from 'src/common/enum/sortField.enum';
 
 export class ClubOutputDto {
   @ApiProperty({ description: '클럽 id' })
@@ -49,9 +49,9 @@ export class ClubOutputDto {
   @ApiProperty({ description: '클럽 매너 점수' })
   mennerScore: number;
 
-  @IsString()
+  @IsArray()
   @ApiProperty({ description: '가입조건' })
-  joinCondition: string;
+  joinCondition: string[];
 
   @IsArray()
   @ApiProperty({ description: '키워드' })
@@ -81,7 +81,7 @@ export class ClubOutputDto {
     this.memberTotal = club.userClubs.length;
     this.memberProfileImages = this.getProfileImage(club.userClubs);
     this.mennerScore = club.mennerScore;
-    this.joinCondition = club.joinCondition;
+    this.joinCondition = club.joinCondition.split(', ');
     this.searchKeyword = club.searchKeyword.split(', ');
     this.introduction = club.introduction;
     this.profileImage = club.profileImage?.url;
@@ -112,21 +112,30 @@ export class ClubListOutPutDto {
 export class GetMyClubListQueryDto {
   @IsString()
   @IsOptional()
-  @ApiProperty({ description: '정렬 기준', required: true })
-  sortField: string;
+  @ApiProperty({
+    description: '정렬 기준',
+    enum: ClubSortField,
+    default: 'name',
+    required: false,
+  })
+  sortField: ClubSortField;
 
   @IsEnum(SortOrderEnum)
   @IsOptional()
-  @ApiProperty({ description: 'ASC or DESC', required: true })
+  @ApiProperty({
+    description: 'ASC or DESC',
+    default: 'ASC',
+    required: false,
+  })
   sortOrder: SortOrderEnum = SortOrderEnum.ASC;
 
   @IsNumber()
   @IsOptional()
-  @ApiProperty({ description: 'offset', required: true })
+  @ApiProperty({ description: 'offset', default: 0, required: false })
   offset: number = 0;
 
   @IsNumber()
   @IsOptional()
-  @ApiProperty({ description: 'limit', required: true })
+  @ApiProperty({ description: 'limit', default: 10, required: false })
   limit: number = 10;
 }

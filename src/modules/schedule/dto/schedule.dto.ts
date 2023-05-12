@@ -58,7 +58,7 @@ export class ScheduleOutputDto {
 
   @IsOptional()
   @IsArray()
-  @ApiProperty({ description: '참가자 프로필 이미지 목록' })
+  @ApiProperty({ description: '참가자 프로필 이미지 목록', required: false })
   participantsProfileImage?: string[];
 
   constructor(
