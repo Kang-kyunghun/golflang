@@ -61,6 +61,7 @@ export class ScheduleService {
       schedule.type.id = ScheduleTypeEnum.id(body.scheduleType);
       schedule.hostUser = user;
 
+      await queryRunner.manager.save(schedule);
       await queryRunner.commitTransaction();
 
       return new ScheduleOutputDto(schedule, userId, []);
@@ -164,6 +165,11 @@ export class ScheduleService {
           endDate,
         })
         .getMany();
+
+      schedules = await this.scheduleRepo.find({
+        relations: ['type', 'users', 'hostUser'],
+        where: {},
+      });
 
       const personalSchedules = schedules.map(
         (schedule) => new ScheduleOutputDto(schedule, userId, schedule.users),

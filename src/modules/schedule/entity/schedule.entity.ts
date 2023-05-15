@@ -14,6 +14,7 @@ import { User } from 'src/modules/user/entity/user.entity';
 import { Club } from 'src/modules/club/entity/club.entity';
 import { ScheduleType } from './schedule-type.entity';
 import { PreParticipation } from 'src/modules/pre-participation/entity/pre-participation.entity';
+import { AlarmInformation } from 'src/modules/alarm/entity/alarm-information.entity';
 
 @Entity()
 export class Schedule extends CoreEntity {
@@ -33,8 +34,8 @@ export class Schedule extends CoreEntity {
   @ApiProperty({ description: '일정 시작 시간' })
   startTime: Date;
 
-  @Column({ nullable: true, default: null })
-  @ApiProperty({ description: '최대 참여자 수', nullable: true, default: null })
+  @Column({ default: 20 })
+  @ApiProperty({ description: '최대 참여자 수', default: 20 })
   maxParticipants: number;
 
   @Column({ nullable: true, default: null })
@@ -70,4 +71,7 @@ export class Schedule extends CoreEntity {
     inverseJoinColumns: [{ name: 'user_id' }],
   })
   users: User[];
+
+  @OneToMany(() => AlarmInformation, (information) => information.schedule)
+  alarmInformations: AlarmInformation[];
 }

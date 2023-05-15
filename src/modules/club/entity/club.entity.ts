@@ -14,6 +14,7 @@ import { UploadFile } from 'src/modules/upload-file/entity/upload-file.entity';
 import { Schedule } from 'src/modules/schedule/entity/schedule.entity';
 import { UserClub } from 'src/modules/user/entity/user-club.entity';
 import { ClubPost } from 'src/modules/club-post/entity/club-post.entity';
+import { ClubMatching } from 'src/modules/club-matching/entity/club-matching.entity';
 
 @Entity()
 export class Club extends CoreEntity {
@@ -57,4 +58,10 @@ export class Club extends CoreEntity {
 
   @OneToMany(() => ClubPost, (clubPost) => clubPost.club)
   posts: ClubPost[];
+
+  @OneToMany(() => ClubMatching, (matching) => matching.requestClub)
+  requetMatchings: ClubMatching[];
+
+  @OneToMany(() => ClubMatching, (matching) => matching.invitedClub)
+  invitedMatchings: ClubMatching[];
 }
