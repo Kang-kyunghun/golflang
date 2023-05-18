@@ -1,5 +1,7 @@
 import { AlarmModule } from 'src/modules/alarm/alarm.module';
 import { Alarm } from 'src/modules/alarm/entity/alarm.entity';
+import { AlarmType } from 'src/modules/alarm/entity/alarm-type.entity';
+import { AlarmInformation } from 'src/modules/alarm/entity/alarm-information.entity';
 import { AuthModule } from 'src/modules/auth/auth.module';
 import { Auth } from 'src/modules/auth/entity/auth.entity';
 import { ChatModule } from 'src/modules/chat/chat.module';
@@ -32,6 +34,8 @@ import { PreParticipation } from 'src/modules/pre-participation/entity/pre-parti
 import { ParticipationType } from 'src/modules/pre-participation/entity/participation-type.entity';
 import { ParticipationState } from 'src/modules/pre-participation/entity/participation-state.entity';
 import { UserClub } from 'src/modules/user/entity/user-club.entity';
+import { ClubMatchingModule } from 'src/modules/club-matching/club-matching.module';
+import { ClubMatching } from 'src/modules/club-matching/entity/club-matching.entity';
 import { ClubPostModule } from 'src/modules/club-post/club-post.module';
 import {
   ClubPostCategory,
@@ -66,6 +70,10 @@ export const ENTITIES = [
   ClubPost,
   ClubPostComment,
   ClubPostImage,
+  ClubMatching,
+  Alarm,
+  AlarmType,
+  AlarmInformation,
 ];
 
 export const MODULES = [
@@ -85,6 +93,8 @@ export const MODULES = [
   PingModule,
   PreParticipationModule,
   ClubPostModule,
+  ClubMatchingModule,
+  AlarmModule,
 ];
 
 export interface DatabaseConfig {

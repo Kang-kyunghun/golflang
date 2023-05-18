@@ -18,6 +18,9 @@ import { Club } from 'src/modules/club/entity/club.entity';
 import { PreParticipation } from 'src/modules/pre-participation/entity/pre-participation.entity';
 import { UserClub } from './user-club.entity';
 import { ClubPost, ClubPostComment } from 'src/modules/club-post/entity';
+import { ClubMatching } from 'src/modules/club-matching/entity/club-matching.entity';
+import { Alarm } from 'src/modules/alarm/entity/alarm.entity';
+import { AlarmInformation } from 'src/modules/alarm/entity/alarm-information.entity';
 
 @Entity()
 export class User extends GuardCoreEntity {
@@ -99,4 +102,13 @@ export class User extends GuardCoreEntity {
 
   @OneToMany(() => ClubPostComment, (clubPostComment) => clubPostComment.user)
   clubPostComments: ClubPostComment[];
+
+  @OneToMany(() => ClubMatching, (matching) => matching.requestUser)
+  requestMatchings: ClubMatching[];
+
+  @OneToMany(() => Alarm, (alarm) => alarm.user)
+  alarms: Alarm[];
+
+  @OneToMany(() => AlarmInformation, (information) => information.user)
+  alarmInformations: AlarmInformation[];
 }
