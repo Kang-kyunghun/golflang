@@ -16,7 +16,6 @@ import { Alarm } from '../alarm/entity/alarm.entity';
 import { AlarmError } from '../alarm/error/alarm.error';
 import { UserError } from './../user/error/user.error';
 import { ScheduleError } from './../schedule/error/schedule.error';
-
 import { UserService } from '../user/user.service';
 import { ScheduleService } from '../schedule/schedule.service';
 import { CommonService } from 'src/common/common.service';

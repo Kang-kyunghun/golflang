@@ -27,6 +27,8 @@ import {
   GetScheduleListDto,
   GetSchedulesQueryDto,
   UpdateScheduleInputDto,
+  GetParticipantListOutputDto,
+  GetWaitingParticipantListOutputDto,
 } from './dto';
 import { JwtAuthGuard } from '../auth/guard/jwt.guard';
 
@@ -92,36 +94,26 @@ export class ScheduleController {
     await this.scheduleService.deleteSchedule(scheduleId, userId);
   }
 
-  // @Get(':scheduleId/participant/confirm')
-  // @SwaggerDefault(
-  //   '라운딩 확정 참가자 리스트 조회',
-  //   GetRoundingAcceptParticipantListOutputDto,
-  //   '라운딩 확정 참가자 리스트 조회',
-  // )
-  // @ApiParam({ name: 'scheduleId', required: true })
-  // async getRoundingAcceptParticipantList(
-  //   @Param('scheduleId') scheduleId: number,
-  // ): Promise<GetRoundingAcceptParticipantListOutputDto> {
-  //   return await this.scheduleService.getRoundingAcceptParticipantList(
-  //     scheduleId,
-  //   );
-  // }
+  @Get(':scheduleId/participant/confirm')
+  @SwaggerDefault('라운딩 확정 참가자 리스트 조회', GetParticipantListOutputDto)
+  @ApiParam({ name: 'scheduleId', required: true })
+  async getConfirmedParticipantList(
+    @Param('scheduleId') scheduleId: number,
+    @GetUserId() userId: number,
+  ): Promise<GetParticipantListOutputDto> {
+    return await this.scheduleService.getConfirmedParticipantList(scheduleId);
+  }
 
-  // @Get(':scheduleId/participant/waiting')
-  // @SwaggerDefault(
-  //   '라운딩 대기중인 참가자 리스트 조회',
-  //   GetRoundingWaitingParticipantListOutputDto,
-  // )
-  // @ApiParam({
-  //   name: 'scheduleId',
-  //   required: true,
-  //   description: 'Schedule id',
-  // })
-  // async getRoundingWaitingParticipantList(
-  //   @Param('scheduleId') scheduleId: number,
-  // ): Promise<GetRoundingWaitingParticipantListOutputDto> {
-  //   return await this.scheduleService.getRoundingWaitingParticipantList(
-  //     scheduleId,
-  //   );
-  // }
+  @Get(':scheduleId/participant/waiting')
+  @SwaggerDefault(
+    '라운딩 대기중인 참가자 리스트 조회',
+    GetParticipantListOutputDto,
+  )
+  @ApiParam({ name: 'scheduleId', required: true })
+  async getWaitingParticipantList(
+    @Param('scheduleId') scheduleId: number,
+    @GetUserId() userId: number,
+  ): Promise<GetWaitingParticipantListOutputDto> {
+    return await this.scheduleService.getWaitingParticipantList(scheduleId);
+  }
 }

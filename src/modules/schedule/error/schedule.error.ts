@@ -5,6 +5,7 @@ export const SCHEDULE_ERROR = {
   ROUNDING_SCHEDULE_NOT_FOUND: 'roundingScheduleNotFound',
   ROUNDING_USER_NOT_FOUND: 'roundingUserNotFound',
   CLUB_NOT_FOUND: 'clubNotFound',
+  INVALID_USER: 'invalidUser',
 };
 
 export class ScheduleError extends CoreError {
@@ -26,6 +27,10 @@ export class ScheduleError extends CoreError {
       [SCHEDULE_ERROR.CLUB_NOT_FOUND]: {
         id: 'Rounding.schedule.club.not.found',
         message: '클럽을 찾을 수 없습니다.',
+      },
+      [SCHEDULE_ERROR.INVALID_USER]: {
+        id: 'Rounding.schedule.invalid.user',
+        message: '권한이 없는 사용자 입니다.',
       },
     };
   }
