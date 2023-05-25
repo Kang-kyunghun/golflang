@@ -1,4 +1,4 @@
 import { PartialType } from '@nestjs/mapped-types';
-import { CreateAlarmDto } from './create-alarm.dto';
+import { CreateAlarmInputDto } from './create-alarm.dto';
 
-export class UpdateAlarmDto extends PartialType(CreateAlarmDto) {}
+export class UpdateAlarmDto extends PartialType(CreateAlarmInputDto) {}

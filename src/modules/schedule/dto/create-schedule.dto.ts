@@ -42,4 +42,9 @@ export class CreateScheduleInputDto {
   @IsEnum(ScheduleTypeEnum)
   @ApiProperty({ description: '개인 or 클럽' })
   scheduleType: ScheduleTypeEnum;
+
+  @IsOptional()
+  @IsNumber()
+  @ApiProperty({ description: '클럽 id' })
+  clubId: number;
 }

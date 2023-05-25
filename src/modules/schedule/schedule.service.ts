@@ -19,8 +19,8 @@ import {
 import { Schedule } from './entity/schedule.entity';
 import { ScheduleType } from './entity/schedule-type.entity';
 import { ScheduleTypeEnum } from './enum/schedule.enum';
-import { ParticipationState } from './enum/schedule.enum';
 import { ScheduleError, SCHEDULE_ERROR } from './error/schedule.error';
+import { Club } from '../club/entity/club.entity';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const moment = require('moment');
@@ -32,6 +32,8 @@ export class ScheduleService {
     private readonly userRepo: Repository<User>,
     @InjectRepository(Schedule)
     private readonly scheduleRepo: Repository<Schedule>,
+    @InjectRepository(Club)
+    private readonly clubRepo: Repository<Club>,
 
     private dataSource: DataSource,
     private readonly logger: Logger,
@@ -51,6 +53,23 @@ export class ScheduleService {
 
       const schedule = new Schedule();
       schedule.type = new ScheduleType();
+
+      if (body.scheduleType === ScheduleTypeEnum.CLUB) {
+        const club = await this.clubRepo.findOne({
+          where: { id: body.clubId },
+          relations: ['host', 'userClubs', 'userClubs.user'],
+        });
+
+        const isMember = club.userClubs.some(
+          (userClub) => userClub.user.id === user.id,
+        );
+
+        if (!club || !isMember) {
+          throw new NotFoundException(SCHEDULE_ERROR.CLUB_NOT_FOUND);
+        }
+
+        schedule.club = club;
+      }
 
       schedule.title = body.title;
       schedule.roundingPlace = body.roundingPlace;
@@ -297,132 +316,29 @@ export class ScheduleService {
     }
   }
 
-  // async getRoundingAcceptParticipantList(
-  //   scheduleId: number,
-  // ): Promise<GetRoundingAcceptParticipantListOutputDto> {
-  //   try {
-  //     const participantList = await this.userScheduleMappingRepo.findAndCount({
-  //       where: {
-  //         schedule: { id: scheduleId },
-  //         participationState: ParticipationState.CONFIRM,
-  //       },
-  //       // relations: { targetUser: { userState: true, profileImage: true } },
-  //     });
+  async getSchedule(scheduleId: number) {
+    try {
+      const schedule = await this.scheduleRepo.findOne({
+        where: { id: scheduleId },
+        relations: ['hostUser'],
+      });
 
-  //     // const userInfos = await Promise.all(
-  //     //   participantList[0].map(async (v) => {
-  //     //     const age = await this.commonService.getAge(v.targetUser.birthday);
+      if (!schedule) {
+        throw new NotFoundException(SCHEDULE_ERROR.ROUNDING_SCHEDULE_NOT_FOUND);
+      }
 
-  //     //     return {
-  //     //       profileImage: v.targetUser.profileImage.url,
-  //     //       nickname: v.targetUser.nickname,
-  //     //       gender: v.targetUser.gender,
-  //     //       age,
-  //     //       avgHitScore: v.targetUser.userState.avgHitScore,
-  //     //     };
-  //     //   }),
-  //     // );
+      return schedule;
+    } catch (error) {
+      this.logger.error(error);
 
-  //     return {
-  //       confirmParticipantCount: participantList[1],
-  //       users: [],
-  //       // users: userInfos,
-  //     };
-  //   } catch (error) {
-  //     this.logger.error(error);
+      const statusCode = error.response
+        ? error.response.statusCode
+        : HttpStatus.BAD_REQUEST;
 
-  //     const statusCode = error.response
-  //       ? error.response.statusCode
-  //       : HttpStatus.BAD_REQUEST;
-
-  //     throw new HttpException(
-  //       this.scheduleError.errorHandler(error.message),
-  //       statusCode,
-  //     );
-  //   }
-  // }
-
-  // async getRoundingWaitingParticipantList(
-  //   scheduleId: number,
-  // ): Promise<GetRoundingWaitingParticipantListOutputDto> {
-  //   try {
-  //     const schedule = await this.scheduleRepo.findOne({
-  //       where: { id: scheduleId },
-  //     });
-
-  //     if (!schedule) {
-  //       throw new NotFoundException(SCHEDULE_ERROR.ROUNDING_SCHEDULE_NOT_FOUND);
-  //     }
-
-  //     const invitationPendingList =
-  //       await this.userScheduleMappingRepo.findAndCount({
-  //         where: {
-  //           schedule: { id: scheduleId },
-  //           participationState: ParticipationState.PENDING,
-  //         },
-  //         // relations: { targetUser: { userState: true, profileImage: true } },
-  //       });
-
-  //     const pendingUsers = await Promise.all(
-  //       invitationPendingList[0].map(async (v) => {
-  //         // const age = await this.commonService.getAge(v.targetUser.birthday);
-
-  //         return {
-  //           // profileImage: v.targetUser.profileImage.url,
-  //           // nickname: v.targetUser.nickname,
-  //           // gender: v.targetUser.gender,
-  //           // age,
-  //           // avgHitScore: v.targetUser.userState.avgHitScore,
-  //         };
-  //       }),
-  //     );
-
-  //     const invitationRejectList =
-  //       await this.userScheduleMappingRepo.findAndCount({
-  //         where: {
-  //           schedule: { id: scheduleId },
-  //           participationState: ParticipationState.REJECT,
-  //         },
-  //         // relations: { targetUser: { userState: true, profileImage: true } },
-  //       });
-
-  //     const rejectUsers = await Promise.all(
-  //       invitationRejectList[0].map(async (v) => {
-  //         // const age = await this.commonService.getAge(v.targetUser.birthday);
-
-  //         return {
-  //           // profileImage: v.targetUser.profileImage.url,
-  //           // nickname: v.targetUser.nickname,
-  //           // gender: v.targetUser.gender,
-  //           // age,
-  //           // avgHitScore: v.targetUser.userState.avgHitScore,
-  //         };
-  //       }),
-  //     );
-
-  //     return {
-  //       pending: {
-  //         count: invitationPendingList[1],
-  //         users: [],
-  //         // users: pendingUsers,
-  //       },
-  //       reject: {
-  //         count: invitationRejectList[1],
-  //         users: [],
-  //         // users: rejectUsers,
-  //       },
-  //     };
-  //   } catch (error) {
-  //     this.logger.error(error);
-
-  //     const statusCode = error.response
-  //       ? error.response.statusCode
-  //       : HttpStatus.BAD_REQUEST;
-
-  //     throw new HttpException(
-  //       this.scheduleError.errorHandler(error.message),
-  //       statusCode,
-  //     );
-  //   }
-  // }
+      throw new HttpException(
+        this.scheduleError.errorHandler(error.message),
+        statusCode,
+      );
+    }
+  }
 }

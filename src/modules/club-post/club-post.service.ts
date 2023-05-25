@@ -38,6 +38,7 @@ export class ClubPostService {
     private readonly dataSource: DataSource,
     private readonly clubError: ClubError,
   ) {}
+
   async createClubPost(
     body: CreateClubPostInputDto,
     userId: number,

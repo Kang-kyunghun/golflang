@@ -11,23 +11,35 @@ import { ParticipationState } from './participation-state.entity';
 export class PreParticipation extends CoreEntity {
   @ManyToOne(() => User, (user) => user.preParticipations)
   @JoinColumn()
-  gestUser: number;
+  guestUser: User;
+
+  @Column()
+  guestUserId: number;
 
   @ManyToOne(() => Schedule, (schedule) => schedule.preParticipations)
   @JoinColumn()
   schedule: Schedule;
+
+  @Column()
+  scheduleId: number;
 
   @ManyToOne(
     () => ParticipationType,
     (participationType) => participationType.preParticipations,
   )
   @JoinColumn()
-  type: number;
+  type: ParticipationType;
+
+  @Column()
+  typeId: number;
 
   @ManyToOne(
     () => ParticipationState,
     (participationState) => participationState.preParticipations,
   )
   @JoinColumn()
-  state: number;
+  state: ParticipationState;
+
+  @Column()
+  stateId: number;
 }

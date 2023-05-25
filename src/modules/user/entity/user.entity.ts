@@ -87,7 +87,7 @@ export class User extends GuardCoreEntity {
 
   @OneToMany(
     () => PreParticipation,
-    (preParticipation) => preParticipation.gestUser,
+    (preParticipation) => preParticipation.guestUser,
   )
   preParticipations: PreParticipation[];
 

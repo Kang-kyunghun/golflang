@@ -1,44 +1,46 @@
-export enum ParticipationType {
+import { AlarmTypeEnum } from 'src/modules/alarm/enum/alarm.enum';
+
+export enum ParticipationTypeEnum {
   INVITATION = 'INVITATION',
   APPLICATION = 'APPLICATION',
 }
 
-export namespace ParticipationType {
-  export function id(type: ParticipationType) {
+export namespace ParticipationTypeEnum {
+  export function id(type: ParticipationTypeEnum) {
     return {
-      [ParticipationType.INVITATION]: 1,
-      [ParticipationType.APPLICATION]: 2,
+      [ParticipationTypeEnum.INVITATION]: 1,
+      [ParticipationTypeEnum.APPLICATION]: 2,
     }[type];
   }
 
   export function value(id: number) {
     return {
-      1: ParticipationType.INVITATION,
-      2: ParticipationType.APPLICATION,
+      1: ParticipationTypeEnum.INVITATION,
+      2: ParticipationTypeEnum.APPLICATION,
     }[id];
   }
 }
 
-export enum ParticipationState {
+export enum ParticipationStateEnum {
   PENDING = 'PENDING',
   CONFIRM = 'CONFIRM',
   REJECT = 'REJECT',
 }
 
-export namespace ParticipationState {
-  export function id(state: ParticipationState) {
+export namespace ParticipationStateEnum {
+  export function id(state: ParticipationStateEnum) {
     return {
-      [ParticipationState.PENDING]: 1,
-      [ParticipationState.CONFIRM]: 2,
-      [ParticipationState.REJECT]: 3,
+      [ParticipationStateEnum.PENDING]: 1,
+      [ParticipationStateEnum.CONFIRM]: 2,
+      [ParticipationStateEnum.REJECT]: 3,
     }[state];
   }
 
   export function value(id: number) {
     return {
-      1: ParticipationState.PENDING,
-      2: ParticipationState.CONFIRM,
-      3: ParticipationState.REJECT,
+      1: ParticipationStateEnum.PENDING,
+      2: ParticipationStateEnum.CONFIRM,
+      3: ParticipationStateEnum.REJECT,
     }[id];
   }
 }
