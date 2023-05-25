@@ -18,6 +18,7 @@ import { UploadFileService } from '../upload-file/upload-file.service';
 import { UserError } from '../user/error/user.error';
 import { ScheduleError } from '../schedule/error/schedule.error';
 import { Club } from '../club/entity/club.entity';
+import { PreParticipation } from '../pre-participation/entity/pre-participation.entity';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { Club } from '../club/entity/club.entity';
       Account,
       Schedule,
       Club,
+      PreParticipation,
     ]),
   ],
   controllers: [AlarmController],

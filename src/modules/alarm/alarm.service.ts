@@ -81,6 +81,7 @@ export class AlarmService {
       const alarmInformation = new AlarmInformation();
 
       alarmInformation.schedule = schedule;
+
       return alarmInformation;
     } catch (error) {
       this.logger.error(error);
