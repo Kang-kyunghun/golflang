@@ -5,6 +5,7 @@ import {
   Injectable,
   Logger,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Not, Repository, Like } from 'typeorm';
@@ -200,6 +201,32 @@ export class UserService {
       const userList = users.map((user) => new UserOutputDto(user));
 
       return new UserListOutputDto(totalCount, userList);
+    } catch (error) {
+      this.logger.error(error);
+
+      const statusCode = error.response
+        ? error.response.statusCode
+        : HttpStatus.BAD_REQUEST;
+
+      throw new HttpException(
+        this.userError.errorHandler(error.message),
+        statusCode,
+      );
+    }
+  }
+
+  async getUser(userId: number): Promise<User> {
+    try {
+      const user = await this.userRepo.findOne({
+        where: { id: userId },
+        relations: ['profileImage'],
+      });
+
+      if (!user) {
+        throw new UnauthorizedException(USER_ERROR.USER_NOT_FOUND);
+      }
+
+      return user;
     } catch (error) {
       this.logger.error(error);
 

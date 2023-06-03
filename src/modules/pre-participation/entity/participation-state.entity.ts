@@ -3,7 +3,7 @@ import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 
 import { CoreEntity } from 'src/common/entity/core.entity';
 import { PreParticipation } from './pre-participation.entity';
-import { ParticipationState as State } from '../enum/pre-participation.enum';
+import { ParticipationStateEnum as State } from '../enum/pre-participation.enum';
 
 @Entity()
 export class ParticipationState extends CoreEntity {

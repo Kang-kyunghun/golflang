@@ -16,9 +16,15 @@ export class Alarm extends CoreEntity {
   @JoinColumn()
   user: User;
 
+  @Column()
+  userId: number;
+
   @ManyToOne(() => AlarmType, (type) => type.alarms)
   @JoinColumn()
   type: AlarmType;
+
+  @Column()
+  typeId: number;
 
   @OneToOne(() => AlarmInformation, (information) => information.alarm)
   information: AlarmInformation;
