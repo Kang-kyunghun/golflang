@@ -61,12 +61,7 @@ export class ScheduleOutputDto {
   @ApiProperty({ description: '참가자 프로필 이미지 목록', required: false })
   participantsProfileImage?: string[];
 
-  constructor(
-    schedule: Schedule,
-    selfUserId: number,
-    participants: User[],
-    profileImages?: string[],
-  ) {
+  constructor(schedule: Schedule, selfUserId: number, participants: User[]) {
     this.id = schedule.id;
     this.isHost = schedule.hostUser?.id === selfUserId;
     this.scheduleType = ScheduleTypeEnum.value(schedule.type.id);
@@ -78,7 +73,15 @@ export class ScheduleOutputDto {
     this.participantCount = participants.length;
     this.maxParticipants = schedule.maxParticipants;
     this.isPrivate = schedule.isPrivate;
-    this.participantsProfileImage = profileImages;
+    this.participantsProfileImage = this.getProfileImages(participants);
+  }
+
+  private getProfileImages(participants: User[]) {
+    const profileImages = participants.map((participant) => {
+      return participant.profileImage?.url;
+    });
+
+    return profileImages;
   }
 }
 

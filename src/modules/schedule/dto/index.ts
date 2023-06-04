@@ -1,6 +1,10 @@
 import { CreateScheduleInputDto } from './create-schedule.dto';
 import { UpdateScheduleInputDto } from './update-schedule.dto';
 import {
+  GetParticipantListOutputDto,
+  GetWaitingParticipantListOutputDto,
+} from './get-participant-list.dto';
+import {
   ScheduleOutputDto,
   GetScheduleListDto,
   GetSchedulesQueryDto,
@@ -12,4 +16,6 @@ export {
   ScheduleOutputDto,
   GetScheduleListDto,
   GetSchedulesQueryDto,
+  GetParticipantListOutputDto,
+  GetWaitingParticipantListOutputDto,
 };

@@ -10,6 +10,7 @@ import { Account } from '../user/entity/account.entity';
 import { Club } from '../club/entity/club.entity';
 import { ScheduleType } from './entity/schedule-type.entity';
 import { ScheduleError } from './error/schedule.error';
+import { PreParticipation } from '../pre-participation/entity/pre-participation.entity';
 
 @Module({
   imports: [
@@ -18,7 +19,8 @@ import { ScheduleError } from './error/schedule.error';
       Schedule,
       Account,
       Club,
-      ScheduleType
+      ScheduleType,
+      PreParticipation,
     ]),
   ],
   controllers: [ScheduleController],

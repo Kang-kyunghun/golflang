@@ -1,4 +1,5 @@
 import {
+  ForbiddenException,
   HttpException,
   HttpStatus,
   Injectable,
@@ -7,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
-import { Between, Repository, DataSource } from 'typeorm';
+import { Not, Repository, DataSource } from 'typeorm';
 import { User } from '../user/entity/user.entity';
 import {
   CreateScheduleInputDto,
@@ -15,12 +16,19 @@ import {
   GetScheduleListDto,
   GetSchedulesQueryDto,
   UpdateScheduleInputDto,
+  GetParticipantListOutputDto,
+  GetWaitingParticipantListOutputDto,
 } from './dto';
 import { Schedule } from './entity/schedule.entity';
 import { ScheduleType } from './entity/schedule-type.entity';
 import { ScheduleTypeEnum } from './enum/schedule.enum';
 import { ScheduleError, SCHEDULE_ERROR } from './error/schedule.error';
 import { Club } from '../club/entity/club.entity';
+import { PreParticipation } from '../pre-participation/entity/pre-participation.entity';
+import {
+  ParticipationStateEnum,
+  ParticipationTypeEnum,
+} from '../pre-participation/enum/pre-participation.enum';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const moment = require('moment');
@@ -34,6 +42,8 @@ export class ScheduleService {
     private readonly scheduleRepo: Repository<Schedule>,
     @InjectRepository(Club)
     private readonly clubRepo: Repository<Club>,
+    @InjectRepository(PreParticipation)
+    private readonly preParticipationRepo: Repository<PreParticipation>,
 
     private dataSource: DataSource,
     private readonly logger: Logger,
@@ -121,16 +131,7 @@ export class ScheduleService {
 
       const participants = schedule.users;
 
-      const participantsProfileImage = participants.map((participant) => {
-        return participant.profileImage?.url;
-      });
-
-      return new ScheduleOutputDto(
-        schedule,
-        userId,
-        participants,
-        participantsProfileImage,
-      );
+      return new ScheduleOutputDto(schedule, userId, participants);
     } catch (error) {
       this.logger.error(error);
 
@@ -320,14 +321,100 @@ export class ScheduleService {
     try {
       const schedule = await this.scheduleRepo.findOne({
         where: { id: scheduleId },
-        relations: ['hostUser'],
+        relations: ['hostUser', 'users', 'users.profileImage'],
       });
 
-      if (!schedule) {
-        throw new NotFoundException(SCHEDULE_ERROR.ROUNDING_SCHEDULE_NOT_FOUND);
-      }
-
       return schedule;
+    } catch (error) {
+      this.logger.error(error);
+
+      const statusCode = error.response
+        ? error.response.statusCode
+        : HttpStatus.BAD_REQUEST;
+
+      throw new HttpException(
+        this.scheduleError.errorHandler(error.message),
+        statusCode,
+      );
+    }
+  }
+
+  async getConfirmedParticipantList(
+    scheduleId: number,
+  ): Promise<GetParticipantListOutputDto> {
+    try {
+      const schedule = await this.getSchedule(scheduleId);
+      const confirmedParticipants = await this.preParticipationRepo.find({
+        where: {
+          scheduleId: schedule.id,
+          state: { state: ParticipationStateEnum.CONFIRM },
+        },
+        relations: [
+          'gestUser',
+          'gestUser.profileImage',
+          'gestUser.userState',
+          'type',
+          'state',
+        ],
+      });
+
+      return new GetParticipantListOutputDto(
+        confirmedParticipants.length,
+        confirmedParticipants,
+      );
+    } catch (error) {
+      this.logger.error(error);
+
+      const statusCode = error.response
+        ? error.response.statusCode
+        : HttpStatus.BAD_REQUEST;
+
+      throw new HttpException(
+        this.scheduleError.errorHandler(error.message),
+        statusCode,
+      );
+    }
+  }
+
+  async getWaitingParticipantList(
+    scheduleId: number,
+  ): Promise<GetWaitingParticipantListOutputDto> {
+    try {
+      const schedule = await this.getSchedule(scheduleId);
+      const inviteeList = await this.preParticipationRepo.find({
+        where: {
+          scheduleId: schedule.id,
+          type: { type: ParticipationTypeEnum.INVITATION },
+          state: { state: Not(ParticipationStateEnum.CONFIRM) },
+        },
+        relations: [
+          'gestUser',
+          'gestUser.profileImage',
+          'gestUser.userState',
+          'type',
+          'state',
+        ],
+      });
+
+      const applicantList = await this.preParticipationRepo.find({
+        where: {
+          scheduleId: schedule.id,
+          type: { type: ParticipationTypeEnum.APPLICATION },
+          state: { state: Not(ParticipationStateEnum.CONFIRM) },
+        },
+        relations: [
+          'gestUser',
+          'gestUser.profileImage',
+          'gestUser.userState',
+          'type',
+          'state',
+        ],
+      });
+
+      return new GetWaitingParticipantListOutputDto(
+        new GetParticipantListOutputDto(inviteeList.length, inviteeList),
+        new GetParticipantListOutputDto(applicantList.length, applicantList),
+      );
     } catch (error) {
       this.logger.error(error);
 

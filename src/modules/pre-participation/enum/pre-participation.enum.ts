@@ -1,5 +1,3 @@
-import { AlarmTypeEnum } from 'src/modules/alarm/enum/alarm.enum';
-
 export enum ParticipationTypeEnum {
   INVITATION = 'INVITATION',
   APPLICATION = 'APPLICATION',
