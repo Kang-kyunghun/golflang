@@ -21,6 +21,7 @@ import {
   PRE_PARTICIPATION_ERROR,
 } from './error/pre-participation.error';
 import { CreatePreParticipationInputDto } from './dto/create-pre-participation.dto';
+import { UpdatePreParticipationStateInputDto } from './dto/update-pre-participation.dto';
 
 import {
   PreParticipationOutputDto,
@@ -47,6 +48,8 @@ export class PreParticipationService {
     private readonly scheduleRepo: Repository<Schedule>,
     @InjectRepository(PreParticipation)
     private readonly preParticipationRepo: Repository<PreParticipation>,
+    @InjectRepository(ParticipationState)
+    private readonly participationStateRepo: Repository<ParticipationState>,
     private readonly userService: UserService,
     private readonly scheduleService: ScheduleService,
     private readonly alarmService: AlarmService,
@@ -187,5 +190,178 @@ export class PreParticipationService {
     });
 
     return preParticipations;
+  }
+
+  async getPreParticipation(prePartipationId: number) {
+    try {
+      const preParticipation = await this.preParticipationRepo.findOne({
+        where: { id: prePartipationId },
+        relations: [
+          'guestUser',
+          'guestUser.profileImage',
+          'schedule',
+          'schedule.hostUser',
+          'schedule.hostUser.profileImage',
+          'type',
+          'state',
+        ],
+      });
+
+      if (!preParticipation)
+        //에러 메시지 변경 필요
+        throw new NotFoundException(PRE_PARTICIPATION_ERROR.SCHEDULE_NOT_FOUND);
+
+      return preParticipation;
+    } catch (error) {
+      this.logger.error(error);
+
+      const statusCode = error.response
+        ? error.response.statusCode
+        : HttpStatus.BAD_REQUEST;
+
+      throw new HttpException(
+        this.preParticipationError.errorHandler(error.message),
+        statusCode,
+      );
+    }
+  }
+
+  async updatePreParticipationState(
+    body: UpdatePreParticipationStateInputDto,
+    prePartipationId: number,
+    userId: number,
+  ) {
+    try {
+      let preParticipation = await this.getPreParticipation(prePartipationId);
+
+      switch (preParticipation.type.type) {
+        case ParticipationTypeEnum.INVITATION:
+          preParticipation = await this.updateInvitaionState(
+            preParticipation,
+            body.state,
+            userId,
+          );
+          break;
+        case ParticipationTypeEnum.APPLICATION:
+          preParticipation = await this.updateApplicationState(
+            preParticipation,
+            body.state,
+            userId,
+          );
+          break;
+      }
+
+      return new PreParticipationOutputDto(preParticipation);
+    } catch (error) {
+      this.logger.error(error);
+
+      const statusCode = error.response
+        ? error.response.statusCode
+        : HttpStatus.BAD_REQUEST;
+
+      throw new HttpException(
+        this.preParticipationError.errorHandler(error.message),
+        statusCode,
+      );
+    }
+  }
+
+  async updateInvitaionState(
+    preParticipation: PreParticipation,
+    state: ParticipationStateEnum,
+    userId: number,
+  ) {
+    const queryRunner = this.dataSource.createQueryRunner();
+
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      if (userId !== preParticipation.guestUserId)
+        throw new ForbiddenException(PRE_PARTICIPATION_ERROR.FORBIDDEN);
+
+      preParticipation.state = await this.participationStateRepo.findOne({
+        where: {
+          id: ParticipationStateEnum.id(ParticipationStateEnum[state]),
+        },
+      });
+      await this.preParticipationRepo.save(preParticipation);
+
+      const alarmContentType =
+        state === ParticipationStateEnum.CONFIRM
+          ? AlarmContentTypeEnum.INVITATION_APPROVE
+          : AlarmContentTypeEnum.INVITATION_REJECT;
+      const alarmContent = AlarmContentTypeEnum.content(alarmContentType, {
+        schedule: preParticipation.schedule,
+        user: preParticipation.guestUser,
+      });
+      const createAlarmInputDto = new CreateAlarmInputDto();
+
+      createAlarmInputDto.scheduleId = preParticipation.schedule.id;
+      createAlarmInputDto.alarmContent = alarmContent;
+      createAlarmInputDto.alarmType = AlarmTypeEnum.Schedule;
+
+      await this.alarmService.createAlarm(
+        createAlarmInputDto,
+        preParticipation.schedule.hostUser.id,
+      ),
+        await queryRunner.commitTransaction();
+
+      return preParticipation;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  async updateApplicationState(
+    preParticipation: PreParticipation,
+    state: ParticipationStateEnum,
+    userId: number,
+  ) {
+    const queryRunner = this.dataSource.createQueryRunner();
+
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      if (userId !== preParticipation.schedule.hostUser.id)
+        throw new ForbiddenException(PRE_PARTICIPATION_ERROR.FORBIDDEN);
+
+      preParticipation.state = await this.participationStateRepo.findOne({
+        where: {
+          id: ParticipationStateEnum.id(ParticipationStateEnum[state]),
+        },
+      });
+      await this.preParticipationRepo.save(preParticipation);
+
+      const alarmContentType =
+        state === ParticipationStateEnum.CONFIRM
+          ? AlarmContentTypeEnum.APPLICATION_APPROVE
+          : AlarmContentTypeEnum.APPLICATION_REJECT;
+      const alarmContent = AlarmContentTypeEnum.content(alarmContentType, {
+        schedule: preParticipation.schedule,
+      });
+      const createAlarmInputDto = new CreateAlarmInputDto();
+
+      createAlarmInputDto.scheduleId = preParticipation.schedule.id;
+      createAlarmInputDto.alarmContent = alarmContent;
+      createAlarmInputDto.alarmType = AlarmTypeEnum.Schedule;
+
+      await this.alarmService.createAlarm(
+        createAlarmInputDto,
+        preParticipation.guestUserId,
+      ),
+        await queryRunner.commitTransaction();
+
+      return preParticipation;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
   }
 }

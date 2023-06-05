@@ -79,6 +79,8 @@ export class User extends GuardCoreEntity {
   @JoinColumn()
   profileImage: UploadFile;
 
+  profileImageUrl: UploadFile;
+
   @OneToMany(() => Schedule, (schedule) => schedule.hostUser)
   hostschedules: Schedule[];
 
