@@ -1,4 +1,4 @@
-export enum HandyState {
+export enum HandyStateEnum {
   PENDING = 'pending',
   APROVE = 'aprove',
   REJECT = 'reject',
@@ -7,7 +7,7 @@ export enum HandyState {
 export enum ClubPostCategoryEnum {
   NOTICE = 'notice',
   FREE = 'free',
-  REQUEST_HANDY = 'request_handy',
+  REQUEST_HANDY = 'request handy',
 }
 
 export namespace ClubPostCategoryEnum {

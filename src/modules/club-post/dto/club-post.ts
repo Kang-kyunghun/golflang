@@ -10,8 +10,7 @@ import {
   IsObject,
 } from 'class-validator';
 
-import { Club } from 'src/modules/club/entity/club.entity';
-import { HandyState } from '../enum/club-post.enum';
+import { ClubPostCategoryEnum, HandyStateEnum } from '../enum/club-post.enum';
 import { ClubPost, ClubPostImage } from '../entity';
 
 export class ClubPostOutputDto {
@@ -34,6 +33,10 @@ export class ClubPostOutputDto {
   @ApiProperty({ description: '게시글 작성자' })
   writer: object;
 
+  @IsBoolean()
+  @ApiProperty({ description: '본인 작성 여부' })
+  isWriter: boolean;
+
   @IsDate()
   @ApiProperty({ description: '핸디 요청 스케줄 일자' })
   scheduleDate: Date;
@@ -42,9 +45,17 @@ export class ClubPostOutputDto {
   @ApiProperty({ description: '요청 핸디 스코어' })
   requestHitScore: number;
 
-  @IsEnum(HandyState)
+  @IsEnum(HandyStateEnum)
   @ApiProperty({ description: '핸디 요청 상태' })
-  handyApproveState: HandyState;
+  handyApproveState: HandyStateEnum;
+
+  @IsNumber()
+  @ApiProperty({ description: '총 댓글 수' })
+  commentCount: number;
+
+  @IsNumber()
+  @ApiProperty({ description: '총 공감 수' })
+  likeCount: number;
 
   constructor(clubPost: ClubPost, userId: number) {
     this.id = clubPost.id;
@@ -56,12 +67,43 @@ export class ClubPostOutputDto {
       nickname: clubPost.user?.nickname,
       profileImage: clubPost.user?.profileImage?.url,
     };
+    this.isWriter = userId === clubPost.user?.id;
     this.scheduleDate = clubPost.scheduleDate;
     this.requestHitScore = clubPost.requestHitScore;
     this.handyApproveState = clubPost.handyApproveState?.state;
+    this.commentCount = clubPost.commentCount || 0;
+    this.likeCount = clubPost.likeCount || 0;
   }
 
   private getClubImages(clubImages: ClubPostImage[]) {
     return clubImages.map((clubImage) => clubImage.clubPostImage?.url);
   }
+}
+
+export class GetClubPostQueryDto {
+  @IsNumber()
+  @ApiProperty({
+    description: '클럽 id',
+    required: true,
+  })
+  clubId: number;
+
+  @IsEnum(ClubPostCategoryEnum)
+  @IsOptional()
+  @ApiProperty({
+    description: '클럽 게시물 카테고리',
+    enum: ClubPostCategoryEnum,
+    required: false,
+  })
+  category: ClubPostCategoryEnum;
+
+  @IsNumber()
+  @IsOptional()
+  @ApiProperty({ description: 'offset', default: 0, required: false })
+  offset: number = 0;
+
+  @IsNumber()
+  @IsOptional()
+  @ApiProperty({ description: 'limit', default: 20, required: false })
+  limit: number = 20;
 }

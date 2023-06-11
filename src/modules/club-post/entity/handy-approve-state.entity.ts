@@ -9,7 +9,7 @@ import {
 } from 'typeorm';
 
 import { ClubPost } from './club-post.entity';
-import { HandyState } from '../enum/club-post.enum';
+import { HandyStateEnum } from '../enum/club-post.enum';
 
 @Entity()
 export class HandyApproveState extends BaseEntity {
@@ -17,9 +17,9 @@ export class HandyApproveState extends BaseEntity {
   @ApiProperty({ description: 'id' })
   id: number;
 
-  @Column({ type: 'enum', enum: HandyState })
+  @Column({ type: 'enum', enum: HandyStateEnum })
   @ApiProperty({ description: '요청 타수 인정 상태' })
-  state: HandyState;
+  state: HandyStateEnum;
 
   @OneToOne(() => ClubPost, (clubPost) => clubPost.handyApproveState)
   @JoinColumn()

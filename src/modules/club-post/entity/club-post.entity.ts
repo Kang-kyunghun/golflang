@@ -16,6 +16,7 @@ import {
   ClubPostComment,
   ClubPostImage,
   HandyApproveState,
+  ClubPostLike,
 } from './';
 
 @Entity()
@@ -53,4 +54,11 @@ export class ClubPost extends CoreEntity {
 
   @OneToOne(() => HandyApproveState, (state) => state.clubPost)
   handyApproveState: HandyApproveState;
+
+  @OneToMany(() => ClubPostLike, (like) => like.clubPost)
+  likes: ClubPostLike[];
+
+  commentCount: number;
+
+  likeCount: number;
 }

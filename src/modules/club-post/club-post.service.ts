@@ -21,8 +21,8 @@ import { UploadFile } from '../upload-file/entity/upload-file.entity';
 import { User } from '../user/entity/user.entity';
 import { CreateClubPostInputDto } from './dto/create-club-post.dto';
 import { Club } from '../club/entity/club.entity';
-import { ClubPostCategoryEnum, HandyState } from './enum/club-post.enum';
-import { ClubPostOutputDto } from './dto/club-post';
+import { ClubPostCategoryEnum, HandyStateEnum } from './enum/club-post.enum';
+import { ClubPostOutputDto, GetClubPostQueryDto } from './dto/club-post';
 
 @Injectable()
 export class ClubPostService {
@@ -114,7 +114,7 @@ export class ClubPostService {
         clubPost.scheduleDate = body.scheduleDate;
 
         const handyApproveState = new HandyApproveState();
-        handyApproveState.state = HandyState.PENDING;
+        handyApproveState.state = HandyStateEnum.PENDING;
         handyApproveState.clubPost = clubPost;
         clubPost.handyApproveState = handyApproveState;
 
@@ -138,6 +138,65 @@ export class ClubPostService {
       );
     } finally {
       await queryRunner.release();
+    }
+  }
+
+  async getClubPostList(
+    queryParams: GetClubPostQueryDto,
+    userId: number,
+  ): Promise<ClubPostOutputDto[]> {
+    try {
+      const { clubId, category, offset, limit } = queryParams;
+
+      const club = await this.clubRepo.findOne({
+        where: { id: clubId, userClubs: { user: { id: userId } } },
+        relations: ['host', 'userClubs.user'],
+      });
+
+      if (!club)
+        throw new ForbiddenException(CLUB_ERROR.CLUB_PERMISSION_DENIED);
+
+      const query = this.clubPostRepo
+        .createQueryBuilder('clubPost')
+        .innerJoinAndSelect('clubPost.club', 'club')
+        .innerJoinAndSelect('clubPost.category', 'category')
+        .innerJoinAndSelect('clubPost.user', 'user')
+        .leftJoinAndSelect('clubPost.handyApproveState', 'handyApproveState')
+        .leftJoinAndSelect('clubPost.images', 'image')
+        .leftJoinAndSelect('image.clubPostImage', 'clubPostImage')
+        .loadRelationCountAndMap(
+          'clubPost.commentCount',
+          'clubPost.comments',
+          'commentCount',
+        )
+        .loadRelationCountAndMap(
+          'clubPost.likeCount',
+          'clubPost.likes',
+          'likeCount',
+        )
+        .where('club.id = :clubId', { clubId: club.id })
+        .skip(offset)
+        .take(limit)
+        .orderBy('clubPost.createDate', 'DESC');
+
+      if (category) query.andWhere('category.name = :category', { category });
+
+      const clubPostList = await query.getMany();
+
+      return clubPostList.map(
+        (clubPost) => new ClubPostOutputDto(clubPost, userId),
+      );
+    } catch (error) {
+      this.logger.error(error);
+
+      const statusCode = error.response
+        ? error.response.statusCode
+        : HttpStatus.BAD_REQUEST;
+
+      throw new HttpException(
+        this.clubError.errorHandler(error.message),
+        statusCode,
+      );
     }
   }
 }
