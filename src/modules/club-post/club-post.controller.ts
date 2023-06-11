@@ -27,7 +27,7 @@ import { UploadMultipleImages } from '../upload-file/decorator/upload-file.decor
 import { GetUserId } from 'src/common/decorator/user.decorator';
 import { ClubPostService } from './club-post.service';
 import { CreateClubPostInputDto } from './dto/create-club-post.dto';
-import { ClubPostOutputDto } from './dto/club-post';
+import { ClubPostOutputDto, GetClubPostQueryDto } from './dto/club-post';
 
 @ApiTags('CLUB-POST')
 @UseGuards(JwtAuthGuard)
@@ -57,5 +57,17 @@ export class ClubPostController {
       userId,
       files,
     );
+  }
+
+  @Get('list')
+  @ApiOperation({
+    summary: '클럽 게시글 목록 조회',
+    description: '클럽 게시글을 조회 합니다.',
+  })
+  async getClubPostList(
+    @Query() query: GetClubPostQueryDto,
+    @GetUserId() userId: number,
+  ): Promise<ClubPostOutputDto[]> {
+    return await this.clubPostService.getClubPostList(query, userId);
   }
 }

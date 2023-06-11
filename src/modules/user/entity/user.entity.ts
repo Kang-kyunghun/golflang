@@ -21,6 +21,7 @@ import { ClubPost, ClubPostComment } from 'src/modules/club-post/entity';
 import { ClubMatching } from 'src/modules/club-matching/entity/club-matching.entity';
 import { Alarm } from 'src/modules/alarm/entity/alarm.entity';
 import { AlarmInformation } from 'src/modules/alarm/entity/alarm-information.entity';
+import { ClubPostLike } from 'src/modules/club-post/entity';
 
 @Entity()
 export class User extends GuardCoreEntity {
@@ -113,4 +114,7 @@ export class User extends GuardCoreEntity {
 
   @OneToMany(() => AlarmInformation, (information) => information.user)
   alarmInformations: AlarmInformation[];
+
+  @OneToMany(() => ClubPostLike, (clubPostLike) => clubPostLike.user)
+  clubPostLikes: ClubPostLike[];
 }

@@ -43,6 +43,7 @@ import {
   ClubPost,
   ClubPostComment,
   ClubPostImage,
+  ClubPostLike,
 } from 'src/modules/club-post/entity';
 
 export const ENTITIES = [
@@ -70,6 +71,7 @@ export const ENTITIES = [
   ClubPost,
   ClubPostComment,
   ClubPostImage,
+  ClubPostLike,
   ClubMatching,
   Alarm,
   AlarmType,

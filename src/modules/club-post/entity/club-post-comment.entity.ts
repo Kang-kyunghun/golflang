@@ -16,7 +16,7 @@ export class ClubPostComment extends CoreEntity {
   content: string;
 
   @ManyToOne(() => User, (user) => user.clubPostComments)
-  @ApiProperty({ description: '댓글 작성자' })
+  @JoinColumn()
   user: User;
 
   @ManyToOne(() => ClubPostComment, (comment) => comment.children, {
