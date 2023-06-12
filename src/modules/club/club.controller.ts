@@ -35,6 +35,8 @@ import {
   ClubMemberListOutPutDto,
   GetClubMemberListQueryDto,
   GetMyClubListQueryDto,
+  SearchClubQueryDto,
+  SearchClubOutputDto,
 } from './dto/';
 
 @ApiTags('CLUB')
@@ -151,5 +153,22 @@ export class ClubController {
     @GetUserId() userId: number,
   ): Promise<ClubListOutPutDto> {
     return await this.clubService.getMyClubList(userId, query);
+  }
+
+  @Get('/search')
+  @ApiOperation({
+    summary: '클럽 검색',
+    description: '입력한 조건에 맞는 클럽 검색',
+  })
+  @ApiOkResponse({
+    description: '요청 성공 응답',
+    type: [SearchClubOutputDto],
+    isArray: false,
+  })
+  async searchClub(
+    @Query() query: SearchClubQueryDto,
+    @GetUserId() userId: number,
+  ): Promise<SearchClubOutputDto[]> {
+    return await this.clubService.searchClub(query);
   }
 }
