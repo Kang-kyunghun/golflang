@@ -10,6 +10,7 @@ import {
   ClubMemberListOutPutDto,
   GetClubMemberListQueryDto,
 } from './get-club-member.dto';
+import { SearchClubQueryDto, SearchClubOutputDto } from './search-club.dto';
 
 export {
   CreateClubInputDto,
@@ -20,4 +21,6 @@ export {
   ClubMemberListOutPutDto,
   GetClubMemberListQueryDto,
   GetMyClubListQueryDto,
+  SearchClubQueryDto,
+  SearchClubOutputDto,
 };

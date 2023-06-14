@@ -19,6 +19,8 @@ import {
   ClubMemberOutPutDto,
   ClubMemberListOutPutDto,
   GetMyClubListQueryDto,
+  SearchClubQueryDto,
+  SearchClubOutputDto,
 } from './dto';
 import { Club } from './entity/club.entity';
 import { UploadFile } from '../upload-file/entity/upload-file.entity';
@@ -349,6 +351,44 @@ export class ClubService {
       const clubList = clubs.map((club) => new ClubOutputDto(club, userId));
 
       return new ClubListOutPutDto(totalCount, clubList);
+    } catch (error) {
+      this.logger.error(error);
+
+      const statusCode = error.response
+        ? error.response.statusCode
+        : HttpStatus.BAD_REQUEST;
+
+      throw new HttpException(
+        this.clubError.errorHandler(error.message),
+        statusCode,
+      );
+    }
+  }
+
+  async searchClub(
+    queryParams: SearchClubQueryDto,
+  ): Promise<SearchClubOutputDto[]> {
+    try {
+      const { keyword, region, offset, limit } = queryParams;
+
+      const query = this.clubRepo
+        .createQueryBuilder('club')
+        .leftJoinAndSelect('club.profileImage', 'clubImage');
+
+      if (keyword)
+        query
+          .where('club.name LIKE :keyword', { keyword: `%${keyword}%` })
+          .orWhere('club.introduction LIKE :keyword', {
+            keyword: `%${keyword}%`,
+          });
+
+      if (region) query.where('club.region = :region', { region });
+
+      query.skip(offset).take(limit).orderBy('club.name', 'ASC');
+
+      const clubs = await query.getMany();
+
+      return clubs.map((club) => new SearchClubOutputDto(club));
     } catch (error) {
       this.logger.error(error);
 
