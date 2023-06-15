@@ -7,7 +7,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DataSource, Between } from 'typeorm';
+import { Repository, DataSource, Between, Like } from 'typeorm';
 
 import { UploadFileService } from '../upload-file/upload-file.service';
 import {
@@ -21,6 +21,8 @@ import {
   GetMyClubListQueryDto,
   SearchClubQueryDto,
   SearchClubOutputDto,
+  SearchKeywordQueryDto,
+  SearchKeywordListOutputDto,
 } from './dto';
 import { Club } from './entity/club.entity';
 import { UploadFile } from '../upload-file/entity/upload-file.entity';
@@ -29,6 +31,7 @@ import { ClubError, CLUB_ERROR } from './error/club.error';
 import { Gender } from '../user/enum/user.enum';
 import { UserClub } from '../user/entity/user-club.entity';
 import { SortOrderEnum } from 'src/common/enum/sortField.enum';
+import { SearchKeyword } from './entity/search-keyword.entity';
 
 @Injectable()
 export class ClubService {
@@ -37,6 +40,9 @@ export class ClubService {
     private readonly clubRepo: Repository<Club>,
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
+    @InjectRepository(SearchKeyword)
+    private readonly searchKeywordRepo: Repository<SearchKeyword>,
+
     private readonly uploadFileService: UploadFileService,
     private readonly logger: Logger,
     private readonly dataSource: DataSource,
@@ -376,6 +382,8 @@ export class ClubService {
         .leftJoinAndSelect('club.profileImage', 'clubImage');
 
       if (keyword)
+        await this.updateSearchKeyword(keyword)
+        
         query
           .where('club.name LIKE :keyword', { keyword: `%${keyword}%` })
           .orWhere('club.introduction LIKE :keyword', {
@@ -389,6 +397,80 @@ export class ClubService {
       const clubs = await query.getMany();
 
       return clubs.map((club) => new SearchClubOutputDto(club));
+    } catch (error) {
+      this.logger.error(error);
+
+      const statusCode = error.response
+        ? error.response.statusCode
+        : HttpStatus.BAD_REQUEST;
+
+      throw new HttpException(
+        this.clubError.errorHandler(error.message),
+        statusCode,
+      );
+    }
+  }
+
+  async getSearchKeywordList(
+    query: SearchKeywordQueryDto,
+  ): Promise<SearchKeywordListOutputDto> {
+    try {
+      const { keyword, limit } = query;
+
+      const searchKeywords = await this.searchKeywordRepo.find({
+        where: {
+          keyword: Like('%' + keyword + '%'),
+        },
+        order: {
+          frequency: 'DESC',
+        },
+        take: limit
+      });
+
+      return new SearchKeywordListOutputDto(searchKeywords);
+    } catch (error) {
+      this.logger.error(error);
+
+      const statusCode = error.response
+        ? error.response.statusCode
+        : HttpStatus.BAD_REQUEST;
+
+      throw new HttpException(
+        this.clubError.errorHandler(error.message),
+        statusCode,
+      );
+    }
+  }
+
+  async updateSearchKeyword(keyword: string) {
+    try {
+      const [serchKeyword, totalCount] =
+        await this.searchKeywordRepo.findAndCount({
+          order: {
+            frequency: 'ASC',
+          },
+          take: 1,
+        });
+
+      if (totalCount >= 1000) await this.searchKeywordRepo.remove(serchKeyword);
+
+      let searchKeywords = await this.searchKeywordRepo.findOne({
+        where: {
+          keyword: keyword,
+        },
+      });
+
+      if (searchKeywords) {
+        searchKeywords.frequency += 1;
+      } else {
+        searchKeywords = this.searchKeywordRepo.create({
+          keyword: keyword,
+          frequency: 1,
+        });
+        searchKeywords = await this.searchKeywordRepo.save(searchKeywords);
+      }
+
+      await this.searchKeywordRepo.save(searchKeywords);
     } catch (error) {
       this.logger.error(error);
 

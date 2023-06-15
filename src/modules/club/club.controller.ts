@@ -37,6 +37,8 @@ import {
   GetMyClubListQueryDto,
   SearchClubQueryDto,
   SearchClubOutputDto,
+  SearchKeywordQueryDto,
+  SearchKeywordListOutputDto,
 } from './dto/';
 
 @ApiTags('CLUB')
@@ -170,5 +172,22 @@ export class ClubController {
     @GetUserId() userId: number,
   ): Promise<SearchClubOutputDto[]> {
     return await this.clubService.searchClub(query);
+  }
+
+  @Get('/search-keyword/list')
+  @ApiOperation({
+    summary: '최대 검색어 조회',
+    description:
+      '검색하려는 키워드와 관련된 키워드즐 중 가장 많이 검색한 키워드 목록 조회',
+  })
+  @ApiOkResponse({
+    description: '요청 성공 응답',
+    type: SearchKeywordListOutputDto,
+    isArray: true,
+  })
+  async getSearchKeywordList(
+    @Query() query: SearchKeywordQueryDto,
+  ): Promise<SearchKeywordListOutputDto> {
+    return await this.clubService.getSearchKeywordList(query);
   }
 }

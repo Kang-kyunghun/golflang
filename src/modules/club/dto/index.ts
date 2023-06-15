@@ -11,6 +11,10 @@ import {
   GetClubMemberListQueryDto,
 } from './get-club-member.dto';
 import { SearchClubQueryDto, SearchClubOutputDto } from './search-club.dto';
+import {
+  SearchKeywordQueryDto,
+  SearchKeywordListOutputDto,
+} from './search-keyword.dto';
 
 export {
   CreateClubInputDto,
@@ -23,4 +27,6 @@ export {
   GetMyClubListQueryDto,
   SearchClubQueryDto,
   SearchClubOutputDto,
+  SearchKeywordQueryDto,
+  SearchKeywordListOutputDto,
 };
