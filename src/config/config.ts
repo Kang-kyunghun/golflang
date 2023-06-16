@@ -37,6 +37,8 @@ import { UserClub } from 'src/modules/user/entity/user-club.entity';
 import { ClubMatchingModule } from 'src/modules/club-matching/club-matching.module';
 import { ClubMatching } from 'src/modules/club-matching/entity/club-matching.entity';
 import { ClubPostModule } from 'src/modules/club-post/club-post.module';
+import { SearchKeyword } from 'src/modules/club/entity/search-keyword.entity';
+
 import {
   ClubPostCategory,
   HandyApproveState,
@@ -76,6 +78,7 @@ export const ENTITIES = [
   Alarm,
   AlarmType,
   AlarmInformation,
+  SearchKeyword,
 ];
 
 export const MODULES = [
