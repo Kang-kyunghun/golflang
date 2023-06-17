@@ -23,6 +23,7 @@ import { CreateClubPostInputDto } from './dto/create-club-post.dto';
 import { Club } from '../club/entity/club.entity';
 import { ClubPostCategoryEnum, HandyStateEnum } from './enum/club-post.enum';
 import { ClubPostOutputDto, GetClubPostQueryDto } from './dto/club-post';
+import { ClubPostError, CLUB_POST_ERROR } from './error/club-post.error';
 
 @Injectable()
 export class ClubPostService {
@@ -37,6 +38,7 @@ export class ClubPostService {
     private readonly logger: Logger,
     private readonly dataSource: DataSource,
     private readonly clubError: ClubError,
+    private readonly clubPostError: ClubPostError,
   ) {}
 
   async createClubPost(
@@ -195,6 +197,50 @@ export class ClubPostService {
 
       throw new HttpException(
         this.clubError.errorHandler(error.message),
+        statusCode,
+      );
+    }
+  }
+
+  async getClubPostDetail(
+    clubPostId: number,
+    userId: number,
+  ): Promise<ClubPostOutputDto> {
+    try {
+      const clubPost = await this.clubPostRepo
+        .createQueryBuilder('clubPost')
+        .innerJoinAndSelect('clubPost.club', 'club')
+        .innerJoinAndSelect('clubPost.category', 'category')
+        .innerJoinAndSelect('clubPost.user', 'user')
+        .leftJoinAndSelect('clubPost.handyApproveState', 'handyApproveState')
+        .leftJoinAndSelect('clubPost.images', 'image')
+        .leftJoinAndSelect('image.clubPostImage', 'clubPostImage')
+        .loadRelationCountAndMap(
+          'clubPost.commentCount',
+          'clubPost.comments',
+          'commentCount',
+        )
+        .loadRelationCountAndMap(
+          'clubPost.likeCount',
+          'clubPost.likes',
+          'likeCount',
+        )
+        .where('clubPost.id = :clubPostId', { clubPostId })
+        .getOne();
+
+      if (!clubPost)
+        throw new NotFoundException(CLUB_POST_ERROR.CLUB_POST_NOT_FOUND);
+
+      return new ClubPostOutputDto(clubPost, userId);
+    } catch (error) {
+      this.logger.error(error);
+
+      const statusCode = error.response
+        ? error.response.statusCode
+        : HttpStatus.BAD_REQUEST;
+
+      throw new HttpException(
+        this.clubPostError.errorHandler(error.message),
         statusCode,
       );
     }
