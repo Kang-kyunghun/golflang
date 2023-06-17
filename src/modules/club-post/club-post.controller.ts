@@ -70,4 +70,22 @@ export class ClubPostController {
   ): Promise<ClubPostOutputDto[]> {
     return await this.clubPostService.getClubPostList(query, userId);
   }
+
+  @Get('/detail/:clubPostId')
+  @ApiOperation({
+    summary: '클럽 게시글 상세 조회',
+    description: '클럽 게시글의 상세 정보를 조회합니다.',
+  })
+  @ApiOkResponse({
+    description: '요청 성공 응답',
+    type: ClubPostOutputDto,
+    isArray: false,
+  })
+  @ApiParam({ name: 'clubPostId', required: true })
+  async getClubDetail(
+    @Param('clubPostId') clubPostId: number,
+    @GetUserId() userId: number,
+  ): Promise<ClubPostOutputDto> {
+    return await this.clubPostService.getClubPostDetail(clubPostId, userId);
+  }
 }
