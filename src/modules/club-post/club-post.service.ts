@@ -19,11 +19,15 @@ import {
 } from './entity';
 import { UploadFile } from '../upload-file/entity/upload-file.entity';
 import { User } from '../user/entity/user.entity';
-import { CreateClubPostInputDto } from './dto/create-club-post.dto';
 import { Club } from '../club/entity/club.entity';
 import { ClubPostCategoryEnum, HandyStateEnum } from './enum/club-post.enum';
-import { ClubPostOutputDto, GetClubPostQueryDto } from './dto/club-post';
 import { ClubPostError, CLUB_POST_ERROR } from './error/club-post.error';
+import {
+  ClubPostOutputDto,
+  GetClubPostQueryDto,
+  CreateClubPostInputDto,
+  UpdateClubPostInputDto,
+} from './dto';
 
 @Injectable()
 export class ClubPostService {
@@ -232,6 +236,84 @@ export class ClubPostService {
         throw new NotFoundException(CLUB_POST_ERROR.CLUB_POST_NOT_FOUND);
 
       return new ClubPostOutputDto(clubPost, userId);
+    } catch (error) {
+      this.logger.error(error);
+
+      const statusCode = error.response
+        ? error.response.statusCode
+        : HttpStatus.BAD_REQUEST;
+
+      throw new HttpException(
+        this.clubPostError.errorHandler(error.message),
+        statusCode,
+      );
+    }
+  }
+
+  async updateClubPost(
+    body: UpdateClubPostInputDto,
+    clubPostId: number,
+    userId: number,
+  ) {
+    try {
+      const clubPost = await this.clubPostRepo.findOne({
+        where: { id: clubPostId, user: { id: userId } },
+      });
+
+      if (!clubPost) {
+        throw new NotFoundException(CLUB_POST_ERROR.CLUB_POST_NOT_FOUND);
+      }
+
+      Object.assign(clubPost, body);
+      await this.clubPostRepo.save(clubPost);
+
+      const updatedClubPost = await this.clubPostRepo
+        .createQueryBuilder('clubPost')
+        .innerJoinAndSelect('clubPost.club', 'club')
+        .innerJoinAndSelect('clubPost.category', 'category')
+        .innerJoinAndSelect('clubPost.user', 'user')
+        .leftJoinAndSelect('clubPost.handyApproveState', 'handyApproveState')
+        .leftJoinAndSelect('clubPost.images', 'image')
+        .leftJoinAndSelect('image.clubPostImage', 'clubPostImage')
+        .loadRelationCountAndMap(
+          'clubPost.commentCount',
+          'clubPost.comments',
+          'commentCount',
+        )
+        .loadRelationCountAndMap(
+          'clubPost.likeCount',
+          'clubPost.likes',
+          'likeCount',
+        )
+        .where('clubPost.id = :clubPostId', { clubPostId })
+        .getOne();
+
+      return new ClubPostOutputDto(updatedClubPost, userId);
+    } catch (error) {
+      this.logger.error(error);
+
+      const statusCode = error.response
+        ? error.response.statusCode
+        : HttpStatus.BAD_REQUEST;
+
+      throw new HttpException(
+        this.clubPostError.errorHandler(error.message),
+        statusCode,
+      );
+    }
+  }
+
+  async deleteClubPost(clubPostId: number, userId: number) {
+    try {
+      const clubPost = await this.clubPostRepo.findOne({
+        where: { id: clubPostId, user: { id: userId } },
+      });
+
+      if (!clubPost) {
+        throw new NotFoundException(CLUB_POST_ERROR.CLUB_POST_NOT_FOUND);
+      }
+
+      await this.clubPostRepo.softDelete(clubPostId);
     } catch (error) {
       this.logger.error(error);
 
