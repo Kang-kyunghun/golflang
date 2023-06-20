@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
-import { Not, Repository, DataSource } from 'typeorm';
+import { In, Not, Repository, DataSource, Between } from 'typeorm';
 import { User } from '../user/entity/user.entity';
 import {
   CreateScheduleInputDto,
@@ -170,48 +170,31 @@ export class ScheduleService {
         throw new NotFoundException(`User with ID ${userId} not found`);
       }
 
-      let schedules = await this.scheduleRepo
-        .createQueryBuilder('schedule')
-        .innerJoinAndSelect('schedule.type', 'type')
-        .leftJoinAndSelect('schedule.users', 'user')
-        .leftJoinAndSelect('schedule.hostUser', 'hostUser')
-        .leftJoinAndSelect('schedule.users', 'scheduleUsers')
-        .where('user.id = :userId', { userId })
-        .andWhere('schedule.id IN (:...scheduleIds)', {
-          scheduleIds: user.schedules.map((schedule) => schedule.id),
-        })
-        .andWhere('schedule.startTime BETWEEN :startDate AND :endDate', {
-          startDate,
-          endDate,
-        })
-        .getMany();
+      const userScheduleIds = user.schedules.map((schedule) => schedule.id);
 
-      schedules = await this.scheduleRepo.find({
+      let schedules = await this.scheduleRepo.find({
         relations: ['type', 'users', 'hostUser'],
-        where: {},
+        where: {
+          id: In(userScheduleIds),
+          type: { id: ScheduleTypeEnum.id(ScheduleTypeEnum.PERSONAL) },
+          startTime: Between(startDate, endDate),
+        },
+        order: { startTime: 'ASC' },
       });
 
       const personalSchedules = schedules.map(
         (schedule) => new ScheduleOutputDto(schedule, userId, schedule.users),
       );
-      const excludedScheduleIds = schedules.map((schedule) => schedule.id);
 
-      schedules = await this.scheduleRepo
-        .createQueryBuilder('schedule')
-        .innerJoinAndSelect('schedule.type', 'type')
-        .innerJoinAndSelect('schedule.users', 'user')
-        .leftJoinAndSelect('schedule.club', 'club')
-        .leftJoinAndSelect('club.users', 'clubUser')
-        .leftJoinAndSelect('schedule.hostUser', 'hostUser')
-        .where('clubUser.id = :userId', { userId })
-        .andWhere('schedule.id NOT IN (:...excludedScheduleIds)', {
-          excludedScheduleIds: excludedScheduleIds,
-        })
-        .andWhere('schedule.startTime BETWEEN :startDate AND :endDate', {
-          startDate,
-          endDate,
-        })
-        .getMany();
+      schedules = await this.scheduleRepo.find({
+        relations: ['type', 'users', 'hostUser'],
+        where: {
+          id: In(userScheduleIds),
+          type: { id: ScheduleTypeEnum.id(ScheduleTypeEnum.CLUB) },
+          startTime: Between(startDate, endDate),
+        },
+        order: { startTime: 'ASC' },
+      });
 
       const clubSchedules = schedules.map(
         (schedule) => new ScheduleOutputDto(schedule, userId, schedule.users),
