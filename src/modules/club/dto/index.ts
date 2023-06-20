@@ -4,6 +4,7 @@ import {
   ClubOutputDto,
   ClubListOutPutDto,
   GetMyClubListQueryDto,
+  JoinClubOutputDto,
 } from './club.dto';
 import {
   ClubMemberOutPutDto,
@@ -29,4 +30,5 @@ export {
   SearchClubOutputDto,
   SearchKeywordQueryDto,
   SearchKeywordListOutputDto,
+  JoinClubOutputDto,
 };

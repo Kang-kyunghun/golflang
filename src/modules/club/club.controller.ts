@@ -39,6 +39,7 @@ import {
   SearchClubOutputDto,
   SearchKeywordQueryDto,
   SearchKeywordListOutputDto,
+  JoinClubOutputDto,
 } from './dto/';
 
 @ApiTags('CLUB')
@@ -189,5 +190,22 @@ export class ClubController {
     @Query() query: SearchKeywordQueryDto,
   ): Promise<SearchKeywordListOutputDto> {
     return await this.clubService.getSearchKeywordList(query);
+  }
+
+  @Post('/:clubId/join')
+  @ApiOperation({
+    summary: '클럽 가입 신청',
+    description: '클럽 가입 신청',
+  })
+  @ApiCreatedResponse({
+    description: '클럽 가입 신청 완료',
+    type: JoinClubOutputDto,
+  })
+  @ApiParam({ name: 'clubId', required: true })
+  async joinClub(
+    @Param('clubId') clubId: number,
+    @GetUserId() userId: number,
+  ): Promise<JoinClubOutputDto> {
+    return this.clubService.joinClub(clubId, userId);
   }
 }

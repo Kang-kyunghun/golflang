@@ -16,7 +16,7 @@ import { UserState } from './user-state.entity';
 import { Schedule } from 'src/modules/schedule/entity/schedule.entity';
 import { Club } from 'src/modules/club/entity/club.entity';
 import { PreParticipation } from 'src/modules/pre-participation/entity/pre-participation.entity';
-import { UserClub } from './user-club.entity';
+import { ClubUser } from '../../club/entity/club-user.entity';
 import { ClubPost, ClubPostComment } from 'src/modules/club-post/entity';
 import { ClubMatching } from 'src/modules/club-matching/entity/club-matching.entity';
 import { Alarm } from 'src/modules/alarm/entity/alarm.entity';
@@ -97,8 +97,8 @@ export class User extends GuardCoreEntity {
   @ManyToMany(() => Schedule, (schedule) => schedule.users)
   schedules: Schedule[];
 
-  @OneToMany(() => UserClub, (userClub) => userClub.user)
-  userClubs: UserClub[];
+  @OneToMany(() => ClubUser, (clubUser) => clubUser.user)
+  clubUsers: ClubUser[];
 
   @OneToMany(() => ClubPost, (clubPost) => clubPost.user)
   clubPosts: ClubPost[];

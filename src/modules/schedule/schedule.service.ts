@@ -67,11 +67,11 @@ export class ScheduleService {
       if (body.scheduleType === ScheduleTypeEnum.CLUB) {
         const club = await this.clubRepo.findOne({
           where: { id: body.clubId },
-          relations: ['host', 'userClubs', 'userClubs.user'],
+          relations: ['host', 'clubUsers', 'clubUsers.user'],
         });
 
-        const isMember = club.userClubs.some(
-          (userClub) => userClub.user.id === user.id,
+        const isMember = club.clubUsers.some(
+          (clubUser) => clubUser.user.id === user.id,
         );
 
         if (!club || !isMember) {

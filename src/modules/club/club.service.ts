@@ -7,7 +7,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DataSource, Between, Like } from 'typeorm';
+import { Repository, DataSource, Between, Like, Not } from 'typeorm';
 
 import { UploadFileService } from '../upload-file/upload-file.service';
 import {
@@ -23,15 +23,19 @@ import {
   SearchClubOutputDto,
   SearchKeywordQueryDto,
   SearchKeywordListOutputDto,
+  JoinClubOutputDto,
 } from './dto';
 import { Club } from './entity/club.entity';
 import { UploadFile } from '../upload-file/entity/upload-file.entity';
 import { User } from '../user/entity/user.entity';
 import { ClubError, CLUB_ERROR } from './error/club.error';
 import { Gender } from '../user/enum/user.enum';
-import { UserClub } from '../user/entity/user-club.entity';
+import { ClubUser } from './entity/club-user.entity';
 import { SortOrderEnum } from 'src/common/enum/sortField.enum';
 import { SearchKeyword } from './entity/search-keyword.entity';
+import { UserService } from '../user/user.service';
+import { ClubUserState } from './entity/club-user-state.entity';
+import { ClubUserStateEnum } from './enum/club.enum';
 
 @Injectable()
 export class ClubService {
@@ -42,7 +46,10 @@ export class ClubService {
     private readonly userRepo: Repository<User>,
     @InjectRepository(SearchKeyword)
     private readonly searchKeywordRepo: Repository<SearchKeyword>,
+    @InjectRepository(ClubUser)
+    private readonly clubUserRepo: Repository<ClubUser>,
 
+    private readonly userService: UserService,
     private readonly uploadFileService: UploadFileService,
     private readonly logger: Logger,
     private readonly dataSource: DataSource,
@@ -87,12 +94,15 @@ export class ClubService {
 
       await queryRunner.manager.save(Club, club);
 
-      const userClub = new UserClub();
-      userClub.user = user;
-      userClub.club = club;
-      club.userClubs = [userClub];
+      const clubUser = new ClubUser();
+      clubUser.state = new ClubUserState();
 
-      await queryRunner.manager.save(UserClub, userClub);
+      clubUser.user = user;
+      clubUser.club = club;
+      clubUser.state.id = ClubUserStateEnum.id(ClubUserStateEnum['APROVE']);
+      club.clubUsers = [clubUser];
+
+      await queryRunner.manager.save(ClubUser, clubUser);
       await queryRunner.commitTransaction();
 
       return new ClubOutputDto(club, userId);
@@ -115,8 +125,8 @@ export class ClubService {
       const club = await this.clubRepo
         .createQueryBuilder('club')
         .innerJoinAndSelect('club.profileImage', 'profileImage')
-        .innerJoinAndSelect('club.userClubs', 'userClubs')
-        .innerJoinAndSelect('userClubs.user', 'user')
+        .innerJoinAndSelect('club.clubUsers', 'clubUsers')
+        .innerJoinAndSelect('clubUsers.user', 'user')
         .leftJoinAndSelect('user.profileImage', 'userProfileImage')
         .leftJoinAndSelect('club.host', 'hostUser')
         .leftJoinAndSelect('hostUser.profileImage', 'hostProfileImage')
@@ -190,8 +200,8 @@ export class ClubService {
       const updatedClub = await this.clubRepo
         .createQueryBuilder('club')
         .innerJoinAndSelect('club.profileImage', 'profileImage')
-        .innerJoinAndSelect('club.userClubs', 'userClubs')
-        .innerJoinAndSelect('userClubs.user', 'user')
+        .innerJoinAndSelect('club.clubUsers', 'clubUsers')
+        .innerJoinAndSelect('clubUsers.user', 'user')
         .leftJoinAndSelect('user.profileImage', 'userProfileImage')
         .leftJoinAndSelect('club.host', 'hostUser')
         .leftJoinAndSelect('hostUser.profileImage', 'hostProfileImage')
@@ -275,18 +285,18 @@ export class ClubService {
           orderBy['birthday'] = sortOrderValue * -1;
           break;
         case 'clubHitScore':
-          orderBy['userClubs'] = { clubHitScore: sortOrderValue };
+          orderBy['clubUsers'] = { clubHitScore: sortOrderValue };
           break;
         default:
           orderBy['nickname'] = sortOrderValue;
       }
 
       const [members, totalCount] = await this.userRepo.findAndCount({
-        relations: ['userClubs', 'profileImage'],
+        relations: ['clubUsers', 'profileImage'],
         where: {
           birthday: Between(minYear.toString(), maxYear.toString()),
           gender: Gender.value(gender),
-          userClubs: {
+          clubUsers: {
             clubHitScore: Between(minHitScore, maxHitScore),
             club: {
               id: clubId,
@@ -337,13 +347,13 @@ export class ClubService {
       const [clubs, totalCount] = await this.clubRepo.findAndCount({
         relations: [
           'profileImage',
-          'userClubs',
+          'clubUsers',
           'host',
           'host.profileImage',
-          'userClubs.user.profileImage',
+          'clubUsers.user.profileImage',
         ],
         where: {
-          userClubs: {
+          clubUsers: {
             user: {
               id: userId,
             },
@@ -381,14 +391,13 @@ export class ClubService {
         .createQueryBuilder('club')
         .leftJoinAndSelect('club.profileImage', 'clubImage');
 
-      if (keyword)
-        await this.updateSearchKeyword(keyword)
-        
-        query
-          .where('club.name LIKE :keyword', { keyword: `%${keyword}%` })
-          .orWhere('club.introduction LIKE :keyword', {
-            keyword: `%${keyword}%`,
-          });
+      if (keyword) await this.updateSearchKeyword(keyword);
+
+      query
+        .where('club.name LIKE :keyword', { keyword: `%${keyword}%` })
+        .orWhere('club.introduction LIKE :keyword', {
+          keyword: `%${keyword}%`,
+        });
 
       if (region) query.where('club.region = :region', { region });
 
@@ -424,7 +433,7 @@ export class ClubService {
         order: {
           frequency: 'DESC',
         },
-        take: limit
+        take: limit,
       });
 
       return new SearchKeywordListOutputDto(searchKeywords);
@@ -471,6 +480,50 @@ export class ClubService {
       }
 
       await this.searchKeywordRepo.save(searchKeywords);
+    } catch (error) {
+      this.logger.error(error);
+
+      const statusCode = error.response
+        ? error.response.statusCode
+        : HttpStatus.BAD_REQUEST;
+
+      throw new HttpException(
+        this.clubError.errorHandler(error.message),
+        statusCode,
+      );
+    }
+  }
+
+  async joinClub(clubId: number, userId: number) {
+    try {
+      const user = await this.userService.getUser(userId);
+      const club = await this.clubRepo.findOne({
+        where: {
+          id: clubId,
+        },
+        relations: ['clubUsers.user'],
+      });
+
+      if (!club) {
+        throw new NotFoundException(CLUB_ERROR.CLUB_NOT_FOUND);
+      }
+
+      const isJoined = club.clubUsers.some(
+        (clubUser) => clubUser.user.id === userId,
+      );
+
+      if (isJoined)
+        throw new ForbiddenException(CLUB_ERROR.CLUB_ALREADY_JOINED);
+
+      const clubUser = new ClubUser();
+      clubUser.state = new ClubUserState();
+
+      clubUser.club = club;
+      clubUser.user = user;
+      clubUser.state.id = ClubUserStateEnum.id(ClubUserStateEnum['PENDING']);
+
+      await this.clubUserRepo.save(clubUser);
+      return new JoinClubOutputDto(clubUser);
     } catch (error) {
       this.logger.error(error);
 
