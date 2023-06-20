@@ -35,7 +35,7 @@ export class CreateClubPostInputDto {
   @IsOptional()
   @IsString()
   @ApiProperty({
-    description: '클럽 대표 이미지',
+    description: '클럽 게시글 이미지 목록',
     type: 'string',
     format: 'binary',
     required: false,

@@ -26,8 +26,12 @@ import { JwtAuthGuard } from '../auth/guard/jwt.guard';
 import { UploadMultipleImages } from '../upload-file/decorator/upload-file.decorator';
 import { GetUserId } from 'src/common/decorator/user.decorator';
 import { ClubPostService } from './club-post.service';
-import { CreateClubPostInputDto } from './dto/create-club-post.dto';
-import { ClubPostOutputDto, GetClubPostQueryDto } from './dto/club-post';
+import {
+  ClubPostOutputDto,
+  GetClubPostQueryDto,
+  CreateClubPostInputDto,
+  UpdateClubPostInputDto,
+} from './dto';
 
 @ApiTags('CLUB-POST')
 @UseGuards(JwtAuthGuard)
@@ -87,5 +91,39 @@ export class ClubPostController {
     @GetUserId() userId: number,
   ): Promise<ClubPostOutputDto> {
     return await this.clubPostService.getClubPostDetail(clubPostId, userId);
+  }
+
+  @Patch(':clubPostId')
+  @ApiOperation({
+    summary: '클럽 게시글 수정',
+    description: '클럽 게시글의 내용을 수정합니다.',
+  })
+  @ApiOkResponse({
+    description: '수정 성공 응답',
+    type: ClubPostOutputDto,
+    isArray: false,
+  })
+  @ApiParam({ name: 'clubPostId', required: true })
+  async updateClubPost(
+    @Body() body: UpdateClubPostInputDto,
+    @Param('clubPostId') clubPostId: number,
+    @GetUserId() userId: number,
+  ): Promise<ClubPostOutputDto> {
+    return this.clubPostService.updateClubPost(body, clubPostId, userId);
+  }
+
+  @Delete(':clubPostId')
+  @HttpCode(204)
+  @ApiOperation({
+    summary: '클럽 게시글 삭제',
+    description: '클럽 게시글의 작성자가 게시글을 삭제합니다..',
+  })
+  @ApiNoContentResponse({ description: '삭제 성공 응답' })
+  @ApiParam({ name: 'clubPostId', required: true })
+  async deleteClubPost(
+    @Param('clubPostId') clubPostId: number,
+    @GetUserId() userId: number,
+  ) {
+    return this.clubPostService.deleteClubPost(clubPostId, userId);
   }
 }
