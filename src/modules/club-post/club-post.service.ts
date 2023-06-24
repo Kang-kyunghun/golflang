@@ -56,8 +56,8 @@ export class ClubPostService {
 
     try {
       const club = await this.clubRepo.findOne({
-        where: { id: body.clubId, userClubs: { user: { id: userId } } },
-        relations: ['host', 'userClubs.user'],
+        where: { id: body.clubId, clubUsers: { user: { id: userId } } },
+        relations: ['host', 'clubUsers.user'],
       });
 
       //TODO: 권한 확인 로직을 따로 분리 필요할 듯
@@ -72,8 +72,8 @@ export class ClubPostService {
       )
         throw new ForbiddenException(CLUB_ERROR.CLUB_PERMISSION_DENIED);
 
-      const user = club.userClubs.find(
-        (userClub) => userClub.user.id === userId,
+      const user = club.clubUsers.find(
+        (clubUser) => clubUser.user.id === userId,
       ).user;
 
       const clubPost = new ClubPost();
@@ -155,8 +155,8 @@ export class ClubPostService {
       const { clubId, category, offset, limit } = queryParams;
 
       const club = await this.clubRepo.findOne({
-        where: { id: clubId, userClubs: { user: { id: userId } } },
-        relations: ['host', 'userClubs.user'],
+        where: { id: clubId, clubUsers: { user: { id: userId } } },
+        relations: ['host', 'clubUsers.user'],
       });
 
       if (!club)

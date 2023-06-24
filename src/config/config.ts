@@ -33,7 +33,7 @@ import { PreParticipationModule } from 'src/modules/pre-participation/pre-partic
 import { PreParticipation } from 'src/modules/pre-participation/entity/pre-participation.entity';
 import { ParticipationType } from 'src/modules/pre-participation/entity/participation-type.entity';
 import { ParticipationState } from 'src/modules/pre-participation/entity/participation-state.entity';
-import { UserClub } from 'src/modules/user/entity/user-club.entity';
+import { ClubUser } from 'src/modules/club/entity/club-user.entity';
 import { ClubMatchingModule } from 'src/modules/club-matching/club-matching.module';
 import { ClubMatching } from 'src/modules/club-matching/entity/club-matching.entity';
 import { ClubPostModule } from 'src/modules/club-post/club-post.module';
@@ -47,6 +47,7 @@ import {
   ClubPostImage,
   ClubPostLike,
 } from 'src/modules/club-post/entity';
+import { ClubUserState } from 'src/modules/club/entity/club-user-state.entity';
 
 export const ENTITIES = [
   User,
@@ -67,7 +68,7 @@ export const ENTITIES = [
   PreParticipation,
   ParticipationType,
   ParticipationState,
-  UserClub,
+  ClubUser,
   ClubPostCategory,
   HandyApproveState,
   ClubPost,
@@ -79,6 +80,7 @@ export const ENTITIES = [
   AlarmType,
   AlarmInformation,
   SearchKeyword,
+  ClubUserState,
 ];
 
 export const MODULES = [

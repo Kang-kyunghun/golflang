@@ -35,7 +35,7 @@ export class ClubMemberOutPutDto {
 
   constructor(member: User) {
     this.userId = member.id;
-    this.clubHitScore = member.userClubs[0].clubHitScore;
+    this.clubHitScore = member.clubUsers[0].clubHitScore;
     this.nickName = member.nickname;
     this.age = this.getMemberAge(member.birthday);
     this.gender = member.gender;

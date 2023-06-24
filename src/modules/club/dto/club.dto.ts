@@ -10,8 +10,9 @@ import {
 } from 'class-validator';
 
 import { Club } from '../entity/club.entity';
-import { UserClub } from 'src/modules/user/entity/user-club.entity';
+import { ClubUser } from 'src/modules/club/entity/club-user.entity';
 import { SortOrderEnum, ClubSortField } from 'src/common/enum/sortField.enum';
+import { ClubUserStateEnum } from '../enum/club.enum';
 
 export class ClubOutputDto {
   @ApiProperty({ description: '클럽 id' })
@@ -73,13 +74,13 @@ export class ClubOutputDto {
       profileImage: club.host?.profileImage?.url,
     };
     this.isHost = club.host?.id === userId;
-    this.isMember = club.userClubs.some(
-      (userClub) => userClub.user.id === userId,
+    this.isMember = club.clubUsers.some(
+      (clubUser) => clubUser.user.id === userId,
     );
     this.name = club.name;
     this.region = club.region;
-    this.memberTotal = club.userClubs.length;
-    this.memberProfileImages = this.getProfileImage(club.userClubs);
+    this.memberTotal = club.clubUsers.length;
+    this.memberProfileImages = this.getProfileImage(club.clubUsers);
     this.mennerScore = club.mennerScore;
     this.joinCondition = club.joinCondition.split(', ');
     this.searchKeyword = club.searchKeyword.split(', ');
@@ -87,7 +88,7 @@ export class ClubOutputDto {
     this.profileImage = club.profileImage?.url;
   }
 
-  private getProfileImage(clubMembers: UserClub[]) {
+  private getProfileImage(clubMembers: ClubUser[]) {
     const profileImage = clubMembers.map((clubMember) => {
       return clubMember.user.profileImage?.url;
     });
@@ -138,4 +139,24 @@ export class GetMyClubListQueryDto {
   @IsOptional()
   @ApiProperty({ description: 'limit', default: 10, required: false })
   limit: number = 10;
+}
+
+export class JoinClubOutputDto {
+  @IsNumber()
+  @ApiProperty({ description: '클럽 id' })
+  clubId: number;
+
+  @IsNumber()
+  @ApiProperty({ description: '신청자 id' })
+  userId: number;
+
+  @IsEnum(ClubUserStateEnum)
+  @ApiProperty({ description: '클럽 가입 상태' })
+  state: ClubUserStateEnum;
+
+  constructor(clubUser: ClubUser) {
+    this.clubId = clubUser.club.id;
+    this.userId = clubUser.user.id;
+    this.state = ClubUserStateEnum.value(clubUser.state.id);
+  }
 }
